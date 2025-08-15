@@ -17,7 +17,7 @@ export default function Home() {
             <Link href="/guest" className="text-gray-600 hover:text-minion-blue transition-colors">
               Guest Access
             </Link>
-            <Link href="/auth/login" className="btn-minion-secondary">
+            <Link href="/login" className="btn-minion-secondary">
               Hotel Login
             </Link>
           </div>
@@ -38,11 +38,11 @@ export default function Home() {
             Services for Hotels
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Transform your hotel guest experience with our comprehensive concierge platform. 
+            Transform your hotel guest experience with our comprehensive concierge platform.
             Seamless service requests, real-time communication, and personalized assistance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/register" className="btn-minion text-lg px-8 py-4">
+            <Link href="/register" className="btn-minion text-lg px-8 py-4">
               Start Free Trial
             </Link>
             <Link href="#features" className="btn-minion-secondary text-lg px-8 py-4">
@@ -67,7 +67,7 @@ export default function Home() {
               <div className="text-4xl mb-4">📱</div>
               <h3 className="text-xl font-semibold mb-3">QR Code Access</h3>
               <p className="text-gray-600">
-                Guests scan room QR codes for instant access to concierge services. 
+                Guests scan room QR codes for instant access to concierge services.
                 No downloads required.
               </p>
             </div>
@@ -76,7 +76,7 @@ export default function Home() {
               <div className="text-4xl mb-4">🛎️</div>
               <h3 className="text-xl font-semibold mb-3">Service Requests</h3>
               <p className="text-gray-600">
-                Room service, housekeeping, transportation, and local recommendations 
+                Room service, housekeeping, transportation, and local recommendations
                 all in one platform.
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function Home() {
               <div className="text-4xl mb-4">📊</div>
               <h3 className="text-xl font-semibold mb-3">Analytics Dashboard</h3>
               <p className="text-gray-600">
-                Track occupancy rates, guest satisfaction, and service performance 
+                Track occupancy rates, guest satisfaction, and service performance
                 with detailed insights.
               </p>
             </div>
@@ -113,7 +113,7 @@ export default function Home() {
                 <li>✅ Basic analytics</li>
                 <li>✅ Email support</li>
               </ul>
-              <Link href="/auth/register?plan=basic" className="btn-minion w-full">
+              <Link href="/register?plan=basic" className="btn-minion w-full">
                 Get Started
               </Link>
             </div>
@@ -131,7 +131,7 @@ export default function Home() {
                 <li>✅ Priority support</li>
                 <li>✅ Custom branding</li>
               </ul>
-              <Link href="/auth/register?plan=premium" className="btn-minion w-full">
+              <Link href="/register?plan=premium" className="btn-minion w-full">
                 Get Started
               </Link>
             </div>
@@ -146,7 +146,7 @@ export default function Home() {
                 <li>✅ 24/7 phone support</li>
                 <li>✅ API access</li>
               </ul>
-              <Link href="/auth/register?plan=enterprise" className="btn-minion w-full">
+              <Link href="/register?plan=enterprise" className="btn-minion w-full">
                 Get Started
               </Link>
             </div>
