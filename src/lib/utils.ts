@@ -35,26 +35,34 @@ export function generateQRCodeData(
     roomNumber: string,
     accessCode: string
 ): string {
-    const data = {
-        hotelId,
-        roomNumber,
-        accessCode,
-        timestamp: Date.now()
-    };
-    return btoa(JSON.stringify(data));
+    // Create a URL that guests can access to view room services
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3001';
+    const guestUrl = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(hotelId)}&roomNumber=${encodeURIComponent(roomNumber)}&accessCode=${encodeURIComponent(accessCode)}`;
+    return guestUrl;
 }
 
-export function parseQRCodeData(qrData: string): {
+export function parseQRCodeData(qrUrl: string): {
     hotelId: string;
     roomNumber: string;
     accessCode: string;
-    timestamp: number;
 } | null {
     try {
-        const decodedData = atob(qrData);
-        return JSON.parse(decodedData);
+        const url = new URL(qrUrl);
+        const hotelId = url.searchParams.get('hotelId');
+        const roomNumber = url.searchParams.get('roomNumber');
+        const accessCode = url.searchParams.get('accessCode');
+        
+        if (!hotelId || !roomNumber || !accessCode) {
+            return null;
+        }
+        
+        return {
+            hotelId,
+            roomNumber,
+            accessCode
+        };
     } catch (error) {
-        console.error("Error parsing QR code data:", error);
+        console.error("Error parsing QR code URL:", error);
         return null;
     }
 }
