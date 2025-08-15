@@ -12,7 +12,7 @@ export default function DashboardPage() {
     useEffect(() => {
         if (status === "loading") return; // Still loading
         if (!session) {
-            router.push("/auth/login");
+            router.push("/login");
         }
     }, [session, status, router]);
 
@@ -34,7 +34,9 @@ export default function DashboardPage() {
     }
 
     const handleSignOut = async () => {
-        await signOut({ callbackUrl: "/" });
+        await signOut({ callbackUrl: "/", redirect: true });
+        // Extra: force reload to clear all client state
+        window.location.replace("/");
     };
 
     return (

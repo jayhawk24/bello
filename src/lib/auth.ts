@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { UserRole } from "@prisma/client";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/utils";
@@ -87,7 +88,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async session({ session, token }) {
             if (token) {
                 session.user.id = token.sub!;
-                session.user.role = token.role as string;
+                session.user.role = token.role as UserRole;
                 session.user.hotelId = token.hotelId as string | null;
                 session.user.hotel = token.hotel as any;
             }
@@ -95,6 +96,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
     },
     pages: {
-        signIn: "/auth/login"
+        signIn: "/login"
     }
 });
