@@ -88,13 +88,15 @@ model User {
     lastLogin DateTime? @map("last_login")
 
     // Relationships
-    hotel            Hotel?           @relation(name: "HotelAdmin", fields: [hotelId], references: [id])
-    managedHotel     Hotel?           @relation(name: "HotelManager")
-    assignedRequests ServiceRequest[] @relation(name: "AssignedStaff")
-    guestRequests    ServiceRequest[] @relation(name: "GuestRequests")
-    guestBookings    Booking[]        @relation(name: "GuestBookings")
-    guestSessions    GuestSession[]
-    notifications    Notification[]
+    hotel                   Hotel?                    @relation(name: "HotelAdmin", fields: [hotelId], references: [id])
+    managedHotel            Hotel?                    @relation(name: "HotelManager")
+    assignedRequests        ServiceRequest[]          @relation(name: "AssignedStaff")
+    guestRequests           ServiceRequest[]          @relation(name: "GuestRequests")
+    guestBookings           Booking[]                 @relation(name: "GuestBookings")
+    guestSessions           GuestSession[]
+    notifications           Notification[]
+    passwordResetTokens     PasswordResetToken[]
+    emailVerificationTokens EmailVerificationToken[]
 
     @@map("users")
 }
@@ -282,4 +284,32 @@ model GuestSession {
     room  Room  @relation(fields: [roomId], references: [id])
 
     @@map("guest_sessions")
+}
+
+model PasswordResetToken {
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    token     String   @unique
+    expiresAt DateTime @map("expires_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    usedAt    DateTime? @map("used_at")
+
+    // Relationships
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    token     String   @unique
+    expiresAt DateTime @map("expires_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    usedAt    DateTime? @map("used_at")
+
+    // Relationships
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("email_verification_tokens")
 }
