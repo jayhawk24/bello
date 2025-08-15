@@ -73,7 +73,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Dashboard Cards */}
-                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
                     <div className="card-minion text-center">
                         <div className="text-4xl mb-4">🏨</div>
                         <h3 className="text-xl font-semibold mb-2">Hotel Profile</h3>
@@ -96,16 +96,18 @@ export default function DashboardPage() {
                         </Link>
                     </div>
 
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">👥</div>
-                        <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
-                        <p className="text-gray-600 mb-4">
-                            Add and manage your hotel staff members
-                        </p>
-                        <Link href="/dashboard/staff" className="btn-minion">
-                            Manage Staff
-                        </Link>
-                    </div>
+                    {session.user.role === "hotel_admin" && (
+                        <div className="card-minion text-center">
+                            <div className="text-4xl mb-4">👥</div>
+                            <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
+                            <p className="text-gray-600 mb-4">
+                                Add and manage your hotel staff members
+                            </p>
+                            <Link href="/dashboard/staff" className="btn-minion">
+                                Manage Staff
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Quick Stats */}

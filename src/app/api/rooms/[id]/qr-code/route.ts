@@ -1,0 +1,67 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { generateQRCodeData } from "@/lib/utils";
+
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const session = await auth();
+        if (!session || session.user.role !== "hotel_admin") {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        const room = await prisma.room.findFirst({
+            where: {
+                id: params.id,
+                hotel: {
+                    adminId: session.user.id
+                }
+            },
+            include: {
+                hotel: true
+            }
+        });
+
+        if (!room) {
+            return NextResponse.json(
+                { error: "Room not found" },
+                { status: 404 }
+            );
+        }
+
+        // Generate QR code data
+        const qrData = generateQRCodeData(
+            room.hotelId,
+            room.roomNumber,
+            room.accessCode
+        );
+
+        // For now, return a simple QR code URL that can be used with a QR code service
+        // In production, you might want to generate actual QR code images
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+
+        // Create a simple response that triggers download
+        const qrCodeResponse = await fetch(qrCodeUrl);
+        const qrCodeBuffer = await qrCodeResponse.arrayBuffer();
+
+        return new NextResponse(qrCodeBuffer, {
+            headers: {
+                'Content-Type': 'image/png',
+                'Content-Disposition': `attachment; filename="room-${room.roomNumber}-qr.png"`
+            }
+        });
+
+    } catch (error) {
+        console.error("QR code generation error:", error);
+        return NextResponse.json(
+            { error: "Internal server error" },
+            { status: 500 }
+        );
+    }
+}
