@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function GuestAccess() {
+    const { data: session } = useSession();
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
             {/* Navigation */}
@@ -31,7 +35,7 @@ export default function GuestAccess() {
                         </div>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-                        Welcome <span className="text-minion-yellow">Guest!</span>
+                        Welcome <span className="text-minion-yellow">{session?.user ? `${session.user.name}!` : 'Guest!'}</span>
                     </h1>
                     <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
                         Access our concierge services instantly. Choose your preferred method to get started.
@@ -65,18 +69,20 @@ export default function GuestAccess() {
                     </div>
                 </div>
 
-                {/* Guest Registration Option */}
-                <div className="card-minion text-center p-8 bg-white">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                        Want to Create an Account?
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                        Create a guest account to save your preferences and access your service history across all stays.
-                    </p>
-                    <Link href="/register?type=guest" className="btn-minion-secondary">
-                        Create Guest Account
-                    </Link>
-                </div>
+                {/* Guest Registration Option - Only show if not logged in */}
+                {!session?.user && (
+                    <div className="card-minion text-center p-8 bg-white">
+                        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                            Want to Create an Account?
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                            Create a guest account to save your preferences and access your service history across all stays.
+                        </p>
+                        <Link href="/guest-register" className="btn-minion-secondary">
+                            Create Guest Account
+                        </Link>
+                    </div>
+                )}
 
                 {/* Information Cards */}
                 <div className="grid md:grid-cols-3 gap-6 mt-16">

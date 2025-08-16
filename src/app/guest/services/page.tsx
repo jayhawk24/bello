@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 interface Service {
@@ -22,6 +23,7 @@ interface ServiceRequestForm {
 export default function ServiceRequestPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { data: session, status } = useSession();
     const bookingId = searchParams.get('bookingId');
     const roomId = searchParams.get('roomId');
     const hotelId = searchParams.get('hotelId');
@@ -39,6 +41,14 @@ export default function ServiceRequestPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [step, setStep] = useState<'select' | 'form'>('select');
+    const [currentUrl, setCurrentUrl] = useState('');
+
+    // Get current URL for login redirect
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setCurrentUrl(window.location.href);
+        }
+    }, []);
 
     useEffect(() => {
         if (!bookingId && (!roomId || !hotelId)) {
@@ -175,15 +185,43 @@ export default function ServiceRequestPage() {
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-800">Service Request</h1>
-                                <p className="text-gray-600">Request hotel services</p>
+                                <p className="text-gray-600">
+                                    {session?.user ? `Welcome, ${session.user.name}!` : 'Request hotel services'}
+                                </p>
                             </div>
                         </div>
-                        <Link 
-                            href={bookingId ? `/guest/dashboard?bookingId=${bookingId}` : '/guest/qr-scan'}
-                            className="text-minion-blue hover:underline"
-                        >
-                            ← Back to {bookingId ? 'Dashboard' : 'Room Access'}
-                        </Link>
+                        <div className="flex items-center space-x-2">
+                            {!bookingId && !session?.user && (
+                                <>
+                                    <Link 
+                                        href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
+                                        className="btn-minion px-3 py-2 text-sm"
+                                    >
+                                        ✨ Sign Up
+                                    </Link>
+                                    <Link 
+                                        href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
+                                        className="btn-minion-secondary px-3 py-2 text-sm"
+                                    >
+                                        👤 Sign In
+                                    </Link>
+                                </>
+                            )}
+                            {session?.user && (
+                                <div className="flex items-center space-x-3 text-gray-600">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-2xl">👤</span>
+                                        <span className="font-medium">{session.user.name}</span>
+                                    </div>
+                                </div>
+                            )}
+                            <Link 
+                                href={bookingId ? `/guest/dashboard?bookingId=${bookingId}` : '/guest/qr-scan'}
+                                className="text-minion-blue hover:underline text-sm"
+                            >
+                                ← Back to {bookingId ? 'Dashboard' : 'Room Access'}
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -212,6 +250,30 @@ export default function ServiceRequestPage() {
                                 </div>
                             ))}
                         </div>
+                        
+                        {!bookingId && !session?.user && (
+                            <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center">
+                                <div className="text-3xl mb-3">👤</div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2">Want to track your requests?</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Create an account to track service requests, save preferences, and get updates.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <Link 
+                                        href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
+                                        className="btn-minion"
+                                    >
+                                        ✨ Create Account
+                                    </Link>
+                                    <Link 
+                                        href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
+                                        className="btn-minion-secondary"
+                                    >
+                                        🔑 Sign In
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div>
@@ -276,6 +338,34 @@ export default function ServiceRequestPage() {
                                         <option value="urgent">Urgent - Immediate attention</option>
                                     </select>
                                 </div>
+
+                                {!bookingId && !session?.user && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="text-blue-500 text-xl">💡</div>
+                                            <div className="flex-1">
+                                                <h4 className="text-blue-800 font-medium mb-2">Want to track your requests?</h4>
+                                                <p className="text-blue-700 text-sm mb-3">
+                                                    Create an account or sign in to track service requests and get updates.
+                                                </p>
+                                                <div className="flex flex-col sm:flex-row gap-2">
+                                                    <Link 
+                                                        href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
+                                                        className="inline-block bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors"
+                                                    >
+                                                        ✨ Create Account
+                                                    </Link>
+                                                    <Link 
+                                                        href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
+                                                        className="inline-block bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        👤 Sign In
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="flex space-x-4">
                                     <button

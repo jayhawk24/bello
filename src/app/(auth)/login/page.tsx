@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const returnUrl = searchParams.get('returnUrl');
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +29,17 @@ export default function LoginPage() {
             if (result?.error) {
                 alert('Invalid email or password. Please try again.');
             } else {
-                // Redirect to dashboard based on user role
-                window.location.href = '/dashboard';
+                // Get the updated session to check user role
+                const session = await getSession();
+                if (session?.user?.role === 'guest') {
+                    // Redirect guests back to the page they came from or guest area
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('returnUrl');
+                    window.location.href = returnUrl || '/guest';
+                } else {
+                    // Redirect staff/admins to dashboard
+                    window.location.href = '/dashboard';
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -45,9 +58,9 @@ export default function LoginPage() {
                             <span className="text-2xl">🏨</span>
                         </div>
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-800">Hotel Admin Login</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">Welcome Back</h1>
                     <p className="text-gray-600 mt-2">
-                        Access your hotel management dashboard
+                        Sign in to your account
                     </p>
                 </div>
 
@@ -102,12 +115,24 @@ export default function LoginPage() {
                 </form>
 
                 <div className="mt-6 text-center">
-                    <p className="text-gray-600">
-                        New to Bello?{" "}
-                        <Link href="/register" className="text-minion-blue hover:underline font-semibold">
-                            Create an account
-                        </Link>
+                    <p className="text-gray-600 mb-4">
+                        New to Bello?
                     </p>
+                    <div className="space-y-2">
+                        <Link 
+                            href={returnUrl ? `/guest-register?returnUrl=${encodeURIComponent(returnUrl)}` : '/guest-register'} 
+                            className="btn-minion w-full inline-block text-center"
+                        >
+                            ✨ Create Guest Account
+                        </Link>
+                        <div className="text-sm text-gray-500">or</div>
+                        <Link 
+                            href="/register" 
+                            className="btn-minion-secondary w-full inline-block text-center"
+                        >
+                            🏨 Create Hotel Account
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-200 text-center">

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 interface GuestDashboardData {
@@ -31,6 +32,7 @@ interface GuestDashboardData {
 export default function GuestDashboardPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { data: session } = useSession();
     const bookingId = searchParams.get('bookingId');
     const successMessage = searchParams.get('success');
     
@@ -39,6 +41,19 @@ export default function GuestDashboardPage() {
     const [error, setError] = useState("");
 
     useEffect(() => {
+        // If user is logged in and has a 'guest' role, redirect them to guest services regardless of booking ID
+        if (session?.user?.role === 'guest') {
+            router.push('/guest/services');
+            return;
+        }
+        
+        // If user is logged in but doesn't have a booking ID, redirect them to guest services
+        if (session?.user && !bookingId) {
+            router.push('/guest/services');
+            return;
+        }
+        
+        // If no booking ID at all, redirect to guest access
         if (!bookingId) {
             router.push('/guest');
             return;
@@ -46,7 +61,7 @@ export default function GuestDashboardPage() {
         
         fetchDashboardData();
         fetchServiceRequests();
-    }, [bookingId, router]);
+    }, [bookingId, session, router]);
 
     const fetchDashboardData = async () => {
         try {
