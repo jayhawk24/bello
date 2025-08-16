@@ -9,16 +9,34 @@ interface Room {
     roomNumber: string;
     roomType: string;
     hotel: {
+        id: string;
         name: string;
         contactEmail: string;
         contactPhone: string;
     };
 }
 
+interface Booking {
+    id: string;
+    bookingReference: string;
+    guestName: string;
+}
+
+interface Service {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    icon: string;
+    price: number;
+}
+
 export default function GuestRoomPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [room, setRoom] = useState<Room | null>(null);
+    const [booking, setBooking] = useState<Booking | null>(null);
+    const [services, setServices] = useState<Service[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -42,6 +60,14 @@ export default function GuestRoomPage() {
             if (response.ok) {
                 const data = await response.json();
                 setRoom(data.room);
+                setBooking(data.booking);
+                
+                // Fetch available services for this hotel
+                const servicesResponse = await fetch(`/api/guest/services?hotelId=${hotelId}`);
+                if (servicesResponse.ok) {
+                    const servicesData = await servicesResponse.json();
+                    setServices(servicesData.services || []);
+                }
             } else {
                 setError("Invalid access code or room not found");
             }
@@ -49,6 +75,19 @@ export default function GuestRoomPage() {
             setError("Network error occurred");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleServiceRequest = async (serviceId: string, serviceName: string) => {
+        if (booking) {
+            // If there's an active booking, redirect to service request with booking context
+            router.push(`/guest/services?bookingId=${booking.id}&category=${serviceName}`);
+        } else if (room) {
+            // If no booking but have room access, redirect to services page with room context
+            router.push(`/guest/services?roomId=${room.id}&hotelId=${room.hotel?.id}&category=${serviceName}`);
+        } else {
+            // If no room access, redirect to booking ID entry
+            router.push(`/guest/booking-id?message=Please enter your booking reference to request services`);
         }
     };
 
@@ -116,6 +155,11 @@ export default function GuestRoomPage() {
                     <h2 className="text-3xl font-bold text-gray-800 mb-4">
                         Welcome to Room {room.roomNumber}
                     </h2>
+                    {booking && (
+                        <p className="text-lg text-gray-700 mb-2">
+                            Hello, {booking.guestName}!
+                        </p>
+                    )}
                     <p className="text-xl text-gray-600 mb-2">
                         {room.roomType}
                     </p>
@@ -126,53 +170,32 @@ export default function GuestRoomPage() {
 
                 {/* Service Categories */}
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
-                    {/* Room Service */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🍽️</div>
-                        <h3 className="text-xl font-semibold mb-2">Room Service</h3>
-                        <p className="text-gray-600 mb-4">
-                            Order food and beverages directly to your room
-                        </p>
-                        <button className="btn-minion w-full">
-                            Order Now
-                        </button>
-                    </div>
-
-                    {/* Housekeeping */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🧹</div>
-                        <h3 className="text-xl font-semibold mb-2">Housekeeping</h3>
-                        <p className="text-gray-600 mb-4">
-                            Request cleaning, towels, or other amenities
-                        </p>
-                        <button className="btn-minion w-full">
-                            Request Service
-                        </button>
-                    </div>
-
-                    {/* Concierge */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🎩</div>
-                        <h3 className="text-xl font-semibold mb-2">Concierge</h3>
-                        <p className="text-gray-600 mb-4">
-                            Local recommendations and assistance
-                        </p>
-                        <button className="btn-minion w-full">
-                            Get Help
-                        </button>
-                    </div>
-
-                    {/* Maintenance */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🔧</div>
-                        <h3 className="text-xl font-semibold mb-2">Maintenance</h3>
-                        <p className="text-gray-600 mb-4">
-                            Report issues or request repairs
-                        </p>
-                        <button className="btn-minion w-full">
-                            Report Issue
-                        </button>
-                    </div>
+                    {services.length > 0 ? (
+                        services.map((service) => (
+                            <div key={service.id} className="card-minion text-center">
+                                <div className="text-4xl mb-4">{service.icon || '🏨'}</div>
+                                <h3 className="text-xl font-semibold mb-2">{service.name}</h3>
+                                <p className="text-gray-600 mb-4">
+                                    {service.description}
+                                </p>
+                                {service.price > 0 && (
+                                    <p className="text-sm text-gray-500 mb-4">
+                                        Starting from ${service.price}
+                                    </p>
+                                )}
+                                <button 
+                                    className="btn-minion w-full"
+                                    onClick={() => handleServiceRequest(service.id, service.name)}
+                                >
+                                    Request {service.name}
+                                </button>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-2 text-center py-8">
+                            <p className="text-gray-500">Loading services...</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Hotel Information */}

@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
             include: {
                 hotel: {
                     select: {
+                        id: true,
                         name: true,
                         contactEmail: true,
                         contactPhone: true
@@ -40,6 +41,17 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // Try to find an active booking for this room
+        const activeBooking = await prisma.booking.findFirst({
+            where: {
+                roomId: room.id,
+                status: 'checked_in'
+            },
+            orderBy: {
+                checkInDate: 'desc'
+            }
+        });
+
         return NextResponse.json({
             success: true,
             room: {
@@ -47,7 +59,12 @@ export async function GET(request: NextRequest) {
                 roomNumber: room.roomNumber,
                 roomType: room.roomType,
                 hotel: room.hotel
-            }
+            },
+            booking: activeBooking ? {
+                id: activeBooking.id,
+                bookingReference: activeBooking.bookingReference,
+                guestName: activeBooking.guestName
+            } : null
         });
     } catch (error) {
         console.error("Guest room access error:", error);

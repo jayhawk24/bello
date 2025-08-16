@@ -1,22 +1,61 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function BookingIdPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [bookingId, setBookingId] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        const messageParam = searchParams.get('message');
+        if (messageParam) {
+            setMessage(messageParam);
+        }
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!bookingId.trim()) return;
 
         setIsLoading(true);
-        // TODO: Implement booking ID verification
-        setTimeout(() => {
+        setError("");
+
+        try {
+            const response = await fetch('/api/guest/booking-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingId: bookingId.trim() })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Store guest session info in localStorage for later use
+                if (result.booking.sessionToken) {
+                    localStorage.setItem('guestSession', JSON.stringify({
+                        sessionToken: result.booking.sessionToken,
+                        bookingId: result.booking.id,
+                        roomId: result.booking.room.id,
+                        hotelId: result.booking.room.hotel.id
+                    }));
+                }
+
+                // Redirect to guest dashboard
+                router.push(`/guest/dashboard?bookingId=${result.booking.id}`);
+            } else {
+                setError(result.error || 'Booking verification failed');
+            }
+        } catch (error) {
+            setError('Network error occurred. Please try again.');
+        } finally {
             setIsLoading(false);
-            alert("Booking ID verification will be implemented in the next phase!");
-        }, 1500);
+        }
     };
 
     return (
@@ -32,7 +71,19 @@ export default function BookingIdPage() {
                     </p>
                 </div>
 
+                {message && (
+                    <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg mb-6">
+                        {message}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="form-group">
                         <label htmlFor="bookingId" className="form-label">
                             Booking Reference / ID
