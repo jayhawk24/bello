@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { roomSchema } from "@/lib/validations";
-import { generateAccessCode } from "@/lib/utils";
+import { ServiceCategory } from "@prisma/client";
 
-export async function GET() {
+interface ServiceData {
+    name: string;
+    description: string;
+    category: string;
+    icon?: string;
+    isActive?: boolean;
+}
+
+export async function GET(request: NextRequest) {
     try {
         const session = await auth();
         if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
@@ -38,17 +45,18 @@ export async function GET() {
             );
         }
 
-        const rooms = await prisma.room.findMany({
+        const services = await prisma.service.findMany({
             where: { hotelId },
-            orderBy: { roomNumber: 'asc' }
+            orderBy: { name: 'asc' }
         });
 
         return NextResponse.json({
             success: true,
-            rooms: rooms
+            services
         });
+
     } catch (error) {
-        console.error("Rooms fetch error:", error);
+        console.error("Services fetch error:", error);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }
@@ -61,74 +69,84 @@ export async function POST(request: NextRequest) {
         const session = await auth();
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "Unauthorized - Only hotel admins can create services" },
                 { status: 401 }
             );
         }
 
         const body = await request.json();
+        const { name, description, category, icon, isActive } = body as ServiceData;
 
-        // Validate input data
-        const validatedFields = roomSchema.safeParse(body);
-        if (!validatedFields.success) {
+        if (!name || !description || !category) {
             return NextResponse.json(
-                {
-                    error: "Invalid input data",
-                    details: validatedFields.error.issues
-                },
+                { error: "Name, description, and category are required" },
                 { status: 400 }
             );
         }
 
-        const { roomNumber, roomType } = validatedFields.data;
+        // Get hotel ID
+        let hotelId = session.user.hotelId;
+        
+        if (!hotelId) {
+            const hotel = await prisma.hotel.findFirst({
+                where: { adminId: session.user.id }
+            });
+            
+            if (!hotel) {
+                return NextResponse.json(
+                    { error: "Hotel not found" },
+                    { status: 404 }
+                );
+            }
+            hotelId = hotel.id;
+        }
 
-        const hotel = await prisma.hotel.findFirst({
-            where: { adminId: session.user.id }
-        });
-
-        if (!hotel) {
+        // Validate category
+        const validCategories = Object.values(ServiceCategory);
+        const categoryValue = category.toLowerCase() as ServiceCategory;
+        
+        if (!validCategories.includes(categoryValue)) {
             return NextResponse.json(
-                { error: "Hotel not found" },
-                { status: 404 }
+                { error: "Invalid category. Must be one of: " + validCategories.join(", ") },
+                { status: 400 }
             );
         }
 
-        // Check if room number already exists
-        const existingRoom = await prisma.room.findFirst({
+        // Check if service name already exists for this hotel
+        const existingService = await prisma.service.findFirst({
             where: {
-                hotelId: hotel.id,
-                roomNumber
+                hotelId,
+                name: name.trim()
             }
         });
 
-        if (existingRoom) {
+        if (existingService) {
             return NextResponse.json(
-                { error: "Room number already exists" },
+                { error: "A service with this name already exists" },
                 { status: 409 }
             );
         }
 
-        // Generate access code
-        const accessCode = generateAccessCode();
-
-        // Create room
-        const room = await prisma.room.create({
+        // Create the service
+        const service = await prisma.service.create({
             data: {
-                roomNumber,
-                roomType,
-                accessCode,
-                hotelId: hotel.id,
-                isOccupied: false
+                name: name.trim(),
+                description: description.trim(),
+                category: categoryValue,
+                icon: icon || "🏨",
+                isActive: isActive !== undefined ? isActive : true,
+                hotelId
             }
         });
 
         return NextResponse.json({
             success: true,
-            message: "Room added successfully",
-            room
+            message: "Service created successfully",
+            service
         });
+
     } catch (error) {
-        console.error("Room creation error:", error);
+        console.error("Service creation error:", error);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }

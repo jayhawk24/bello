@@ -67,46 +67,76 @@ export default function DashboardPage() {
                     </h1>
                     <p className="text-xl text-gray-600">
                         {session.user.role === "hotel_admin" ? "Manage your hotel and provide excellent guest experiences." :
-                            session.user.role === "hotel_staff" ? "Help guests with their service requests." :
+                            session.user.role === "hotel_staff" ? `Help guests with their service requests at ${session.user.hotel?.name || 'your hotel'}.` :
                                 "Enjoy our premium concierge services."}
                     </p>
                 </div>
 
                 {/* Dashboard Cards */}
-                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🏨</div>
-                        <h3 className="text-xl font-semibold mb-2">Hotel Profile</h3>
-                        <p className="text-gray-600 mb-4">
-                            {session.user.hotel?.name || "Setup your hotel details"}
-                        </p>
-                        <Link href="/dashboard/hotel" className="btn-minion">
-                            Manage Hotel
-                        </Link>
-                    </div>
+                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
+                    {session.user.role === "hotel_admin" && (
+                        <div className="card-minion text-center">
+                            <div className="text-4xl mb-4">🏨</div>
+                            <h3 className="text-xl font-semibold mb-2">Hotel Profile</h3>
+                            <p className="text-gray-600 mb-4">
+                                {session.user.hotel?.name || "Setup your hotel details"}
+                            </p>
+                            <Link href="/dashboard/hotel" className="btn-minion">
+                                Manage Hotel
+                            </Link>
+                        </div>
+                    )}
 
                     <div className="card-minion text-center">
                         <div className="text-4xl mb-4">🛏️</div>
                         <h3 className="text-xl font-semibold mb-2">Rooms & QR Codes</h3>
                         <p className="text-gray-600 mb-4">
-                            Configure rooms and generate QR codes for guests
+                            {session.user.role === "hotel_admin" 
+                                ? "Configure rooms and generate QR codes for guests"
+                                : "View rooms and download QR codes for guest access"
+                            }
                         </p>
                         <Link href="/dashboard/rooms" className="btn-minion">
-                            Manage Rooms
+                            {session.user.role === "hotel_admin" ? "Manage Rooms" : "View Rooms"}
                         </Link>
                     </div>
 
-                    {session.user.role === "hotel_admin" && (
+                    {(session.user.role === "hotel_staff" || session.user.role === "hotel_admin") && (
                         <div className="card-minion text-center">
-                            <div className="text-4xl mb-4">👥</div>
-                            <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
+                            <div className="text-4xl mb-4">📋</div>
+                            <h3 className="text-xl font-semibold mb-2">Service Requests</h3>
                             <p className="text-gray-600 mb-4">
-                                Add and manage your hotel staff members
+                                View and manage incoming guest service requests
                             </p>
-                            <Link href="/dashboard/staff" className="btn-minion">
-                                Manage Staff
+                            <Link href="/dashboard/staff-requests" className="btn-minion">
+                                View Requests
                             </Link>
                         </div>
+                    )}
+
+                    {session.user.role === "hotel_admin" && (
+                        <>
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">�️</div>
+                                <h3 className="text-xl font-semibold mb-2">Services Management</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Configure services offered to your guests
+                                </p>
+                                <Link href="/dashboard/services" className="btn-minion">
+                                    Manage Services
+                                </Link>
+                            </div>
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">�👥</div>
+                                <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Add and manage your hotel staff members
+                                </p>
+                                <Link href="/dashboard/staff" className="btn-minion">
+                                    Manage Staff
+                                </Link>
+                            </div>
+                        </>
                     )}
                 </div>
 

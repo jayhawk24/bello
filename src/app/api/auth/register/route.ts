@@ -81,6 +81,48 @@ export async function POST(request: NextRequest) {
                     data: { hotelId: hotel.id }
                 });
 
+                // Create default services for the new hotel
+                const defaultServices = [
+                    {
+                        name: "Room Service",
+                        description: "Order food and beverages directly to your room",
+                        category: "room_service" as const,
+                        icon: "🍽️"
+                    },
+                    {
+                        name: "Housekeeping",
+                        description: "Request cleaning services, towels, and amenities",
+                        category: "housekeeping" as const,
+                        icon: "🧹"
+                    },
+                    {
+                        name: "Concierge Services",
+                        description: "Local recommendations and assistance",
+                        category: "concierge" as const,
+                        icon: "🎩"
+                    },
+                    {
+                        name: "Maintenance",
+                        description: "Report room issues and request repairs",
+                        category: "maintenance" as const,
+                        icon: "🔧"
+                    },
+                    {
+                        name: "Laundry Service",
+                        description: "Professional cleaning and pressing services",
+                        category: "laundry" as const,
+                        icon: "👔"
+                    }
+                ];
+
+                await tx.service.createMany({
+                    data: defaultServices.map(service => ({
+                        ...service,
+                        hotelId: hotel.id,
+                        isActive: true
+                    }))
+                });
+
                 return { user: updatedUser, hotel };
             }
         );

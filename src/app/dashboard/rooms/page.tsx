@@ -28,7 +28,7 @@ export default function RoomsPage() {
             router.push("/login");
             return;
         }
-        if (session.user.role !== "hotel_admin") {
+        if (!['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
             router.push("/dashboard");
             return;
         }
@@ -85,7 +85,7 @@ export default function RoomsPage() {
         );
     }
 
-    if (!session || session.user.role !== "hotel_admin") {
+    if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
         return null;
     }
 
@@ -118,12 +118,17 @@ export default function RoomsPage() {
                             Room Management 🛏️
                         </h1>
                         <p className="text-xl text-gray-600">
-                            Manage your hotel rooms and generate QR codes for guest access
+                            {session.user.role === 'hotel_admin' 
+                                ? 'Manage your hotel rooms and generate QR codes for guest access'
+                                : 'View hotel rooms and download QR codes for guest access'
+                            }
                         </p>
                     </div>
-                    <Link href="/dashboard/rooms/add" className="btn-minion">
-                        ➕ Add New Room
-                    </Link>
+                    {session.user.role === 'hotel_admin' && (
+                        <Link href="/dashboard/rooms/add" className="btn-minion">
+                            ➕ Add New Room
+                        </Link>
+                    )}
                 </div>
 
                 {error && (
@@ -137,11 +142,16 @@ export default function RoomsPage() {
                         <div className="text-6xl mb-4">🛏️</div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">No Rooms Added Yet</h2>
                         <p className="text-gray-600 mb-6">
-                            Start by adding your hotel rooms to enable guest services
+                            {session.user.role === 'hotel_admin' 
+                                ? 'Start by adding your hotel rooms to enable guest services'
+                                : 'No rooms have been set up yet. Please contact your hotel administrator.'
+                            }
                         </p>
-                        <Link href="/dashboard/rooms/add" className="btn-minion">
-                            Add Your First Room
-                        </Link>
+                        {session.user.role === 'hotel_admin' && (
+                            <Link href="/dashboard/rooms/add" className="btn-minion">
+                                Add Your First Room
+                            </Link>
+                        )}
                     </div>
                 ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -183,17 +193,21 @@ export default function RoomsPage() {
                                         📱 Download QR Code
                                     </button>
                                     <div className="flex space-x-2">
-                                        <Link 
-                                            href={`/dashboard/rooms/${room.id}/edit`} 
-                                            className="btn-minion-secondary flex-1 text-center text-sm"
-                                        >
-                                            ✏️ Edit
-                                        </Link>
+                                        {session.user.role === 'hotel_admin' && (
+                                            <Link 
+                                                href={`/dashboard/rooms/${room.id}/edit`} 
+                                                className="btn-minion-secondary flex-1 text-center text-sm"
+                                            >
+                                                ✏️ Edit
+                                            </Link>
+                                        )}
                                         <Link 
                                             href={`/dashboard/rooms/${room.id}`} 
-                                            className="btn-minion-secondary flex-1 text-center text-sm"
+                                            className={`btn-minion-secondary text-center text-sm ${
+                                                session.user.role === 'hotel_admin' ? 'flex-1' : 'w-full'
+                                            }`}
                                         >
-                                            👁️ View
+                                            👁️ View Details
                                         </Link>
                                     </div>
                                 </div>

@@ -9,19 +9,41 @@ export async function GET(
 ) {
     try {
         const session = await auth();
-        if (!session || session.user.role !== "hotel_admin") {
+        if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
             );
         }
 
+        // For hotel staff, use their hotelId directly. For admins, find their hotel
+        let hotelId = session.user.hotelId;
+        
+        if (session.user.role === "hotel_admin" && !hotelId) {
+            const hotel = await prisma.hotel.findFirst({
+                where: { adminId: session.user.id }
+            });
+            
+            if (!hotel) {
+                return NextResponse.json(
+                    { error: "Hotel not found" },
+                    { status: 404 }
+                );
+            }
+            hotelId = hotel.id;
+        }
+
+        if (!hotelId) {
+            return NextResponse.json(
+                { error: "Hotel not found" },
+                { status: 404 }
+            );
+        }
+
         const room = await prisma.room.findFirst({
             where: {
                 id: params.id,
-                hotel: {
-                    adminId: session.user.id
-                }
+                hotelId: hotelId
             },
             include: {
                 hotel: true

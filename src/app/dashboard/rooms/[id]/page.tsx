@@ -10,6 +10,7 @@ interface Room {
     roomNumber: string;
     roomType: string;
     accessCode: string;
+    hotelId: string;
     isOccupied: boolean;
     currentBookingId: string | null;
     createdAt: string;
@@ -35,7 +36,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
             router.push("/login");
             return;
         }
-        if (session.user.role !== "hotel_admin") {
+        if (!['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
             router.push("/dashboard");
             return;
         }
@@ -81,6 +82,31 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
         }
     };
 
+    const copyQRDetails = async () => {
+        if (!room) return;
+        
+        try {
+            // Generate the same QR data that would be in the QR code (matching the generateQRCodeData function)
+            const baseUrl = window.location.origin;
+            const qrData = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(room.hotelId)}&roomNumber=${encodeURIComponent(room.roomNumber)}&accessCode=${encodeURIComponent(room.accessCode)}`;
+            
+            await navigator.clipboard.writeText(qrData);
+            alert("QR code URL copied to clipboard!");
+        } catch (error) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            const baseUrl = window.location.origin;
+            const qrData = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(room.hotelId)}&roomNumber=${encodeURIComponent(room.roomNumber)}&accessCode=${encodeURIComponent(room.accessCode)}`;
+            
+            textArea.value = qrData;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert("QR code URL copied to clipboard!");
+        }
+    };
+
     const deleteRoom = async () => {
         if (!room) return;
         
@@ -121,7 +147,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
         );
     }
 
-    if (!session || session.user.role !== "hotel_admin") {
+    if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
         return null;
     }
 
@@ -188,17 +214,25 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                         </p>
                     </div>
                     <div className="flex space-x-3">
-                        <Link 
-                            href={`/dashboard/rooms/${room.id}/edit`} 
-                            className="btn-minion"
-                        >
-                            ✏️ Edit Room
-                        </Link>
+                        {session.user.role === 'hotel_admin' && (
+                            <Link 
+                                href={`/dashboard/rooms/${room.id}/edit`} 
+                                className="btn-minion"
+                            >
+                                ✏️ Edit Room
+                            </Link>
+                        )}
                         <button
                             onClick={downloadQRCode}
                             className="btn-minion-secondary"
                         >
                             📱 Download QR
+                        </button>
+                        <button
+                            onClick={copyQRDetails}
+                            className="btn-minion-secondary"
+                        >
+                            📋 Copy QR URL
                         </button>
                     </div>
                 </div>
@@ -304,12 +338,20 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                             <p className="text-sm text-gray-600 mb-4">
                                 Guests can scan the QR code to access room services
                             </p>
-                            <button
-                                onClick={downloadQRCode}
-                                className="btn-minion w-full"
-                            >
-                                📱 Download QR Code
-                            </button>
+                            <div className="flex flex-col space-y-2">
+                                <button
+                                    onClick={downloadQRCode}
+                                    className="btn-minion w-full"
+                                >
+                                    📱 Download QR Code
+                                </button>
+                                <button
+                                    onClick={copyQRDetails}
+                                    className="btn-minion-secondary w-full"
+                                >
+                                    📋 Copy QR URL
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -317,13 +359,15 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                 {/* Actions */}
                 <div className="mt-12 card-minion">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-                    <div className="grid md:grid-cols-4 gap-4">
-                        <Link 
-                            href={`/dashboard/rooms/${room.id}/edit`}
-                            className="btn-minion text-center"
-                        >
-                            ✏️ Edit Room Details
-                        </Link>
+                    <div className={`grid gap-4 ${session.user.role === 'hotel_admin' ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
+                        {session.user.role === 'hotel_admin' && (
+                            <Link 
+                                href={`/dashboard/rooms/${room.id}/edit`}
+                                className="btn-minion text-center"
+                            >
+                                ✏️ Edit Room Details
+                            </Link>
+                        )}
                         <button
                             onClick={downloadQRCode}
                             className="btn-minion-secondary"
@@ -331,15 +375,23 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                             📱 Download QR Code
                         </button>
                         <button
-                            onClick={deleteRoom}
-                            disabled={room.isOccupied}
-                            className={`${room.isOccupied 
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                                : 'bg-red-500 hover:bg-red-600 text-white'
-                            } px-4 py-2 rounded-lg font-medium transition-colors`}
+                            onClick={copyQRDetails}
+                            className="btn-minion-secondary"
                         >
-                            🗑️ Delete Room
+                            📋 Copy QR URL
                         </button>
+                        {session.user.role === 'hotel_admin' && (
+                            <button
+                                onClick={deleteRoom}
+                                disabled={room.isOccupied}
+                                className={`${room.isOccupied 
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-red-500 hover:bg-red-600 text-white'
+                                } px-4 py-2 rounded-lg font-medium transition-colors`}
+                            >
+                                🗑️ Delete Room
+                            </button>
+                        )}
                         <Link 
                             href="/dashboard/rooms"
                             className="btn-minion-secondary text-center"
