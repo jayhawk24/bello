@@ -93,6 +93,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 session.user.hotel = token.hotel as any;
             }
             return session;
+        },
+        async redirect({ url, baseUrl }) {
+            // Handle redirect after login based on user role
+            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            else if (new URL(url).origin === baseUrl) return url;
+            return `${baseUrl}/dashboard`;
         }
     },
     pages: {

@@ -33,12 +33,11 @@ function LoginForm() {
                 const session = await getSession();
                 if (session?.user?.role === 'guest') {
                     // Redirect guests back to the page they came from or guest area
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const returnUrl = urlParams.get('returnUrl');
-                    window.location.href = returnUrl || '/guest';
+                    const returnUrl = searchParams.get('returnUrl');
+                    router.push(returnUrl || '/guest');
                 } else {
                     // Redirect staff/admins to dashboard
-                    window.location.href = '/dashboard';
+                    router.push('/dashboard');
                 }
             }
         } catch (error) {
