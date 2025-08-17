@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Output configuration
-    output: 'out',
+    // Build output configuration
     distDir: 'dist',
-    trailingSlash: true,
 
     // Production optimizations
     compress: true,
