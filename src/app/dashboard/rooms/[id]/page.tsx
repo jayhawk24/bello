@@ -18,9 +18,9 @@ interface Room {
 }
 
 interface RoomViewPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function RoomViewPage({ params }: RoomViewPageProps) {
@@ -29,6 +29,15 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
     const [room, setRoom] = useState<Room | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [roomId, setRoomId] = useState<string>("");
+
+    useEffect(() => {
+        const initializeParams = async () => {
+            const resolvedParams = await params;
+            setRoomId(resolvedParams.id);
+        };
+        initializeParams();
+    }, [params]);
 
     useEffect(() => {
         if (status === "loading") return;
@@ -40,12 +49,14 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
             router.push("/dashboard");
             return;
         }
-        fetchRoom();
-    }, [session, status, router, params.id]);
+        if (roomId) {
+            fetchRoom();
+        }
+    }, [session, status, router, roomId]);
 
     const fetchRoom = async () => {
         try {
-            const response = await fetch(`/api/rooms/${params.id}`);
+            const response = await fetch(`/api/rooms/${roomId}`);
             if (response.ok) {
                 const data = await response.json();
                 setRoom(data.room);

@@ -13,9 +13,10 @@ interface ServiceUpdateData {
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
             return NextResponse.json(
@@ -50,7 +51,7 @@ export async function GET(
 
         const service = await prisma.service.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId
             }
         });
@@ -78,9 +79,10 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
@@ -112,7 +114,7 @@ export async function PUT(
         // Verify service belongs to the hotel
         const existingService = await prisma.service.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId
             }
         });
@@ -125,7 +127,13 @@ export async function PUT(
         }
 
         // Prepare update data
-        const updateData: any = {};
+        const updateData: {
+            name?: string;
+            description?: string;
+            category?: ServiceCategory;
+            icon?: string;
+            isActive?: boolean;
+        } = {};
 
         if (name !== undefined) {
             updateData.name = name.trim();
@@ -135,7 +143,7 @@ export async function PUT(
                 where: {
                     hotelId,
                     name: name.trim(),
-                    id: { not: params.id }
+                    id: { not: id }
                 }
             });
 
@@ -176,7 +184,7 @@ export async function PUT(
 
         // Update the service
         const updatedService = await prisma.service.update({
-            where: { id: params.id },
+            where: { id: id },
             data: updateData
         });
 
@@ -197,9 +205,10 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
@@ -228,7 +237,7 @@ export async function DELETE(
         // Verify service belongs to the hotel
         const existingService = await prisma.service.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId
             }
         });
@@ -243,7 +252,7 @@ export async function DELETE(
         // Check if service has active requests
         const activeRequests = await prisma.serviceRequest.count({
             where: {
-                serviceId: params.id,
+                serviceId: id,
                 status: { in: ['pending', 'in_progress'] }
             }
         });
@@ -257,7 +266,7 @@ export async function DELETE(
 
         // Delete the service
         await prisma.service.delete({
-            where: { id: params.id }
+            where: { id: id }
         });
 
         return NextResponse.json({

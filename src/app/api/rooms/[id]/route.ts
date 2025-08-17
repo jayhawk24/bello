@@ -9,9 +9,10 @@ interface RoomUpdateData {
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
             return NextResponse.json(
@@ -46,7 +47,7 @@ export async function GET(
 
         const room = await prisma.room.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId: hotelId
             }
         });
@@ -72,11 +73,13 @@ export async function GET(
 }
 
 export async function PUT(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
+        
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
@@ -86,13 +89,6 @@ export async function PUT(
 
         const body = await request.json();
         const { roomNumber, roomType } = body as RoomUpdateData;
-
-        if (!roomNumber || !roomType) {
-            return NextResponse.json(
-                { error: "Room number and type are required" },
-                { status: 400 }
-            );
-        }
 
         const hotel = await prisma.hotel.findFirst({
             where: { adminId: session.user.id }
@@ -105,10 +101,10 @@ export async function PUT(
             );
         }
 
-        // Check if room exists and belongs to the hotel
+        // Verify room exists and belongs to the hotel
         const existingRoom = await prisma.room.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId: hotel.id
             }
         });
@@ -120,30 +116,39 @@ export async function PUT(
             );
         }
 
-        // Check if room number is already taken (excluding current room)
-        const roomNumberExists = await prisma.room.findFirst({
-            where: {
-                roomNumber,
-                hotelId: hotel.id,
-                id: { not: params.id }
-            }
-        });
+        // Check if new room number conflicts with another room
+        if (roomNumber && roomNumber !== existingRoom.roomNumber) {
+            const roomNumberConflict = await prisma.room.findFirst({
+                where: {
+                    hotelId: hotel.id,
+                    roomNumber: roomNumber,
+                    id: { not: id }
+                }
+            });
 
-        if (roomNumberExists) {
-            return NextResponse.json(
-                { error: "Room number already exists" },
-                { status: 409 }
-            );
+            if (roomNumberConflict) {
+                return NextResponse.json(
+                    { error: "A room with this number already exists" },
+                    { status: 409 }
+                );
+            }
+        }
+
+        // Prepare update data
+        const updateData: Partial<RoomUpdateData> = {};
+        
+        if (roomNumber !== undefined) {
+            updateData.roomNumber = roomNumber.trim();
+        }
+        
+        if (roomType !== undefined) {
+            updateData.roomType = roomType.trim();
         }
 
         // Update the room
         const updatedRoom = await prisma.room.update({
-            where: { id: params.id },
-            data: {
-                roomNumber,
-                roomType,
-                updatedAt: new Date()
-            }
+            where: { id: id },
+            data: updateData
         });
 
         return NextResponse.json({
@@ -151,6 +156,7 @@ export async function PUT(
             message: "Room updated successfully",
             room: updatedRoom
         });
+
     } catch (error) {
         console.error("Room update error:", error);
         return NextResponse.json(
@@ -162,9 +168,10 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
@@ -187,7 +194,7 @@ export async function DELETE(
         // Check if room exists and belongs to the hotel
         const existingRoom = await prisma.room.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId: hotel.id
             }
         });
@@ -209,7 +216,7 @@ export async function DELETE(
 
         // Delete the room
         await prisma.room.delete({
-            where: { id: params.id }
+            where: { id: id }
         });
 
         return NextResponse.json({

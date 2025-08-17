@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, Suspense, useState } from "react";
 import Link from "next/link";
 
 interface ServiceRequest {
@@ -20,7 +20,7 @@ interface ServiceRequest {
     } | null;
 }
 
-export default function GuestRequestsPage() {
+function GuestRequestsComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const bookingId = searchParams.get('bookingId');
@@ -214,5 +214,13 @@ export default function GuestRequestsPage() {
                 )}
             </main>
         </div>
+    );
+}
+
+export default function GuestRequestsPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <GuestRequestsComponent />
+        </Suspense>
     );
 }

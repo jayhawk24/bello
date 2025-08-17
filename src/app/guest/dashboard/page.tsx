@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -26,10 +26,21 @@ interface GuestDashboardData {
             };
         };
     };
-    serviceRequests: any[];
+    serviceRequests: {
+        id: string;
+        title: string;
+        description: string;
+        status: string;
+        priority: string;
+        requestedAt: string;
+        service: {
+            name: string;
+            category: string;
+        };
+    }[];
 }
 
-export default function GuestDashboardPage() {
+function GuestDashboardComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { data: session } = useSession();
@@ -263,7 +274,7 @@ export default function GuestDashboardPage() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {dashboardData.serviceRequests.slice(0, 3).map((request: any) => (
+                            {dashboardData.serviceRequests.slice(0, 3).map((request: typeof dashboardData.serviceRequests[0]) => (
                                 <div key={request.id} className="border rounded-lg p-4 bg-gray-50">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -342,5 +353,13 @@ export default function GuestDashboardPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function GuestDashboardPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <GuestDashboardComponent />
+        </Suspense>
     );
 }

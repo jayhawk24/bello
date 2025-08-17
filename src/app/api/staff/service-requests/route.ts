@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { ServiceRequestStatus, Priority } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
     try {
@@ -18,16 +19,20 @@ export async function GET(request: NextRequest) {
         const priority = searchParams.get('priority');
         
         // Build where clause
-        const whereClause: any = {
+        const whereClause: {
+            hotelId: string;
+            status?: ServiceRequestStatus;
+            priority?: Priority;
+        } = {
             hotelId: session.user.hotelId
         };
 
         if (status) {
-            whereClause.status = status;
+            whereClause.status = status as ServiceRequestStatus;
         }
 
         if (priority) {
-            whereClause.priority = priority;
+            whereClause.priority = priority as Priority;
         }
 
         // Get service requests for the staff's hotel
@@ -121,7 +126,12 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Build update data
-        const updateData: any = {};
+        const updateData: {
+            status?: ServiceRequestStatus;
+            startedAt?: Date;
+            completedAt?: Date;
+            assignedStaffId?: string | null;
+        } = {};
         
         if (status) {
             updateData.status = status;

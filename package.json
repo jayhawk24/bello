@@ -12,7 +12,17 @@
         "db:generate": "prisma generate",
         "db:push": "prisma db push",
         "db:studio": "prisma studio",
-        "db:migrate": "prisma migrate dev"
+        "db:migrate": "prisma migrate dev",
+        "db:migrate:prod": "prisma migrate deploy",
+        "db:reset": "prisma migrate reset --force",
+        "db:seed": "prisma db seed",
+        "build:analyze": "ANALYZE=true npm run build",
+        "test": "echo \"No tests specified\" && exit 0",
+        "postinstall": "prisma generate",
+        "prod:setup": "npm ci && npm run db:generate && npm run build",
+        "health": "curl -f http://localhost:3000/api/health || exit 1",
+        "db:switch:postgres": "node scripts/switch-to-postgres.js",
+        "db:switch:sqlite": "node scripts/switch-to-sqlite.js"
     },
     "dependencies": {
         "@prisma/client": "^6.14.0",
@@ -31,6 +41,7 @@
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "critters": "^0.0.23",
         "eslint": "^9",
         "eslint-config-next": "15.4.6",
         "tailwindcss": "^4",

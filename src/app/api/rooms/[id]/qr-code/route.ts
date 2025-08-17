@@ -5,9 +5,10 @@ import { generateQRCodeData } from "@/lib/utils";
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
             return NextResponse.json(
@@ -42,7 +43,7 @@ export async function GET(
 
         const room = await prisma.room.findFirst({
             where: {
-                id: params.id,
+                id: id,
                 hotelId: hotelId
             },
             include: {

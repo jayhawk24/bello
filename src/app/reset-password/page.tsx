@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { ResetPasswordForm } from '@/components/auth';
 
@@ -14,16 +14,25 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <div className="bg-white rounded-lg shadow-lg p-8">
-                    <ResetPasswordForm />
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                        Reset Password
+                    </h2>
+                    
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <ResetPasswordForm />
+                    </Suspense>
+                </div>
 
-                    <div className="mt-6 text-center">
-                        <Link
-                            href="/login"
-                            className="text-yellow-600 hover:text-yellow-700 font-medium"
-                        >
-                            Back to Login
-                        </Link>
-                    </div>
+                <div className="text-center">
+                    <Link href="/login" className="text-sm text-minion-blue hover:underline">
+                        Remember your password? Sign in
+                    </Link>
+                </div>
+
+                <div className="text-center">
+                    <Link href="/" className="text-gray-500 hover:underline">
+                        ← Back to Home
+                    </Link>
                 </div>
             </div>
         </div>

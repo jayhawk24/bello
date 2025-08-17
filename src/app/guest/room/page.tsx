@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, Suspense, useState } from "react";
 import Link from "next/link";
 
 interface Room {
@@ -31,7 +31,7 @@ interface Service {
     price: number;
 }
 
-export default function GuestRoomPage() {
+function GuestRoomComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [room, setRoom] = useState<Room | null>(null);
@@ -237,5 +237,13 @@ export default function GuestRoomPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function GuestRoomPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <GuestRoomComponent />
+        </Suspense>
     );
 }

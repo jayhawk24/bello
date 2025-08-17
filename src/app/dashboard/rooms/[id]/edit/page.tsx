@@ -22,19 +22,30 @@ interface RoomFormData {
 }
 
 interface RoomEditPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function RoomEditPage({ params }: RoomEditPageProps) {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [room, setRoom] = useState<Room | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<RoomFormData>({
         roomNumber: "",
-        roomType: "Standard"
+        roomType: ""
     });
+    const [roomId, setRoomId] = useState<string>("");
+
+    useEffect(() => {
+        const initializeParams = async () => {
+            const resolvedParams = await params;
+            setRoomId(resolvedParams.id);
+        };
+        initializeParams();
+    }, [params]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
@@ -58,12 +69,14 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
             router.push("/dashboard");
             return;
         }
-        fetchRoom();
-    }, [session, status, router, params.id]);
+        if (roomId) {
+            fetchRoom();
+        }
+    }, [session, status, router, roomId]);
 
     const fetchRoom = async () => {
         try {
-            const response = await fetch(`/api/rooms/${params.id}`);
+            const response = await fetch(`/api/rooms/${roomId}`);
             if (response.ok) {
                 const data = await response.json();
                 setRoom(data.room);
@@ -95,7 +108,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
         setError("");
 
         try {
-            const response = await fetch(`/api/rooms/${params.id}`, {
+            const response = await fetch(`/api/rooms/${roomId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -104,7 +117,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
             });
 
             if (response.ok) {
-                router.push(`/dashboard/rooms/${params.id}`);
+                router.push(`/dashboard/rooms/${roomId}`);
             } else {
                 const errorData = await response.json();
                 setError(errorData.error || "Failed to update room");
@@ -178,7 +191,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                     </div>
                     <div className="flex items-center space-x-4">
                         <span className="text-gray-600">Welcome, {session.user.name}</span>
-                        <Link href={`/dashboard/rooms/${params.id}`} className="btn-minion-secondary">
+                        <Link href={`/dashboard/rooms/${roomId}`} className="btn-minion-secondary">
                             ← Back to Room
                         </Link>
                     </div>
@@ -250,7 +263,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                                     {isSubmitting ? "Updating..." : "💾 Update Room"}
                                 </button>
                                 <Link 
-                                    href={`/dashboard/rooms/${params.id}`}
+                                    href={`/dashboard/rooms/${roomId}`}
                                     className="btn-minion-secondary flex-1 text-center"
                                 >
                                     Cancel

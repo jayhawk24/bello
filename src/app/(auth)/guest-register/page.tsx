@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function GuestRegisterPage() {
+function GuestRegisterForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get('returnUrl');
@@ -247,5 +247,13 @@ export default function GuestRegisterPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function GuestRegisterPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <GuestRegisterForm />
+        </Suspense>
     );
 }

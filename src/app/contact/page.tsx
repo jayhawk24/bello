@@ -31,7 +31,7 @@ export default function Contact() {
                         <span className="text-4xl">📧</span>
                     </div>
                     <h1 className="text-4xl font-bold text-gray-800 mb-4">Contact Us</h1>
-                    <p className="text-xl text-gray-600">We'd love to hear from you!</p>
+                    <p className="text-xl text-gray-600">We&apos;d love to hear from you!</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">

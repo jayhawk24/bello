@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -20,7 +20,7 @@ interface ServiceRequestForm {
     priority: 'low' | 'medium' | 'high' | 'urgent';
 }
 
-export default function ServiceRequestPage() {
+function ServiceRequestComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { data: session, status } = useSession();
@@ -389,5 +389,13 @@ export default function ServiceRequestPage() {
                 )}
             </main>
         </div>
+    );
+}
+
+export default function ServiceRequestPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ServiceRequestComponent />
+        </Suspense>
     );
 }

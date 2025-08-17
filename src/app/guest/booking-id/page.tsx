@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function BookingIdPage() {
+function BookingIdComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [bookingId, setBookingId] = useState("");
@@ -134,5 +134,13 @@ export default function BookingIdPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function BookingIdPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <BookingIdComponent />
+        </Suspense>
     );
 }
