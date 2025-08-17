@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Build output configuration
-    distDir: 'dist',
-
     // Production optimizations
     compress: true,
     poweredByHeader: false,
+    
+    // Vercel optimizations
+    swcMinify: true,
+    compiler: {
+        removeConsole: process.env.NODE_ENV === 'production',
+    },
 
     // Security headers for production
     async headers() {
