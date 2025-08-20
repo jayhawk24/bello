@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useRoomAccess } from "@/hooks/useRooms";
 
 // Dynamically import the QR scanner to avoid SSR issues
 const BarcodeScannerComponent = dynamic(
@@ -14,10 +15,22 @@ const BarcodeScannerComponent = dynamic(
 export default function QRScanPage() {
     const router = useRouter();
     const [roomCode, setRoomCode] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
     const [showScanner, setShowScanner] = useState(false);
     const [scannerError, setScannerError] = useState("");
+    const [accessParams, setAccessParams] = useState<{
+        hotelId: string;
+        roomNumber: string;
+        accessCode: string;
+    } | null>(null);
+
+    // Use React Query for room access
+    const {
+        data: roomData,
+        isLoading,
+        error: accessError
+    } = useRoomAccess(
+        accessParams || { hotelId: "", roomNumber: "", accessCode: "" }
+    );
 
     const handleQRCodeScanned = (result: string) => {
         if (result) {
@@ -34,43 +47,37 @@ export default function QRScanPage() {
     };
 
     const processRoomCode = async (code: string) => {
-
-        setIsLoading(true);
-        setError("");
+        setScannerError("");
 
         try {
             // Room code format: HOTEL_ID-ROOM_NUMBER-ACCESS_CODE
-            // Example: cmectc6bi0002gl61x1ohhqwe-102-N6I42CT8
             const parts = code.trim().split('-');
 
             if (parts.length !== 3) {
-                setError('Invalid room code format. Expected: HOTEL-ROOM-ACCESS');
+                setScannerError('Invalid room code format. Expected: HOTEL-ROOM-ACCESS');
                 return;
             }
 
             const [hotelId, roomNumber, accessCode] = parts;
 
             if (!hotelId || !roomNumber || !accessCode) {
-                setError('Invalid room code. All parts are required.');
+                setScannerError('Invalid room code. All parts are required.');
                 return;
             }
 
-            // First, validate the room access
-            const response = await fetch(`/api/guest/room-access?hotelId=${hotelId}&roomNumber=${roomNumber}&accessCode=${accessCode}`);
-
-            if (response.ok) {
-                const data = await response.json();
-                // Redirect directly to services page with room information
-                router.push(`/guest/services?roomId=${data.room.id}&hotelId=${hotelId}`);
-            } else {
-                setError('Invalid room code or access denied');
-            }
+            // Set access parameters to trigger the query
+            setAccessParams({ hotelId, roomNumber, accessCode });
         } catch (error) {
-            setError('Error processing room code');
-        } finally {
-            setIsLoading(false);
+            setScannerError('Error processing room code');
         }
     };
+
+    // Handle successful room access with useEffect
+    useEffect(() => {
+        if (roomData && accessParams) {
+            router.push(`/guest/services?roomId=${roomData.room.id}&hotelId=${accessParams.hotelId}`);
+        }
+    }, [roomData, accessParams, router]);
 
     const handleRoomCodeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,7 +85,7 @@ export default function QRScanPage() {
         await processRoomCode(roomCode);
     };
 
-    return (
+    const error = accessError?.message || scannerError; return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center p-6">
             <div className="card-minion max-w-md w-full text-center">
                 <div className="mb-6">
