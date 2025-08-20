@@ -29,14 +29,56 @@
 body {
     background: var(--background);
     color: var(--foreground);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
     line-height: 1.6;
+    font-weight: 400;
+}
+
+/* Typography Classes */
+.font-raleway {
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
+}
+
+.font-montserrat {
+    font-family: var(--font-montserrat), "Montserrat", system-ui, -apple-system, sans-serif;
+}
+
+/* Headings use Montserrat for impact */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-montserrat), "Montserrat", system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+/* Specific heading sizes with Montserrat */
+h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Body text uses Raleway */
+p, span, div, a, li, td, th {
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
 }
 
 /* Custom Minion-style Button Component */
 .btn-minion {
     background-color: var(--minion-yellow);
     color: #1f2937;
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
     font-weight: 600;
     padding: 12px 24px;
     border-radius: var(--radius-minion);
@@ -48,6 +90,7 @@ body {
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    font-size: 14px;
 }
 
 .btn-minion:hover {
@@ -94,6 +137,7 @@ body {
 .btn-minion-secondary {
     background-color: var(--minion-blue);
     color: white;
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
     font-weight: 600;
     padding: 12px 24px;
     border-radius: var(--radius-minion);
@@ -105,6 +149,7 @@ body {
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    font-size: 14px;
 }
 
 .btn-minion-secondary:hover {
@@ -130,6 +175,7 @@ body {
 .btn-minion-success {
     background-color: var(--success);
     color: white;
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
     font-weight: 600;
     padding: 12px 24px;
     border-radius: var(--radius-minion);
@@ -141,6 +187,7 @@ body {
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    font-size: 14px;
 }
 
 .btn-minion-success:hover {
@@ -170,6 +217,7 @@ body {
 .btn-minion-danger {
     background-color: var(--error);
     color: white;
+    font-family: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
     font-weight: 600;
     padding: 12px 24px;
     border-radius: var(--radius-minion);
