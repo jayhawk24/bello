@@ -5,9 +5,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-// Dynamically import the QR scanner to avoid SSR issues
-const BarcodeScannerComponent = dynamic(
-    () => import("react-qr-barcode-scanner").then((mod) => mod.default),
+// Dynamically import our custom QR scanner to avoid SSR issues
+const QRScanner = dynamic(
+    () => import("@/components/QRScanner"),
     { ssr: false }
 );
 
@@ -18,19 +18,31 @@ export default function QRScanPage() {
     const [error, setError] = useState("");
     const [showScanner, setShowScanner] = useState(false);
     const [scannerError, setScannerError] = useState("");
+    const [isStopping, setIsStopping] = useState(false);
 
     const handleQRCodeScanned = (result: string) => {
         if (result) {
             setRoomCode(result);
             setShowScanner(false);
+            setIsStopping(false);
             // Automatically process the scanned code
             processRoomCode(result);
         }
     };
 
-    const handleScannerError = (error: any) => {
-        setScannerError("Camera access denied or not available. Please enter the room code manually.");
+    const handleScannerError = (error: string) => {
+        setScannerError(error);
         setShowScanner(false);
+        setIsStopping(false);
+    };
+
+    const handleStopScanner = () => {
+        setIsStopping(true);
+        // Add a small delay to allow for cleanup, then hide scanner
+        setTimeout(() => {
+            setShowScanner(false);
+            setIsStopping(false);
+        }, 500);
     };
 
     const processRoomCode = async (code: string) => {
@@ -109,27 +121,34 @@ export default function QRScanPage() {
                     ) : (
                         <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-black">
                             <div className="relative">
-                                <BarcodeScannerComponent
-                                    width="100%"
-                                    height={300}
-                                    onUpdate={(err, result) => {
-                                        if (result) {
-                                            handleQRCodeScanned(result.getText());
-                                        }
-                                        if (err) {
-                                            handleScannerError(err);
-                                        }
-                                    }}
-                                />
+                                {!isStopping ? (
+                                    <QRScanner
+                                        width={400}
+                                        height={300}
+                                        onResult={(result) => handleQRCodeScanned(result)}
+                                        onError={(error) => handleScannerError(error)}
+                                    />
+                                ) : (
+                                    <div className="w-full h-[300px] bg-black flex items-center justify-center">
+                                        <div className="text-white text-center">
+                                            <div className="text-2xl mb-2">⏹️</div>
+                                            <p>Stopping camera...</p>
+                                        </div>
+                                    </div>
+                                )}
                                 <button
-                                    onClick={() => setShowScanner(false)}
-                                    className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm"
+                                    onClick={handleStopScanner}
+                                    disabled={isStopping}
+                                    className={`absolute top-2 right-2 px-3 py-1 rounded-full text-sm z-10 ${isStopping
+                                            ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                                            : 'bg-red-500 text-white hover:bg-red-600'
+                                        }`}
                                 >
-                                    ✕ Stop
+                                    {isStopping ? '⏹️ Stopping...' : '✕ Stop'}
                                 </button>
                             </div>
                             <div className="bg-gray-800 text-white p-2 text-center text-sm">
-                                Point your camera at the QR code
+                                {isStopping ? 'Stopping camera...' : 'Point your camera at the QR code'}
                             </div>
                         </div>
                     )}
