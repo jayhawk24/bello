@@ -70,6 +70,12 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
         }
     };
 
+    const openBrandedQR = () => {
+        if (!room) return;
+        const brandedQRUrl = `/api/rooms/${room.id}/branded-qr`;
+        window.open(brandedQRUrl, '_blank');
+    };
+
     const downloadQRCode = async () => {
         if (!room) return;
         
@@ -351,10 +357,16 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                             </p>
                             <div className="flex flex-col space-y-2">
                                 <button
+                                    onClick={openBrandedQR}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
+                                >
+                                    ✨ View Branded QR Code
+                                </button>
+                                <button
                                     onClick={downloadQRCode}
                                     className="btn-minion w-full"
                                 >
-                                    📱 Download QR Code
+                                    📱 Download Simple QR Code
                                 </button>
                                 <button
                                     onClick={copyQRDetails}
@@ -379,6 +391,12 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                                 ✏️ Edit Room Details
                             </Link>
                         )}
+                        <button
+                            onClick={openBrandedQR}
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 text-sm"
+                        >
+                            ✨ Branded QR
+                        </button>
                         <button
                             onClick={downloadQRCode}
                             className="btn-minion-secondary"

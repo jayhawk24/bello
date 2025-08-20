@@ -65,18 +65,27 @@ export async function GET(
             room.accessCode
         );
 
-        // For now, return a simple QR code URL that can be used with a QR code service
-        // In production, you might want to generate actual QR code images
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+        // Create a more attractive QR code with hotel branding
+        // Using a more sophisticated QR code service with customization options
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?` + 
+            `size=400x400&` +
+            `data=${encodeURIComponent(qrData)}&` +
+            `format=png&` +
+            `ecc=M&` +
+            `color=2c3e50&` +
+            `bgcolor=ffffff&` +
+            `qzone=2&` +
+            `download=1`;
 
-        // Create a simple response that triggers download
+        // For now, we'll use the simple QR code and later enhance with canvas manipulation
+        // In a future enhancement, we could use Canvas API to add hotel name and styling
         const qrCodeResponse = await fetch(qrCodeUrl);
         const qrCodeBuffer = await qrCodeResponse.arrayBuffer();
 
         return new NextResponse(qrCodeBuffer, {
             headers: {
                 'Content-Type': 'image/png',
-                'Content-Disposition': `attachment; filename="room-${room.roomNumber}-qr.png"`
+                'Content-Disposition': `attachment; filename="${room.hotel.name.replace(/[^a-z0-9]/gi, '_')}-Room-${room.roomNumber}-QR.png"`
             }
         });
 
