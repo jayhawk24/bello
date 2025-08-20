@@ -1,4 +1,5 @@
 import { UserRole, SubscriptionPlan } from "@prisma/client";
+import type { DefaultSession } from "next-auth";
 
 export interface ExtendedUser {
     id: string;
@@ -16,7 +17,7 @@ export interface ExtendedUser {
 declare module "next-auth" {
     interface User extends ExtendedUser {}
 
-    interface Session {
+    interface Session extends DefaultSession {
         user: ExtendedUser;
     }
 }
