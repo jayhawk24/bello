@@ -102,32 +102,57 @@ export default function DashboardPage() {
                     </div>
 
                     {(session.user.role === "hotel_staff" || session.user.role === "hotel_admin") && (
-                        <div className="card-minion text-center">
-                            <div className="text-4xl mb-4">📋</div>
-                            <h3 className="text-xl font-semibold mb-2">Service Requests</h3>
-                            <p className="text-gray-600 mb-4">
-                                View and manage incoming guest service requests
-                            </p>
-                            <Link href="/dashboard/staff-requests" className="btn-minion">
-                                View Requests
-                            </Link>
-                        </div>
+                        <>
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">📋</div>
+                                <h3 className="text-xl font-semibold mb-2">Service Requests</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Basic view and manage guest service requests
+                                </p>
+                                <Link href="/dashboard/staff-requests" className="btn-minion">
+                                    Legacy Dashboard
+                                </Link>
+                            </div>
+                            
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">🚀</div>
+                                <h3 className="text-xl font-semibold mb-2">Enhanced Staff Dashboard</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Advanced workload management and analytics
+                                </p>
+                                <Link href="/dashboard/enhanced-staff" className="btn-minion">
+                                    New Dashboard
+                                </Link>
+                            </div>
+                        </>
                     )}
 
                     {session.user.role === "hotel_admin" && (
                         <>
                             <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">�️</div>
+                                <div className="text-4xl mb-4">🛎️</div>
                                 <h3 className="text-xl font-semibold mb-2">Services Management</h3>
                                 <p className="text-gray-600 mb-4">
-                                    Configure services offered to your guests
+                                    Basic service configuration
                                 </p>
                                 <Link href="/dashboard/services" className="btn-minion">
-                                    Manage Services
+                                    Legacy Services
                                 </Link>
                             </div>
+                            
                             <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">�👥</div>
+                                <div className="text-4xl mb-4">⚙️</div>
+                                <h3 className="text-xl font-semibold mb-2">Advanced Service Catalog</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Create custom services and manage catalog
+                                </p>
+                                <Link href="/dashboard/service-management" className="btn-minion">
+                                    Manage Catalog
+                                </Link>
+                            </div>
+                            
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">👥</div>
                                 <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
                                 <p className="text-gray-600 mb-4">
                                     Add and manage your hotel staff members
