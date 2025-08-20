@@ -60,6 +60,19 @@ body {
     transform: translateY(0);
 }
 
+.btn-minion:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-minion:disabled:hover {
+    background-color: var(--minion-yellow);
+    transform: none;
+    box-shadow: none;
+}
+
 /* Secondary Button */
 .btn-minion-secondary {
     background-color: var(--minion-blue);
@@ -81,6 +94,99 @@ body {
     background-color: var(--minion-blue-dark);
     box-shadow: 0 10px 25px 0 rgba(33, 150, 243, 0.35);
     transform: translateY(-2px);
+}
+
+.btn-minion-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-minion-secondary:disabled:hover {
+    background-color: var(--minion-blue);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Success Button */
+.btn-minion-success {
+    background-color: var(--success);
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: var(--radius-minion);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgba(76, 175, 80, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-minion-success:hover {
+    background-color: #45a049;
+    box-shadow: 0 10px 25px 0 rgba(76, 175, 80, 0.35);
+    transform: translateY(-2px);
+}
+
+.btn-minion-success:active {
+    transform: translateY(0);
+}
+
+.btn-minion-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-minion-success:disabled:hover {
+    background-color: var(--success);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Danger/Delete Button */
+.btn-minion-danger {
+    background-color: var(--error);
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: var(--radius-minion);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgba(244, 67, 54, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-minion-danger:hover {
+    background-color: #d32f2f;
+    box-shadow: 0 10px 25px 0 rgba(244, 67, 54, 0.35);
+    transform: translateY(-2px);
+}
+
+.btn-minion-danger:active {
+    transform: translateY(0);
+}
+
+.btn-minion-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-minion-danger:disabled:hover {
+    background-color: var(--error);
+    transform: none;
+    box-shadow: none;
 }
 
 /* Custom Card Component */

@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
@@ -51,6 +52,7 @@ export default function DashboardPage() {
                         <h1 className="text-2xl font-bold text-gray-800">Bello Dashboard</h1>
                     </div>
                     <div className="flex items-center space-x-4">
+                        <NotificationBell />
                         <span className="text-gray-600">Welcome, {session.user.name}</span>
                         <button onClick={handleSignOut} className="btn-minion-secondary">
                             Sign Out

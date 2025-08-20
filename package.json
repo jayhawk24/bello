@@ -22,7 +22,9 @@
         "prod:setup": "npm ci && npm run db:generate && npm run build",
         "health": "curl -f http://localhost:3000/api/health || exit 1",
         "db:switch:postgres": "node scripts/switch-to-postgres.js",
-        "db:switch:sqlite": "node scripts/switch-to-sqlite.js"
+        "db:switch:sqlite": "node scripts/switch-to-sqlite.js",
+        "cleanup": "node scripts/cleanup-old-requests.js",
+        "setup:cleanup": "bash scripts/setup-cleanup.sh"
     },
     "dependencies": {
         "@prisma/client": "^6.14.0",
@@ -33,6 +35,7 @@
         "prisma": "^6.14.0",
         "react": "19.1.0",
         "react-dom": "19.1.0",
+        "web-push": "^3.6.7",
         "zod": "^4.0.17"
     },
     "devDependencies": {

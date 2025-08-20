@@ -194,3 +194,73 @@ export async function PATCH(request: NextRequest) {
         );
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const session = await auth();
+        
+        if (!session?.user || session.user.role !== 'hotel_admin' || !session.user.hotelId) {
+            return NextResponse.json(
+                { error: 'Unauthorized - Admin access required' },
+                { status: 401 }
+            );
+        }
+
+        const { searchParams } = new URL(request.url);
+        const requestId = searchParams.get('requestId');
+        const roomId = searchParams.get('roomId');
+
+        if (requestId) {
+            // Delete a specific service request
+            const serviceRequest = await prisma.serviceRequest.findFirst({
+                where: {
+                    id: requestId,
+                    hotelId: session.user.hotelId
+                }
+            });
+
+            if (!serviceRequest) {
+                return NextResponse.json(
+                    { error: 'Service request not found or unauthorized' },
+                    { status: 404 }
+                );
+            }
+
+            await prisma.serviceRequest.delete({
+                where: { id: requestId }
+            });
+
+            return NextResponse.json({
+                success: true,
+                message: 'Service request deleted successfully'
+            });
+
+        } else if (roomId) {
+            // Delete all service requests for a specific room
+            const deleteResult = await prisma.serviceRequest.deleteMany({
+                where: {
+                    roomId,
+                    hotelId: session.user.hotelId
+                }
+            });
+
+            return NextResponse.json({
+                success: true,
+                message: `Deleted ${deleteResult.count} service requests for the room`
+            });
+
+        } else {
+            return NextResponse.json(
+                { error: 'Either requestId or roomId is required' },
+                { status: 400 }
+            );
+        }
+
+    } catch (error) {
+        console.error('Delete service request error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}

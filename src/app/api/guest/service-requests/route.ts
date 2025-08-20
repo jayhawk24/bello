@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { serviceRequestSchema } from '@/lib/validations';
+import { notifyStaffNewServiceRequest } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
     try {
@@ -102,6 +103,29 @@ export async function POST(request: NextRequest) {
                 }
             }
         });
+
+        // Send notifications to all staff members
+        try {
+            await notifyStaffNewServiceRequest({
+                id: serviceRequest.id,
+                title: serviceRequest.title,
+                priority: serviceRequest.priority,
+                hotelId: booking.hotelId,
+                guest: {
+                    name: serviceRequest.guest.name
+                },
+                room: {
+                    roomNumber: serviceRequest.room.roomNumber
+                },
+                service: {
+                    name: serviceRequest.service.name,
+                    category: serviceRequest.service.category
+                }
+            });
+        } catch (notificationError) {
+            // Don't fail the request if notification fails
+            console.error('Failed to send notifications:', notificationError);
+        }
 
         return NextResponse.json({
             success: true,
