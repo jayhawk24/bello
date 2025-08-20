@@ -46,28 +46,54 @@ export default function QRScanPage() {
     };
 
     const processRoomCode = async (code: string) => {
-
         setIsLoading(true);
         setError("");
 
         try {
-            // Room code format: HOTEL_ID-ROOM_NUMBER-ACCESS_CODE
-            // Example: cmectc6bi0002gl61x1ohhqwe-102-N6I42CT8
-            const parts = code.trim().split('-');
+            let hotelId: string, roomNumber: string, accessCode: string;
 
-            if (parts.length !== 3) {
-                setError('Invalid room code format. Expected: HOTEL-ROOM-ACCESS');
-                return;
+            // Check if the scanned code is a URL (QR code format)
+            if (code.includes('http') && code.includes('/guest/room')) {
+                try {
+                    const url = new URL(code);
+                    const urlHotelId = url.searchParams.get('hotelId');
+                    const urlRoomNumber = url.searchParams.get('roomNumber');
+                    const urlAccessCode = url.searchParams.get('accessCode');
+                    
+                    if (!urlHotelId || !urlRoomNumber || !urlAccessCode) {
+                        setError('Invalid QR code. Missing required room information.');
+                        return;
+                    }
+                    
+                    hotelId = urlHotelId;
+                    roomNumber = urlRoomNumber;
+                    accessCode = urlAccessCode;
+                } catch (urlError) {
+                    setError('Invalid QR code URL format.');
+                    return;
+                }
+            } else {
+                // Legacy format: HOTEL_ID-ROOM_NUMBER-ACCESS_CODE
+                const parts = code.trim().split('-');
+
+                if (parts.length !== 3) {
+                    setError('Invalid room code format. Expected: HOTEL-ROOM-ACCESS');
+                    return;
+                }
+
+                const [legacyHotelId, legacyRoomNumber, legacyAccessCode] = parts;
+
+                if (!legacyHotelId || !legacyRoomNumber || !legacyAccessCode) {
+                    setError('Invalid room code. All parts are required.');
+                    return;
+                }
+
+                hotelId = legacyHotelId;
+                roomNumber = legacyRoomNumber;
+                accessCode = legacyAccessCode;
             }
 
-            const [hotelId, roomNumber, accessCode] = parts;
-
-            if (!hotelId || !roomNumber || !accessCode) {
-                setError('Invalid room code. All parts are required.');
-                return;
-            }
-
-            // First, validate the room access
+            // Validate the room access
             const response = await fetch(`/api/guest/room-access?hotelId=${hotelId}&roomNumber=${roomNumber}&accessCode=${accessCode}`);
 
             if (response.ok) {
@@ -78,6 +104,7 @@ export default function QRScanPage() {
                 setError('Invalid room code or access denied');
             }
         } catch (error) {
+            console.error('Error processing room code:', error);
             setError('Error processing room code');
         } finally {
             setIsLoading(false);
@@ -176,15 +203,17 @@ export default function QRScanPage() {
                                     type="text"
                                     value={roomCode}
                                     onChange={(e) => {
-                                        setRoomCode(e.target.value.toUpperCase());
+                                        const value = e.target.value;
+                                        // Only uppercase if it's not a URL
+                                        setRoomCode(value.includes('http') ? value : value.toUpperCase());
                                         setScannerError(""); // Clear scanner error when typing
                                     }}
-                                    placeholder="Enter room code (e.g., HOTEL-ROOM-ACCESS)"
+                                    placeholder="Enter room code or URL from QR code"
                                     className="input-minion text-center font-mono"
                                     required
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    Format: HOTEL-ROOM-ACCESS
+                                    Accepts: Room URL or HOTEL-ROOM-ACCESS format
                                 </p>
                             </div>
 
