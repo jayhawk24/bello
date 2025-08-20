@@ -1,5 +1,6 @@
 // Main components
 export { Providers } from './providers';
+export { default as DashboardNav } from './DashboardNav';
 
 // Auth components
 export * from './auth';

@@ -1,9 +1,10 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import DashboardNav from "@/components/DashboardNav";
 
 interface Service {
     id: string;
@@ -204,27 +205,9 @@ export default function ServicesManagementPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            {/* Navigation */}
-            <nav className="nav-minion px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
-                            <span className="text-2xl">🛎️</span>
-                        </div>
-                        <Link href="/dashboard" className="text-2xl font-bold text-gray-800 hover:text-minion-blue transition-colors">
-                            Bello Dashboard
-                        </Link>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <span className="text-gray-600">Welcome, {session.user.name}</span>
-                        <Link href="/dashboard" className="btn-minion-secondary">
-                            ← Back to Dashboard
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            <DashboardNav title="Service Management" icon="🛎️" />
 
-            <main className="max-w-7xl mx-auto px-6 py-12">
+            <main className="max-w-7xl mx-auto px-6 py-12">{/* Navigation updated to use component */}
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h1 className="text-4xl font-bold text-gray-800 mb-4">

@@ -1,10 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import NotificationBell from "@/components/NotificationBell";
+import DashboardNav from "@/components/DashboardNav";
 
 interface ServiceRequest {
     id: string;
@@ -269,26 +270,9 @@ export default function StaffDashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            {/* Navigation */}
-            <nav className="nav-minion px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
-                            <span className="text-2xl">🏨</span>
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-800">Staff Dashboard</h1>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <NotificationBell />
-                        <span className="text-gray-600">Welcome, {session.user.name}</span>
-                        <Link href="/dashboard" className="btn-minion-secondary">
-                            Main Dashboard
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            <DashboardNav title="Staff Dashboard" showNotifications={true} />
 
-            <main className="max-w-7xl mx-auto px-6 py-8">
+            <main className="max-w-7xl mx-auto px-6 py-8">{/* Navigation removed, now using component */}
                 {/* Stats Cards */}
                 <div className="grid md:grid-cols-4 gap-6 mb-8">
                     <div className="card-minion text-center">
