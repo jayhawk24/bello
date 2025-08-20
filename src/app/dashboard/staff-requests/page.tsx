@@ -406,7 +406,7 @@ export default function StaffDashboard() {
                                                 <button
                                                     onClick={() => deleteServiceRequest(request.id)}
                                                     disabled={deletingRequests.has(request.id)}
-                                                    className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="btn-minion-danger text-sm px-3 py-1"
                                                     title="Delete this service request"
                                                 >
                                                     {deletingRequests.has(request.id) ? '⏳ Deleting...' : '🗑️ Delete'}
@@ -448,7 +448,7 @@ export default function StaffDashboard() {
                                 {session?.user.role === 'hotel_admin' && (
                                     <button
                                         onClick={() => deleteRoomRequests(room.roomNumber)}
-                                        className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded mt-2 w-full transition-colors"
+                                        className="btn-minion-danger text-xs px-2 py-1 w-full mt-2"
                                         title={`Delete all service requests for Room ${room.roomNumber}`}
                                     >
                                         🗑️ Clear Requests
