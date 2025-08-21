@@ -89,7 +89,11 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Dashboard Cards */}
-                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
+                <div className={`grid gap-6 mb-8 ${
+                    session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" : 
+                    session.user.role === "super_admin" ? "md:grid-cols-2 lg:grid-cols-2" :
+                    "md:grid-cols-3"
+                }`}>
                     {session.user.role === "hotel_admin" && (
                         <div className="card-minion text-center">
                             <div className="text-4xl mb-4">🏨</div>
@@ -152,7 +156,30 @@ export default function DashboardPage() {
                                     Manage Staff
                                 </Link>
                             </div>
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">💳</div>
+                                <h3 className="text-xl font-semibold mb-2">Subscription</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Manage your subscription plan and billing
+                                </p>
+                                <Link href="/dashboard/subscription" className="btn-minion">
+                                    View Plans
+                                </Link>
+                            </div>
                         </>
+                    )}
+
+                    {session.user.role === "super_admin" && (
+                        <div className="card-minion text-center">
+                            <div className="text-4xl mb-4">👑</div>
+                            <h3 className="text-xl font-semibold mb-2">Super Admin</h3>
+                            <p className="text-gray-600 mb-4">
+                                Manage all hotels and subscriptions
+                            </p>
+                            <Link href="/dashboard/super-admin" className="btn-minion">
+                                Admin Dashboard
+                            </Link>
+                        </div>
                     )}
                 </div>
 
