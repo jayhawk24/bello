@@ -2,14 +2,44 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import NotificationBell from "@/components/NotificationBell";
 import DashboardNav from "@/components/DashboardNav";
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [hotelName, setHotelName] = useState<string>("");
+
+    useEffect(() => {
+        if (status === "loading") return; // Still loading
+        if (!session) {
+            router.push("/login");
+        }
+    }, [session, status, router]);
+
+    useEffect(() => {
+        const fetchHotelInfo = async () => {
+            if (session?.user) {
+                try {
+                    const response = await fetch('/api/hotel/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        setHotelName(data.hotel?.name || "Dashboard");
+                    } else {
+                        setHotelName("Dashboard");
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch hotel info:', error);
+                    setHotelName("Dashboard");
+                }
+            }
+        };
+
+        if (session) {
+            fetchHotelInfo();
+        }
+    }, [session]);
 
     useEffect(() => {
         if (status === "loading") return; // Still loading
@@ -43,7 +73,7 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            <DashboardNav title="Bello Dashboard" showNotifications={true} />
+            <DashboardNav title={hotelName || "Dashboard"} showNotifications={true} />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-12">
@@ -77,7 +107,7 @@ export default function DashboardPage() {
                         <div className="text-4xl mb-4">🛏️</div>
                         <h3 className="text-xl font-semibold mb-2">Rooms & QR Codes</h3>
                         <p className="text-gray-600 mb-4">
-                            {session.user.role === "hotel_admin" 
+                            {session.user.role === "hotel_admin"
                                 ? "Configure rooms and generate QR codes for guests"
                                 : "View rooms and download QR codes for guest access"
                             }
@@ -103,7 +133,7 @@ export default function DashboardPage() {
                     {session.user.role === "hotel_admin" && (
                         <>
                             <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">�️</div>
+                                <div className="text-4xl mb-4">🛎️</div>
                                 <h3 className="text-xl font-semibold mb-2">Services Management</h3>
                                 <p className="text-gray-600 mb-4">
                                     Configure services offered to your guests
@@ -113,7 +143,7 @@ export default function DashboardPage() {
                                 </Link>
                             </div>
                             <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">�👥</div>
+                                <div className="text-4xl mb-4">👥</div>
                                 <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
                                 <p className="text-gray-600 mb-4">
                                     Add and manage your hotel staff members
