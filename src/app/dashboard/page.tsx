@@ -14,8 +14,27 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (status === "loading") return; // Still loading
+        
         if (!session) {
             router.push("/login");
+            return;
+        }
+
+        // Role-based access control
+        if (session.user?.role === 'guest') {
+            router.push("/guest/services");
+            return;
+        }
+
+        if (session.user?.role === 'super_admin') {
+            router.push("/dashboard/super-admin");
+            return;
+        }
+
+        // Allow hotel_admin and hotel_staff to access this dashboard
+        if (session.user?.role !== 'hotel_admin' && session.user?.role !== 'hotel_staff') {
+            router.push("/login");
+            return;
         }
     }, [session, status, router]);
 
@@ -41,13 +60,6 @@ export default function DashboardPage() {
             fetchHotelInfo();
         }
     }, [session]);
-
-    useEffect(() => {
-        if (status === "loading") return; // Still loading
-        if (!session) {
-            router.push("/login");
-        }
-    }, [session, status, router]);
 
     if (status === "loading") {
         return (
