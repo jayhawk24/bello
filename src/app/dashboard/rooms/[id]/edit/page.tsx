@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import toast from 'react-hot-toast';
 
 interface Room {
     id: string;
@@ -53,7 +54,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
     const roomTypes = [
         "Standard",
         "Deluxe",
-        "Suite", 
+        "Suite",
         "Presidential Suite",
         "Family Room",
         "Executive Room"
@@ -212,7 +213,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                     {/* Edit Form */}
                     <div className="card-minion">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Room Details</h2>
-                        
+
                         {error && (
                             <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                                 {error}
@@ -262,7 +263,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                                 >
                                     {isSubmitting ? "Updating..." : "💾 Update Room"}
                                 </button>
-                                <Link 
+                                <Link
                                     href={`/dashboard/rooms/${roomId}`}
                                     className="btn-minion-secondary flex-1 text-center"
                                 >
@@ -309,7 +310,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                     {/* Current Details Preview */}
                     <div className="card-minion">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Current Details</h2>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -345,11 +346,10 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Status
                                 </label>
-                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                    room.isOccupied 
-                                        ? 'bg-red-100 text-red-800' 
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${room.isOccupied
+                                        ? 'bg-red-100 text-red-800'
                                         : 'bg-green-100 text-green-800'
-                                }`}>
+                                    }`}>
                                     {room.isOccupied ? 'Occupied' : 'Available'}
                                 </span>
                             </div>
@@ -379,7 +379,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                 <div className="mt-12 card-minion">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">Additional Actions</h2>
                     <div className="grid md:grid-cols-3 gap-4">
-                        <Link 
+                        <Link
                             href={`/dashboard/rooms/${room.id}`}
                             className="btn-minion-secondary text-center"
                         >
@@ -401,14 +401,14 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                                         window.URL.revokeObjectURL(url);
                                     }
                                 } catch (error) {
-                                    alert("Error downloading QR code");
+                                    toast.error("Error downloading QR code");
                                 }
                             }}
                             className="btn-minion-secondary"
                         >
                             📱 Download QR Code
                         </button>
-                        <Link 
+                        <Link
                             href="/dashboard/rooms"
                             className="btn-minion-secondary text-center"
                         >

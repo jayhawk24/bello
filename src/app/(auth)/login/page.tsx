@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, Suspense } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import toast from 'react-hot-toast';
 
 function LoginForm() {
     const router = useRouter();
@@ -27,7 +28,7 @@ function LoginForm() {
             });
 
             if (result?.error) {
-                alert('Invalid email or password. Please try again.');
+                toast.error('Invalid email or password. Please try again.');
             } else {
                 // Get the updated session to check user role
                 const session = await getSession();
@@ -42,7 +43,7 @@ function LoginForm() {
             }
         } catch (error) {
             console.error('Login error:', error);
-            alert('Login failed. Please try again.');
+            toast.error('Login failed. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -118,15 +119,15 @@ function LoginForm() {
                         New to Bello?
                     </p>
                     <div className="space-y-2">
-                        <Link 
-                            href={returnUrl ? `/guest-register?returnUrl=${encodeURIComponent(returnUrl)}` : '/guest-register'} 
+                        <Link
+                            href={returnUrl ? `/guest-register?returnUrl=${encodeURIComponent(returnUrl)}` : '/guest-register'}
                             className="btn-minion w-full inline-block text-center"
                         >
                             ✨ Create Guest Account
                         </Link>
                         <div className="text-sm text-gray-500">or</div>
-                        <Link 
-                            href="/register" 
+                        <Link
+                            href="/register"
                             className="btn-minion-secondary w-full inline-block text-center"
                         >
                             🏨 Create Hotel Account

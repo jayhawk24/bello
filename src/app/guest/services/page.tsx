@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import toast from 'react-hot-toast';
 
 interface Service {
     id: string;
@@ -28,7 +29,7 @@ function ServiceRequestComponent() {
     const roomId = searchParams.get('roomId');
     const hotelId = searchParams.get('hotelId');
     const serviceCategory = searchParams.get('category');
-    
+
     const [services, setServices] = useState<Service[]>([]);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [formData, setFormData] = useState<ServiceRequestForm>({
@@ -55,7 +56,7 @@ function ServiceRequestComponent() {
             router.push('/guest');
             return;
         }
-        
+
         fetchServices();
     }, [bookingId, roomId, hotelId, router]);
 
@@ -110,7 +111,7 @@ function ServiceRequestComponent() {
 
         try {
             let apiUrl, requestBody;
-            
+
             if (bookingId) {
                 // Booking-based request
                 apiUrl = '/api/guest/service-requests';
@@ -146,7 +147,7 @@ function ServiceRequestComponent() {
                 if (bookingId) {
                     router.push(`/guest/dashboard?bookingId=${bookingId}&success=Service request submitted successfully`);
                 } else {
-                    alert(`Service request submitted successfully! Request ID: ${result.serviceRequest.id.slice(-8)}`);
+                    toast.success(`Service request submitted successfully! Request ID: ${result.serviceRequest.id.slice(-8)}`);
                     // Go back to room page
                     router.back();
                 }
@@ -193,13 +194,13 @@ function ServiceRequestComponent() {
                         <div className="flex items-center space-x-2">
                             {!bookingId && !session?.user && (
                                 <>
-                                    <Link 
+                                    <Link
                                         href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
                                         className="btn-minion px-3 py-2 text-sm"
                                     >
                                         ✨ Sign Up
                                     </Link>
-                                    <Link 
+                                    <Link
                                         href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
                                         className="btn-minion-secondary px-3 py-2 text-sm"
                                     >
@@ -215,7 +216,7 @@ function ServiceRequestComponent() {
                                     </div>
                                 </div>
                             )}
-                            <Link 
+                            <Link
                                 href={bookingId ? `/guest/dashboard?bookingId=${bookingId}` : '/guest/qr-scan'}
                                 className="text-minion-blue hover:underline text-sm"
                             >
@@ -250,7 +251,7 @@ function ServiceRequestComponent() {
                                 </div>
                             ))}
                         </div>
-                        
+
                         {!bookingId && !session?.user && (
                             <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center">
                                 <div className="text-3xl mb-3">👤</div>
@@ -259,13 +260,13 @@ function ServiceRequestComponent() {
                                     Create an account to track service requests, save preferences, and get updates.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                    <Link 
+                                    <Link
                                         href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
                                         className="btn-minion"
                                     >
                                         ✨ Create Account
                                     </Link>
-                                    <Link 
+                                    <Link
                                         href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
                                         className="btn-minion-secondary"
                                     >
@@ -349,13 +350,13 @@ function ServiceRequestComponent() {
                                                     Create an account or sign in to track service requests and get updates.
                                                 </p>
                                                 <div className="flex flex-col sm:flex-row gap-2">
-                                                    <Link 
+                                                    <Link
                                                         href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
                                                         className="inline-block bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors"
                                                     >
                                                         ✨ Create Account
                                                     </Link>
-                                                    <Link 
+                                                    <Link
                                                         href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
                                                         className="inline-block bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
                                                     >

@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import toast from 'react-hot-toast';
 
 interface Room {
     id: string;
@@ -78,7 +79,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
 
     const downloadQRCode = async () => {
         if (!room) return;
-        
+
         try {
             const response = await fetch(`/api/rooms/${room.id}/qr-code`);
             if (response.ok) {
@@ -92,43 +93,43 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                 a.click();
                 window.URL.revokeObjectURL(url);
             } else {
-                alert("Failed to generate QR code");
+                toast.error("Failed to generate QR code");
             }
         } catch (error) {
-            alert("Error downloading QR code");
+            toast.error("Error downloading QR code");
         }
     };
 
     const copyQRDetails = async () => {
         if (!room) return;
-        
+
         try {
             // Generate the same QR data that would be in the QR code (matching the generateQRCodeData function)
             const baseUrl = window.location.origin;
             const qrData = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(room.hotelId)}&roomNumber=${encodeURIComponent(room.roomNumber)}&accessCode=${encodeURIComponent(room.accessCode)}`;
-            
+
             await navigator.clipboard.writeText(qrData);
-            alert("QR code URL copied to clipboard!");
+            toast.success("QR code URL copied to clipboard!");
         } catch (error) {
             // Fallback for older browsers
             const textArea = document.createElement('textarea');
             const baseUrl = window.location.origin;
             const qrData = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(room.hotelId)}&roomNumber=${encodeURIComponent(room.roomNumber)}&accessCode=${encodeURIComponent(room.accessCode)}`;
-            
+
             textArea.value = qrData;
             document.body.appendChild(textArea);
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            alert("QR code URL copied to clipboard!");
+            toast.success("QR code URL copied to clipboard!");
         }
     };
 
     const deleteRoom = async () => {
         if (!room) return;
-        
+
         if (room.isOccupied) {
-            alert("Cannot delete an occupied room");
+            toast.error("Cannot delete an occupied room");
             return;
         }
 
@@ -144,10 +145,10 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                 router.push("/dashboard/rooms");
             } else {
                 const errorData = await response.json();
-                alert(errorData.error || "Failed to delete room");
+                toast.error(errorData.error || "Failed to delete room");
             }
         } catch (error) {
-            alert("Error deleting room");
+            toast.error("Error deleting room");
         }
     };
 
@@ -232,8 +233,8 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                     </div>
                     <div className="flex space-x-3">
                         {session.user.role === 'hotel_admin' && (
-                            <Link 
-                                href={`/dashboard/rooms/${room.id}/edit`} 
+                            <Link
+                                href={`/dashboard/rooms/${room.id}/edit`}
                                 className="btn-minion"
                             >
                                 ✏️ Edit Room
@@ -258,7 +259,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                     {/* Room Details */}
                     <div className="card-minion">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Room Details</h2>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -291,11 +292,10 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Status
                                 </label>
-                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                    room.isOccupied 
-                                        ? 'bg-red-100 text-red-800' 
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${room.isOccupied
+                                        ? 'bg-red-100 text-red-800'
                                         : 'bg-green-100 text-green-800'
-                                }`}>
+                                    }`}>
                                     {room.isOccupied ? 'Occupied' : 'Available'}
                                 </span>
                             </div>
@@ -316,7 +316,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                     {/* Timestamps */}
                     <div className="card-minion">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Room Information</h2>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -384,7 +384,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
                     <div className={`grid gap-4 ${session.user.role === 'hotel_admin' ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
                         {session.user.role === 'hotel_admin' && (
-                            <Link 
+                            <Link
                                 href={`/dashboard/rooms/${room.id}/edit`}
                                 className="btn-minion text-center"
                             >
@@ -413,15 +413,15 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                             <button
                                 onClick={deleteRoom}
                                 disabled={room.isOccupied}
-                                className={`${room.isOccupied 
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                className={`${room.isOccupied
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-red-500 hover:bg-red-600 text-white'
-                                } px-4 py-2 rounded-lg font-medium transition-colors`}
+                                    } px-4 py-2 rounded-lg font-medium transition-colors`}
                             >
                                 🗑️ Delete Room
                             </button>
                         )}
-                        <Link 
+                        <Link
                             href="/dashboard/rooms"
                             className="btn-minion-secondary text-center"
                         >
