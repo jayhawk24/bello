@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import toast from 'react-hot-toast';
 
 interface Room {
     id: string;
@@ -65,10 +66,10 @@ export default function RoomsPage() {
                 a.click();
                 window.URL.revokeObjectURL(url);
             } else {
-                alert("Failed to generate QR code");
+                toast.error("Failed to generate QR code");
             }
         } catch (error) {
-            alert("Error downloading QR code");
+            toast.error("Error downloading QR code");
         }
     };
 
@@ -118,7 +119,7 @@ export default function RoomsPage() {
                             Room Management 🛏️
                         </h1>
                         <p className="text-xl text-gray-600">
-                            {session.user.role === 'hotel_admin' 
+                            {session.user.role === 'hotel_admin'
                                 ? 'Manage your hotel rooms and generate QR codes for guest access'
                                 : 'View hotel rooms and download QR codes for guest access'
                             }
@@ -142,7 +143,7 @@ export default function RoomsPage() {
                         <div className="text-6xl mb-4">🛏️</div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">No Rooms Added Yet</h2>
                         <p className="text-gray-600 mb-6">
-                            {session.user.role === 'hotel_admin' 
+                            {session.user.role === 'hotel_admin'
                                 ? 'Start by adding your hotel rooms to enable guest services'
                                 : 'No rooms have been set up yet. Please contact your hotel administrator.'
                             }
@@ -162,11 +163,10 @@ export default function RoomsPage() {
                                         <h3 className="text-xl font-bold text-gray-800">Room {room.roomNumber}</h3>
                                         <p className="text-gray-600">{room.roomType}</p>
                                     </div>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        room.isOccupied 
-                                            ? 'bg-red-100 text-red-800' 
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${room.isOccupied
+                                            ? 'bg-red-100 text-red-800'
                                             : 'bg-green-100 text-green-800'
-                                    }`}>
+                                        }`}>
                                         {room.isOccupied ? 'Occupied' : 'Available'}
                                     </span>
                                 </div>
@@ -194,18 +194,17 @@ export default function RoomsPage() {
                                     </button>
                                     <div className="flex space-x-2">
                                         {session.user.role === 'hotel_admin' && (
-                                            <Link 
-                                                href={`/dashboard/rooms/${room.id}/edit`} 
+                                            <Link
+                                                href={`/dashboard/rooms/${room.id}/edit`}
                                                 className="btn-minion-secondary flex-1 text-center text-sm"
                                             >
                                                 ✏️ Edit
                                             </Link>
                                         )}
-                                        <Link 
-                                            href={`/dashboard/rooms/${room.id}`} 
-                                            className={`btn-minion-secondary text-center text-sm ${
-                                                session.user.role === 'hotel_admin' ? 'flex-1' : 'w-full'
-                                            }`}
+                                        <Link
+                                            href={`/dashboard/rooms/${room.id}`}
+                                            className={`btn-minion-secondary text-center text-sm ${session.user.role === 'hotel_admin' ? 'flex-1' : 'w-full'
+                                                }`}
                                         >
                                             👁️ View Details
                                         </Link>

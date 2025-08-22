@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import toast from 'react-hot-toast';
 
 function GuestRegisterForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get('returnUrl');
     const hotelId = searchParams.get('hotelId');
-    
+
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -64,9 +65,9 @@ function GuestRegisterForm() {
             const data = await response.json();
 
             if (response.ok) {
-                alert('Guest account created successfully! Please sign in to continue.');
+                toast.success('Guest account created successfully! Please sign in to continue.');
                 // Redirect to login page with return URL
-                const loginUrl = returnUrl 
+                const loginUrl = returnUrl
                     ? `/login?returnUrl=${encodeURIComponent(returnUrl)}`
                     : '/login';
                 router.push(loginUrl);
@@ -228,7 +229,7 @@ function GuestRegisterForm() {
                 <div className="mt-6 text-center">
                     <p className="text-gray-600">
                         Already have an account?{" "}
-                        <Link 
+                        <Link
                             href={returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login'}
                             className="text-minion-blue hover:underline font-semibold"
                         >
@@ -238,7 +239,7 @@ function GuestRegisterForm() {
                 </div>
 
                 <div className="mt-4 text-center">
-                    <Link 
+                    <Link
                         href={returnUrl || '/guest'}
                         className="text-gray-500 hover:underline text-sm"
                     >

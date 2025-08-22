@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import toast from 'react-hot-toast';
 
 function RegisterForm() {
     const searchParams = useSearchParams();
@@ -30,7 +31,7 @@ function RegisterForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            alert("Passwords don't match!");
+            toast.error("Passwords don't match!");
             return;
         }
 
@@ -48,15 +49,15 @@ function RegisterForm() {
             const data = await response.json();
 
             if (response.ok) {
-                alert('Account created successfully! Please sign in to continue.');
+                toast.success('Account created successfully! Please sign in to continue.');
                 // Redirect to login page
                 window.location.href = '/login';
             } else {
-                alert(data.error || 'Registration failed. Please try again.');
+                toast.error(data.error || 'Registration failed. Please try again.');
             }
         } catch (error) {
             console.error('Registration error:', error);
-            alert('Network error. Please try again.');
+            toast.error('Network error. Please try again.');
         } finally {
             setIsLoading(false);
         }

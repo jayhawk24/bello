@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardNav from "@/components/DashboardNav";
+import toast from 'react-hot-toast';
 
 interface ServiceRequest {
     id: string;
@@ -58,37 +59,37 @@ export default function StaffDashboard() {
 
     useEffect(() => {
         if (status === "loading") return;
-        
+
         if (!session?.user || !['hotel_staff', 'hotel_admin'].includes(session.user.role)) {
             router.push("/dashboard");
             return;
         }
-        
+
         fetchData();
     }, [session, status, router, selectedStatus, selectedPriority]);
 
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            
+
             // Fetch service requests
             const params = new URLSearchParams();
             if (selectedStatus) params.append('status', selectedStatus);
             if (selectedPriority) params.append('priority', selectedPriority);
-            
+
             const requestsResponse = await fetch(`/api/staff/service-requests?${params.toString()}`);
             if (requestsResponse.ok) {
                 const requestsData = await requestsResponse.json();
                 setServiceRequests(requestsData.serviceRequests);
             }
-            
+
             // Fetch rooms
             const roomsResponse = await fetch('/api/rooms');
             if (roomsResponse.ok) {
                 const roomsData = await roomsResponse.json();
                 setRooms(roomsData.rooms || []);
             }
-            
+
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -106,11 +107,11 @@ export default function StaffDashboard() {
             if (!requestToUpdate) return;
 
             // Optimistically update the UI state first
-            setServiceRequests(prevRequests => 
-                prevRequests.map(request => 
-                    request.id === requestId 
-                        ? { 
-                            ...request, 
+            setServiceRequests(prevRequests =>
+                prevRequests.map(request =>
+                    request.id === requestId
+                        ? {
+                            ...request,
                             status: newStatus as 'pending' | 'in_progress' | 'completed',
                             assignedStaff: newStatus === 'in_progress' ? {
                                 id: session?.user.id || '',
@@ -124,8 +125,8 @@ export default function StaffDashboard() {
             const response = await fetch('/api/staff/service-requests', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    requestId, 
+                body: JSON.stringify({
+                    requestId,
                     status: newStatus,
                     assignedStaffId: newStatus === 'in_progress' ? session?.user.id : undefined
                 })
@@ -133,8 +134,8 @@ export default function StaffDashboard() {
 
             if (!response.ok) {
                 // Revert the optimistic update if the request failed
-                setServiceRequests(prevRequests => 
-                    prevRequests.map(request => 
+                setServiceRequests(prevRequests =>
+                    prevRequests.map(request =>
                         request.id === requestId ? requestToUpdate : request
                     )
                 );
@@ -143,8 +144,8 @@ export default function StaffDashboard() {
         } catch (error) {
             console.error('Error updating request:', error);
             // Revert the optimistic update on error
-            setServiceRequests(prevRequests => 
-                prevRequests.map(request => 
+            setServiceRequests(prevRequests =>
+                prevRequests.map(request =>
                     request.id === requestId ? serviceRequests.find(r => r.id === requestId) || request : request
                 )
             );
@@ -173,17 +174,17 @@ export default function StaffDashboard() {
 
             if (response.ok) {
                 // Remove the request from the UI
-                setServiceRequests(prevRequests => 
+                setServiceRequests(prevRequests =>
                     prevRequests.filter(request => request.id !== requestId)
                 );
             } else {
                 const errorData = await response.json();
                 console.error('Failed to delete request:', errorData.error);
-                alert('Failed to delete the service request. Please try again.');
+                toast.error('Failed to delete the service request. Please try again.');
             }
         } catch (error) {
             console.error('Error deleting request:', error);
-            alert('Failed to delete the service request. Please try again.');
+            toast.error('Failed to delete the service request. Please try again.');
         } finally {
             // Remove request from deleting set
             setDeletingRequests(prev => {
@@ -203,7 +204,7 @@ export default function StaffDashboard() {
             // Find the room ID
             const room = rooms.find(r => r.roomNumber === roomNumber);
             if (!room) {
-                alert('Room not found');
+                toast.error('Room not found');
                 return;
             }
 
@@ -214,18 +215,18 @@ export default function StaffDashboard() {
             if (response.ok) {
                 const result = await response.json();
                 // Remove all requests for this room from the UI
-                setServiceRequests(prevRequests => 
+                setServiceRequests(prevRequests =>
                     prevRequests.filter(request => request.room.id !== room.id)
                 );
-                alert(result.message);
+                toast.success(result.message);
             } else {
                 const errorData = await response.json();
                 console.error('Failed to delete room requests:', errorData.error);
-                alert('Failed to delete room requests. Please try again.');
+                toast.error('Failed to delete room requests. Please try again.');
             }
         } catch (error) {
             console.error('Error deleting room requests:', error);
-            alert('Failed to delete room requests. Please try again.');
+            toast.error('Failed to delete room requests. Please try again.');
         }
     };
 
@@ -422,7 +423,7 @@ export default function StaffDashboard() {
                                 </div>
                                 <p className="text-gray-600 text-sm mb-2">{room.roomType}</p>
                                 <p className="text-xs text-gray-500">Status: {room.status || 'Available'}</p>
-                                <Link 
+                                <Link
                                     href={`/dashboard/rooms/${room.id}`}
                                     className="btn-minion-secondary w-full text-sm mt-3 block text-center"
                                 >
