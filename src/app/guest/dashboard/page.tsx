@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import DashboardCard from "@/components/dashboard/DashboardCard";
+import GuestNav from "@/components/GuestNav";
 
 interface GuestDashboardData {
     booking: {
@@ -146,26 +147,17 @@ function GuestDashboardComponent() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-4xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-minion-yellow rounded-full flex items-center justify-center">
-                                <span className="text-2xl">🏨</span>
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-800">{booking.room.hotel.name}</h1>
-                                <p className="text-gray-600">Guest Dashboard</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-sm text-gray-600">Room {booking.room.roomNumber}</p>
-                            <p className="text-xs text-gray-500">{booking.bookingReference}</p>
-                        </div>
+            <GuestNav
+                title={booking.room.hotel.name}
+                subtitle="Guest Dashboard"
+                icon="🏨"
+                rightInfo={
+                    <div className="text-right">
+                        <p className="text-sm text-gray-600">Room {booking.room.roomNumber}</p>
+                        <p className="text-xs text-gray-500">{booking.bookingReference}</p>
                     </div>
-                </div>
-            </header>
+                }
+            />
 
             <main className="max-w-4xl mx-auto px-6 py-8">
                 {/* Success Message */}
