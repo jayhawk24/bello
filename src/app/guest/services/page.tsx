@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import toast from 'react-hot-toast';
+import GuestNav from "@/components/GuestNav";
 
 interface Service {
     id: string;
@@ -176,56 +177,38 @@ function ServiceRequestComponent() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-4xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-minion-yellow rounded-full flex items-center justify-center">
-                                <span className="text-2xl">🛎️</span>
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-800">Service Request</h1>
-                                <p className="text-gray-600">
-                                    {session?.user ? `Welcome, ${session.user.name}!` : 'Request hotel services'}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            {!bookingId && !session?.user && (
-                                <>
-                                    <Link
-                                        href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
-                                        className="btn-minion px-3 py-2 text-sm"
-                                    >
-                                        ✨ Sign Up
-                                    </Link>
-                                    <Link
-                                        href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
-                                        className="btn-minion-secondary px-3 py-2 text-sm"
-                                    >
-                                        👤 Sign In
-                                    </Link>
-                                </>
-                            )}
-                            {session?.user && (
-                                <div className="flex items-center space-x-3 text-gray-600">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-2xl">👤</span>
-                                        <span className="font-medium">{session.user.name}</span>
-                                    </div>
-                                </div>
-                            )}
+            <GuestNav
+                title="Service Request"
+                subtitle={session?.user ? `Welcome, ${session.user.name}!` : 'Request hotel services'}
+                icon="🛎️"
+                actions={
+                    !bookingId && !session?.user ? (
+                        <>
                             <Link
-                                href={bookingId ? `/guest/dashboard?bookingId=${bookingId}` : '/guest/qr-scan'}
-                                className="text-minion-blue hover:underline text-sm"
+                                href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
+                                className="btn-minion px-3 py-2 text-sm"
                             >
-                                ← Back to {bookingId ? 'Dashboard' : 'Room Access'}
+                                ✨ Sign Up
                             </Link>
+                            <Link
+                                href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
+                                className="btn-minion-secondary px-3 py-2 text-sm"
+                            >
+                                👤 Sign In
+                            </Link>
+                        </>
+                    ) : session?.user ? (
+                        <div className="flex items-center space-x-2 text-gray-600">
+                            <span className="text-xl">👤</span>
+                            <span className="font-medium text-sm">{session.user.name}</span>
                         </div>
-                    </div>
-                </div>
-            </header>
+                    ) : null
+                }
+                backLink={{
+                    href: bookingId ? `/guest/dashboard?bookingId=${bookingId}` : '/guest/qr-scan',
+                    label: `← Back to ${bookingId ? 'Dashboard' : 'Room Access'}`
+                }}
+            />
 
             <main className="max-w-4xl mx-auto px-6 py-8">
                 {step === 'select' ? (

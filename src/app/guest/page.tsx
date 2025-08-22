@@ -2,31 +2,24 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import GuestNav from "@/components/GuestNav";
 
 export default function GuestAccess() {
     const { data: session } = useSession();
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            {/* Navigation */}
-            <nav className="nav-minion px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
-                            <span className="text-2xl">🏨</span>
-                        </div>
-                        <Link href="/" className="text-2xl font-bold text-gray-800 hover:text-minion-blue transition-colors">
-                            Bello
-                        </Link>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <Link href="/login" className="text-gray-600 hover:text-minion-blue transition-colors">
-                            Hotel Login
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            <GuestNav
+                title="Guest Services"
+                subtitle="Access hotel services and amenities"
+                icon="🏨"
+                actions={
+                    <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
+                        Hotel Login
+                    </Link>
+                }
+            />
 
-            <main className="max-w-4xl mx-auto px-6 py-16">
+            <main className="max-w-4xl mx-auto px-6 py-8">
                 {/* Hero Section */}
                 <div className="text-center mb-16">
                     <div className="mb-8">
