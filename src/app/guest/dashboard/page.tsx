@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import DashboardCard from "@/components/dashboard/DashboardCard";
 
 interface GuestDashboardData {
     booking: {
@@ -192,64 +193,44 @@ function GuestDashboardComponent() {
                 {/* Quick Service Access */}
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
                     {/* Room Service */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🍽️</div>
-                        <h3 className="text-xl font-semibold mb-2">Room Service</h3>
-                        <p className="text-gray-600 mb-4">
-                            Order food and beverages directly to your room
-                        </p>
-                        <Link 
-                            href={`/guest/services?bookingId=${booking.id}&category=room_service`}
-                            className="btn-minion w-full"
-                        >
-                            Order Now
-                        </Link>
-                    </div>
+                    <DashboardCard
+                        icon="🍽️"
+                        title="Room Service"
+                        description="Order food and beverages directly to your room"
+                        buttonText="Order Now"
+                        href={`/guest/services?bookingId=${booking.id}&category=room_service`}
+                        className="w-full"
+                    />
 
                     {/* Housekeeping */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🧹</div>
-                        <h3 className="text-xl font-semibold mb-2">Housekeeping</h3>
-                        <p className="text-gray-600 mb-4">
-                            Request cleaning, towels, or other amenities
-                        </p>
-                        <Link 
-                            href={`/guest/services?bookingId=${booking.id}&category=housekeeping`}
-                            className="btn-minion w-full"
-                        >
-                            Request Service
-                        </Link>
-                    </div>
+                    <DashboardCard
+                        icon="🧹"
+                        title="Housekeeping"
+                        description="Request cleaning, towels, or other amenities"
+                        buttonText="Request Service"
+                        href={`/guest/services?bookingId=${booking.id}&category=housekeeping`}
+                        className="w-full"
+                    />
 
                     {/* Concierge */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🎩</div>
-                        <h3 className="text-xl font-semibold mb-2">Concierge</h3>
-                        <p className="text-gray-600 mb-4">
-                            Local recommendations and assistance
-                        </p>
-                        <Link 
-                            href={`/guest/services?bookingId=${booking.id}&category=concierge`}
-                            className="btn-minion w-full"
-                        >
-                            Get Help
-                        </Link>
-                    </div>
+                    <DashboardCard
+                        icon="🎩"
+                        title="Concierge"
+                        description="Local recommendations and assistance"
+                        buttonText="Get Help"
+                        href={`/guest/services?bookingId=${booking.id}&category=concierge`}
+                        className="w-full"
+                    />
 
                     {/* Maintenance */}
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🔧</div>
-                        <h3 className="text-xl font-semibold mb-2">Maintenance</h3>
-                        <p className="text-gray-600 mb-4">
-                            Report issues or request repairs
-                        </p>
-                        <Link 
-                            href={`/guest/services?bookingId=${booking.id}&category=maintenance`}
-                            className="btn-minion w-full"
-                        >
-                            Report Issue
-                        </Link>
-                    </div>
+                    <DashboardCard
+                        icon="🔧"
+                        title="Maintenance"
+                        description="Report issues or request repairs"
+                        buttonText="Report Issue"
+                        href={`/guest/services?bookingId=${booking.id}&category=maintenance`}
+                        className="w-full"
+                    />
                 </div>
 
                 {/* Service Request History */}

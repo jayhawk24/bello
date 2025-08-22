@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardNav from "@/components/DashboardNav";
+import DashboardCard from "@/components/dashboard/DashboardCard";
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
@@ -91,67 +92,53 @@ export default function DashboardPage() {
                 {/* Dashboard Cards */}
                 <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
                     {session.user.role === "hotel_admin" && (
-                        <div className="card-minion text-center">
-                            <div className="text-4xl mb-4">🏨</div>
-                            <h3 className="text-xl font-semibold mb-2">Hotel Profile</h3>
-                            <p className="text-gray-600 mb-4">
-                                {session.user.hotel?.name || "Setup your hotel details"}
-                            </p>
-                            <Link href="/dashboard/hotel" className="btn-minion">
-                                Manage Hotel
-                            </Link>
-                        </div>
+                        <DashboardCard
+                            icon="🏨"
+                            title="Hotel Profile"
+                            description={session.user.hotel?.name || "Setup your hotel details"}
+                            buttonText="Manage Hotel"
+                            href="/dashboard/hotel"
+                        />
                     )}
 
-                    <div className="card-minion text-center">
-                        <div className="text-4xl mb-4">🛏️</div>
-                        <h3 className="text-xl font-semibold mb-2">Rooms & QR Codes</h3>
-                        <p className="text-gray-600 mb-4">
-                            {session.user.role === "hotel_admin"
+                    <DashboardCard
+                        icon="🛏️"
+                        title="Rooms & QR Codes"
+                        description={
+                            session.user.role === "hotel_admin"
                                 ? "Configure rooms and generate QR codes for guests"
                                 : "View rooms and download QR codes for guest access"
-                            }
-                        </p>
-                        <Link href="/dashboard/rooms" className="btn-minion">
-                            {session.user.role === "hotel_admin" ? "Manage Rooms" : "View Rooms"}
-                        </Link>
-                    </div>
+                        }
+                        buttonText={session.user.role === "hotel_admin" ? "Manage Rooms" : "View Rooms"}
+                        href="/dashboard/rooms"
+                    />
 
                     {(session.user.role === "hotel_staff" || session.user.role === "hotel_admin") && (
-                        <div className="card-minion text-center">
-                            <div className="text-4xl mb-4">📋</div>
-                            <h3 className="text-xl font-semibold mb-2">Service Requests</h3>
-                            <p className="text-gray-600 mb-4">
-                                View and manage incoming guest service requests
-                            </p>
-                            <Link href="/dashboard/staff-requests" className="btn-minion">
-                                View Requests
-                            </Link>
-                        </div>
+                        <DashboardCard
+                            icon="📋"
+                            title="Service Requests"
+                            description="View and manage incoming guest service requests"
+                            buttonText="View Requests"
+                            href="/dashboard/staff-requests"
+                        />
                     )}
 
                     {session.user.role === "hotel_admin" && (
                         <>
-                            <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">🛎️</div>
-                                <h3 className="text-xl font-semibold mb-2">Services Management</h3>
-                                <p className="text-gray-600 mb-4">
-                                    Configure services offered to your guests
-                                </p>
-                                <Link href="/dashboard/services" className="btn-minion">
-                                    Manage Services
-                                </Link>
-                            </div>
-                            <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">👥</div>
-                                <h3 className="text-xl font-semibold mb-2">Staff Management</h3>
-                                <p className="text-gray-600 mb-4">
-                                    Add and manage your hotel staff members
-                                </p>
-                                <Link href="/dashboard/staff" className="btn-minion">
-                                    Manage Staff
-                                </Link>
-                            </div>
+                            <DashboardCard
+                                icon="🛎️"
+                                title="Services Management"
+                                description="Configure services offered to your guests"
+                                buttonText="Manage Services"
+                                href="/dashboard/services"
+                            />
+                            <DashboardCard
+                                icon="👥"
+                                title="Staff Management"
+                                description="Add and manage your hotel staff members"
+                                buttonText="Manage Staff"
+                                href="/dashboard/staff"
+                            />
                         </>
                     )}
                 </div>
@@ -179,23 +166,23 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Getting Started */}
-                <div className="mt-12 card-minion">
-                    <h2 className="text-2xl font-bold mb-4">🚀 Getting Started</h2>
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold mb-6">🚀 Getting Started</h2>
                     <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <h3 className="font-semibold mb-2">1. Complete Hotel Setup</h3>
-                            <p className="text-gray-600 mb-4">Add your hotel details, address, and contact information.</p>
-                            <Link href="/dashboard/hotel/setup" className="btn-minion">
-                                Complete Setup
-                            </Link>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold mb-2">2. Add Rooms</h3>
-                            <p className="text-gray-600 mb-4">Configure your rooms and generate QR codes for guest access.</p>
-                            <Link href="/dashboard/rooms/add" className="btn-minion">
-                                Add Rooms
-                            </Link>
-                        </div>
+                        <DashboardCard
+                            icon="🏨"
+                            title="Complete Hotel Setup"
+                            description="Add your hotel details, address, and contact information."
+                            buttonText="Complete Setup"
+                            href="/dashboard/hotel/setup"
+                        />
+                        <DashboardCard
+                            icon="🛏️"
+                            title="Add Rooms"
+                            description="Configure your rooms and generate QR codes for guest access."
+                            buttonText="Add Rooms"
+                            href="/dashboard/rooms/add"
+                        />
                     </div>
                 </div>
             </main>
