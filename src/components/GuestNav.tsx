@@ -15,7 +15,7 @@ interface GuestNavProps {
     rightInfo?: React.ReactNode;
 }
 
-const GuestNav = ({ 
+const GuestNav = ({
     title,
     subtitle,
     icon = "🏨",
@@ -55,7 +55,7 @@ const GuestNav = ({
                     )}
                     {backLink && (
                         <div className="text-center">
-                            <Link 
+                            <Link
                                 href={backLink.href}
                                 className="text-minion-blue hover:underline text-sm"
                             >
@@ -82,7 +82,7 @@ const GuestNav = ({
                         {actions}
                         {rightInfo}
                         {backLink && (
-                            <Link 
+                            <Link
                                 href={backLink.href}
                                 className="text-minion-blue hover:underline"
                             >

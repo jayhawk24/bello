@@ -6,11 +6,11 @@ import GuestNav from "@/components/GuestNav";
 
 export default function GuestAccess() {
     const { data: session } = useSession();
-    
+
     const handleSignOut = async () => {
-        await signOut({ callbackUrl: "/guest", redirect: true });
+        await signOut({ redirect: true });
     };
-    
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
             <GuestNav
@@ -19,15 +19,21 @@ export default function GuestAccess() {
                 icon="🏨"
                 actions={
                     session?.user ? (
-                        <button 
+                        <button
                             onClick={handleSignOut}
                             className="btn-minion-secondary text-sm px-3 py-2"
                         >
                             Sign Out
                         </button>
                     ) : (
-                        <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
-                            Hotel Login
+                        <Link
+                            href="/login"
+                        >
+                            <button
+                                className="btn-minion-secondary text-sm px-3 py-2"
+                            >
+                                Login
+                            </button>
                         </Link>
                     )
                 }
