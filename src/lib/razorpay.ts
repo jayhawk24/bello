@@ -79,31 +79,7 @@ export const SUBSCRIPTION_PLANS = {
     }
 };
 
-// Helper function to create subscription
-export async function createSubscription(planId: keyof typeof SUBSCRIPTION_PLANS) {
-    const plan = SUBSCRIPTION_PLANS[planId];
-    
-    try {
-        const subscription = await razorpay.subscriptions.create({
-            plan_id: planId,
-            customer_notify: 1,
-            quantity: 1,
-            total_count: 12, // 12 months
-            addons: [],
-            notes: {
-                plan_name: plan.name,
-                room_limit: plan.roomLimit.toString(),
-            }
-        });
-        
-        return subscription;
-    } catch (error) {
-        console.error('Error creating subscription:', error);
-        throw error;
-    }
-}
-
-// Helper function to create payment order
+// Helper function to create payment order (for one-time payments)
 export async function createPaymentOrder(amount: number, currency: string = 'INR', receipt?: string) {
     try {
         const order = await razorpay.orders.create({
@@ -129,6 +105,20 @@ export function verifyPaymentSignature(
     const crypto = require('crypto');
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!);
     hmac.update(orderId + '|' + paymentId);
+    const generated_signature = hmac.digest('hex');
+    
+    return generated_signature === signature;
+}
+
+// Helper function to verify subscription signature
+export function verifySubscriptionSignature(
+    subscriptionId: string,
+    paymentId: string,
+    signature: string
+): boolean {
+    const crypto = require('crypto');
+    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!);
+    hmac.update(subscriptionId + '|' + paymentId);
     const generated_signature = hmac.digest('hex');
     
     return generated_signature === signature;

@@ -24,7 +24,9 @@
         "db:switch:postgres": "node scripts/switch-to-postgres.js",
         "db:switch:sqlite": "node scripts/switch-to-sqlite.js",
         "cleanup": "node scripts/cleanup-old-requests.js",
-        "setup:cleanup": "bash scripts/setup-cleanup.sh"
+        "setup:cleanup": "bash scripts/setup-cleanup.sh",
+        "billing:test": "node scripts/test-subscription-billing.js",
+        "billing:run": "curl -X GET http://localhost:3000/api/cron/subscription-billing"
     },
     "dependencies": {
         "@prisma/client": "^6.14.0",
