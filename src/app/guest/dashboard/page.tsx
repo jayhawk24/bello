@@ -45,7 +45,7 @@ interface GuestDashboardData {
 function GuestDashboardComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const bookingId = searchParams.get('bookingId');
     const successMessage = searchParams.get('success');
     
@@ -54,15 +54,20 @@ function GuestDashboardComponent() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        // If user is logged in and has a 'guest' role, redirect them to guest services regardless of booking ID
-        if (session?.user?.role === 'guest') {
-            router.push('/guest/services');
-            return;
-        }
+        // Wait for session to load
+        if (status === "loading") return;
         
-        // If user is logged in but doesn't have a booking ID, redirect them to guest services
-        if (session?.user && !bookingId) {
-            router.push('/guest/services');
+        // If any user is logged in (regardless of role), redirect to their appropriate dashboard
+        if (session?.user) {
+            if (session.user.role === 'super_admin') {
+                router.push('/dashboard/super-admin');
+            } else if (session.user.role === 'hotel_admin') {
+                router.push('/dashboard');
+            } else if (session.user.role === 'hotel_staff') {
+                router.push('/dashboard');
+            } else if (session.user.role === 'guest') {
+                router.push('/guest/services');
+            }
             return;
         }
         
@@ -72,9 +77,10 @@ function GuestDashboardComponent() {
             return;
         }
         
+        // Only allow access with booking ID and no authenticated user
         fetchDashboardData();
         fetchServiceRequests();
-    }, [bookingId, session, router]);
+    }, [bookingId, session, status, router]);
 
     const fetchDashboardData = async () => {
         try {
