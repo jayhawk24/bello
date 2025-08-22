@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hotelDetailsSchema } from "@/lib/validations";
 
 export async function GET() {
     try {
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
@@ -13,18 +14,69 @@ export async function GET() {
             );
         }
 
-        const hotel = await prisma.hotel.findFirst({
-            where: { adminId: session.user.id },
+        console.log("Session user ID:", session.user.id);
+        console.log("Session user:", session.user);
+
+        // Get the user with hotel information
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
             include: {
-                _count: {
-                    select: {
-                        rooms: true,
-                        staff: true,
-                        serviceRequests: true
+                managedHotel: {
+                    include: {
+                        _count: {
+                            select: {
+                                rooms: true,
+                                staff: true,
+                                serviceRequests: true
+                            }
+                        }
                     }
-                }
+                },
+                hotel: true
             }
         });
+
+        console.log("Found user:", user ? "YES" : "NO");
+
+        if (!user) {
+            // Try to find user without the specific ID to see if there are any users
+            const allUsers = await prisma.user.findMany({
+                take: 5,
+                select: { id: true, email: true, role: true }
+            });
+            console.log("All users (first 5):", allUsers);
+
+            return NextResponse.json(
+                {
+                    error: "User not found",
+                    debug: {
+                        sessionUserId: session.user.id,
+                        allUsersCount: allUsers.length
+                    }
+                },
+                { status: 404 }
+            );
+        }
+
+        // Get the hotel - prioritize managed hotel, then assigned hotel
+        let hotel = user.managedHotel;
+        if (!hotel) {
+            // Try finding by adminId as fallback
+            hotel = await prisma.hotel.findFirst({
+                where: { adminId: session.user.id },
+                include: {
+                    _count: {
+                        select: {
+                            rooms: true,
+                            staff: true,
+                            serviceRequests: true
+                        }
+                    }
+                }
+            });
+        }
+
+        console.log("Found hotel:", hotel ? "YES" : "NO");
 
         if (!hotel) {
             return NextResponse.json(
@@ -53,7 +105,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
     try {
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         if (!session || session.user.role !== "hotel_admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
@@ -75,11 +127,51 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        const { name, address, city, state, country, contactEmail, contactPhone, totalRooms } = validatedFields.data;
+        const {
+            name,
+            address,
+            city,
+            state,
+            country,
+            contactEmail,
+            contactPhone,
+            totalRooms
+        } = validatedFields.data;
+
+        // Get the user with hotel information
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            include: {
+                managedHotel: true,
+                hotel: true
+            }
+        });
+
+        if (!user) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 404 }
+            );
+        }
+
+        // Get the hotel - prioritize managed hotel, then try adminId lookup
+        let hotel = user.managedHotel;
+        if (!hotel) {
+            hotel = await prisma.hotel.findFirst({
+                where: { adminId: session.user.id }
+            });
+        }
+
+        if (!hotel) {
+            return NextResponse.json(
+                { error: "Hotel not found" },
+                { status: 404 }
+            );
+        }
 
         // Update hotel
         const updatedHotel = await prisma.hotel.update({
-            where: { adminId: session.user.id },
+            where: { id: hotel.id },
             data: {
                 name,
                 address,

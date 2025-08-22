@@ -178,22 +178,20 @@ export default function HotelProfilePage() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">Current Plan</label>
                                         <div className="flex items-center">
-                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                                hotel.subscriptionPlan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                                                hotel.subscriptionPlan === 'premium' ? 'bg-blue-100 text-blue-800' :
-                                                'bg-green-100 text-green-800'
-                                            }`}>
+                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionPlan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                                                    hotel.subscriptionPlan === 'premium' ? 'bg-blue-100 text-blue-800' :
+                                                        'bg-green-100 text-green-800'
+                                                }`}>
                                                 {hotel.subscriptionPlan.charAt(0).toUpperCase() + hotel.subscriptionPlan.slice(1)}
                                             </span>
                                         </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                            hotel.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
-                                            hotel.subscriptionStatus === 'trial' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                        }`}>
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
+                                                hotel.subscriptionStatus === 'trial' ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-red-100 text-red-800'
+                                            }`}>
                                             {hotel.subscriptionStatus.charAt(0).toUpperCase() + hotel.subscriptionStatus.slice(1)}
                                         </span>
                                     </div>
@@ -209,6 +207,9 @@ export default function HotelProfilePage() {
                             <div className="card-minion mt-6">
                                 <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
                                 <div className="space-y-3">
+                                    <Link href="/dashboard/hotel/setup" className="block btn-minion w-full text-center">
+                                        🛠️ Hotel Setup
+                                    </Link>
                                     <Link href="/dashboard/rooms" className="block btn-minion-secondary w-full text-center">
                                         🛏️ Manage Rooms
                                     </Link>

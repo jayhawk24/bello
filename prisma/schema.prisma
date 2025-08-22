@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgres"
     url      = env("DATABASE_URL")
 }
 
@@ -58,6 +58,7 @@ model Hotel {
     subscriptions      Subscription[]
     paymentOrders      PaymentOrder[]
     staff              User[]             @relation("HotelAdmin")
+    HotelInfo          HotelInfo?
 
     @@map("hotels")
 }
@@ -368,4 +369,123 @@ enum ChatMessageType {
     staff_to_guest
     staff_to_staff
     system
+}
+
+// Hotel Setup Information Models
+model HotelInfo {
+    id               String   @id @default(cuid())
+    hotelId          String   @unique @map("hotel_id")
+    receptionNumber  String?  @map("reception_number")
+    emergencyNumber  String?  @map("emergency_number")
+    checkInTime      String?  @map("check_in_time") // e.g., "3:00 PM"
+    checkOutTime     String?  @map("check_out_time") // e.g., "11:00 AM"
+    hotelDescription String?  @map("hotel_description")
+    amenities        String[] // Array of amenity names
+    createdAt        DateTime @default(now()) @map("created_at")
+    updatedAt        DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    hotel     Hotel       @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+    wifiInfos HotelWifi[]
+    tvGuides  TvGuide[]
+    foodMenus FoodMenu[]
+
+    @@map("hotel_info")
+}
+
+model HotelWifi {
+    id           String   @id @default(cuid())
+    hotelInfoId  String   @map("hotel_info_id")
+    networkName  String   @map("network_name")
+    password     String?
+    description  String? // e.g., "Main Lobby", "Guest Rooms", "Conference Hall"
+    isPublic     Boolean  @default(false) @map("is_public")
+    bandwidth    String? // e.g., "High Speed", "Standard"
+    coverage     String? // e.g., "Entire Hotel", "Lobby Only"
+    instructions String? // Additional connection instructions
+    createdAt    DateTime @default(now()) @map("created_at")
+    updatedAt    DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    hotelInfo HotelInfo @relation(fields: [hotelInfoId], references: [id], onDelete: Cascade)
+
+    @@map("hotel_wifi")
+}
+
+model TvGuide {
+    id          String      @id @default(cuid())
+    hotelInfoId String      @map("hotel_info_id")
+    title       String
+    description String?
+    category    String? // e.g., "News", "Entertainment", "Sports"
+    channels    TvChannel[]
+    createdAt   DateTime    @default(now()) @map("created_at")
+    updatedAt   DateTime    @updatedAt @map("updated_at")
+
+    // Relationships
+    hotelInfo HotelInfo @relation(fields: [hotelInfoId], references: [id], onDelete: Cascade)
+
+    @@map("tv_guides")
+}
+
+model TvChannel {
+    id          String   @id @default(cuid())
+    tvGuideId   String   @map("tv_guide_id")
+    number      Int
+    name        String
+    category    String? // e.g., "News", "Movies", "Sports"
+    language    String? // e.g., "English", "Hindi"
+    isHd        Boolean  @default(false) @map("is_hd")
+    logo        String? // URL to channel logo
+    description String?
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    tvGuide TvGuide @relation(fields: [tvGuideId], references: [id], onDelete: Cascade)
+
+    @@map("tv_channels")
+}
+
+model FoodMenu {
+    id            String     @id @default(cuid())
+    hotelInfoId   String     @map("hotel_info_id")
+    name          String // e.g., "Room Service", "Restaurant Menu", "Bar Menu"
+    description   String?
+    category      String? // e.g., "Room Service", "Restaurant", "Bar", "Breakfast"
+    isActive      Boolean    @default(true) @map("is_active")
+    availableFrom String?    @map("available_from") // e.g., "6:00 AM"
+    availableTo   String?    @map("available_to") // e.g., "11:00 PM"
+    menuItems     MenuItem[]
+    createdAt     DateTime   @default(now()) @map("created_at")
+    updatedAt     DateTime   @updatedAt @map("updated_at")
+
+    // Relationships
+    hotelInfo HotelInfo @relation(fields: [hotelInfoId], references: [id], onDelete: Cascade)
+
+    @@map("food_menus")
+}
+
+model MenuItem {
+    id           String   @id @default(cuid())
+    menuId       String   @map("menu_id")
+    name         String
+    description  String?
+    price        Float?
+    category     String? // e.g., "Appetizer", "Main Course", "Dessert", "Beverage"
+    isVegetarian Boolean  @default(false) @map("is_vegetarian")
+    isVegan      Boolean  @default(false) @map("is_vegan")
+    allergens    String[] // Array of allergen names
+    spiceLevel   String?  @map("spice_level") // e.g., "Mild", "Medium", "Spicy"
+    isAvailable  Boolean  @default(true) @map("is_available")
+    image        String? // URL to food image
+    prepTime     String?  @map("prep_time") // e.g., "15-20 minutes"
+    calories     Int?
+    createdAt    DateTime @default(now()) @map("created_at")
+    updatedAt    DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    menu FoodMenu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+    @@map("menu_items")
 }

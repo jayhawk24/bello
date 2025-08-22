@@ -364,3 +364,152 @@ export interface Theme {
         xl: string;
     };
 }
+
+// Hotel Setup Types
+export interface HotelInfo {
+    id: string;
+    hotelId: string;
+    receptionNumber?: string;
+    emergencyNumber?: string;
+    checkInTime?: string;
+    checkOutTime?: string;
+    hotelDescription?: string;
+    amenities: string[];
+    wifiInfos?: HotelWifi[];
+    tvGuides?: TvGuide[];
+    foodMenus?: FoodMenu[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface HotelWifi {
+    id: string;
+    hotelInfoId: string;
+    networkName: string;
+    password?: string;
+    description?: string;
+    isPublic: boolean;
+    bandwidth?: string;
+    coverage?: string;
+    instructions?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface TvGuide {
+    id: string;
+    hotelInfoId: string;
+    title: string;
+    description?: string;
+    category?: string;
+    channels: TvChannel[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface TvChannel {
+    id: string;
+    tvGuideId: string;
+    number: number;
+    name: string;
+    category?: string;
+    language?: string;
+    isHd: boolean;
+    logo?: string;
+    description?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface FoodMenu {
+    id: string;
+    hotelInfoId: string;
+    name: string;
+    description?: string;
+    category?: string;
+    isActive: boolean;
+    availableFrom?: string;
+    availableTo?: string;
+    menuItems: MenuItem[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface MenuItem {
+    id: string;
+    menuId: string;
+    name: string;
+    description?: string;
+    price?: number;
+    category?: string;
+    isVegetarian: boolean;
+    isVegan: boolean;
+    allergens: string[];
+    spiceLevel?: string;
+    isAvailable: boolean;
+    image?: string;
+    prepTime?: string;
+    calories?: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+// Hotel Setup Form Types
+export interface HotelInfoFormData {
+    receptionNumber?: string;
+    emergencyNumber?: string;
+    checkInTime?: string;
+    checkOutTime?: string;
+    hotelDescription?: string;
+    amenities: string[];
+}
+
+export interface HotelWifiFormData {
+    networkName: string;
+    password?: string;
+    description?: string;
+    isPublic: boolean;
+    bandwidth?: string;
+    coverage?: string;
+    instructions?: string;
+}
+
+export interface TvGuideFormData {
+    title: string;
+    description?: string;
+    category?: string;
+}
+
+export interface TvChannelFormData {
+    number: number;
+    name: string;
+    category?: string;
+    language?: string;
+    isHd: boolean;
+    logo?: string;
+    description?: string;
+}
+
+export interface FoodMenuFormData {
+    name: string;
+    description?: string;
+    category?: string;
+    isActive: boolean;
+    availableFrom?: string;
+    availableTo?: string;
+}
+
+export interface MenuItemFormData {
+    name: string;
+    description?: string;
+    price?: number;
+    category?: string;
+    isVegetarian: boolean;
+    isVegan: boolean;
+    allergens: string[];
+    spiceLevel?: string;
+    isAvailable: boolean;
+    image?: string;
+    prepTime?: string;
+    calories?: number;
+}
