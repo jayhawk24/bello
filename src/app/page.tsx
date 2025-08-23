@@ -13,8 +13,8 @@ export default function Home() {
             </div>
             <h1 className="text-2xl font-bold text-gray-800">Bello</h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/guest" className="text-gray-600 hover:text-minion-blue transition-colors">
+          <div className="flex items-center space-x-4 ml-5">
+            <Link href="/guest" className="btn-minion">
               Guest Access
             </Link>
             <Link href="/login" className="btn-minion-secondary">
