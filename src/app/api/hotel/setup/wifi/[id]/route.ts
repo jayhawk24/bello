@@ -5,9 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await getServerSession(authOptions);
 
         if (!session || session.user.role !== "hotel_admin") {
@@ -39,7 +40,7 @@ export async function DELETE(
             );
         }
 
-        const wifiId = params.id;
+        const wifiId = id;
 
         // Verify the WiFi network belongs to the hotel
         const wifiNetwork = await prisma.hotelWifi.findFirst({
