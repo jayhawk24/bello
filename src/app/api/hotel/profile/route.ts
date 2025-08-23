@@ -14,9 +14,6 @@ export async function GET() {
             );
         }
 
-        console.log("Session user ID:", session.user.id);
-        console.log("Session user:", session.user);
-
         // Get the user with hotel information
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
@@ -36,30 +33,8 @@ export async function GET() {
             }
         });
 
-        console.log("Found user:", user ? "YES" : "NO");
-
-        if (!user) {
-            // Try to find user without the specific ID to see if there are any users
-            const allUsers = await prisma.user.findMany({
-                take: 5,
-                select: { id: true, email: true, role: true }
-            });
-            console.log("All users (first 5):", allUsers);
-
-            return NextResponse.json(
-                {
-                    error: "User not found",
-                    debug: {
-                        sessionUserId: session.user.id,
-                        allUsersCount: allUsers.length
-                    }
-                },
-                { status: 404 }
-            );
-        }
-
         // Get the hotel - prioritize managed hotel, then assigned hotel
-        let hotel = user.managedHotel;
+        let hotel = user?.managedHotel;
         if (!hotel) {
             // Try finding by adminId as fallback
             hotel = await prisma.hotel.findFirst({
@@ -75,8 +50,6 @@ export async function GET() {
                 }
             });
         }
-
-        console.log("Found hotel:", hotel ? "YES" : "NO");
 
         if (!hotel) {
             return NextResponse.json(

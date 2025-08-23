@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRef } from "react";
 
 interface HotelData {
     id: string;
@@ -26,6 +27,15 @@ export default function HotelProfilePage() {
     const [hotel, setHotel] = useState<HotelData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    // TV Guide & WiFi state
+    const [activeTab, setActiveTab] = useState<'info' | 'tv' | 'wifi'>("info");
+    const [tvGuides, setTvGuides] = useState<any[]>([]);
+    const [wifiGuides, setWifiGuides] = useState<any[]>([]);
+    const [showAddTvModal, setShowAddTvModal] = useState(false);
+    const [showAddWifiModal, setShowAddWifiModal] = useState(false);
+    const tvTitleRef = useRef<HTMLInputElement>(null);
+    const wifiNameRef = useRef<HTMLInputElement>(null);
+
 
     useEffect(() => {
         if (status === "loading") return;
@@ -38,7 +48,10 @@ export default function HotelProfilePage() {
             return;
         }
         fetchHotelData();
+        fetchTvGuides();
+        fetchWifiGuides();
     }, [session, status, router]);
+
 
     const fetchHotelData = async () => {
         try {
@@ -54,6 +67,58 @@ export default function HotelProfilePage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    // --- TV Guide CRUD ---
+    const fetchTvGuides = async () => {
+        try {
+            const res = await fetch("/api/hotel/setup/tv-guide");
+            if (res.ok) {
+                const data = await res.json();
+                setTvGuides(data.data || []);
+            }
+        } catch { }
+    };
+    const addTvGuide = async () => {
+        const title = tvTitleRef.current?.value.trim();
+        if (!title) return;
+        await fetch("/api/hotel/setup/tv-guide", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title })
+        });
+        setShowAddTvModal(false);
+        fetchTvGuides();
+    };
+    const deleteTvGuide = async (id: string) => {
+        await fetch(`/api/hotel/setup/tv-guide/${id}`, { method: "DELETE" });
+        fetchTvGuides();
+    };
+
+    // --- WiFi Guide CRUD ---
+    const fetchWifiGuides = async () => {
+        try {
+            const res = await fetch("/api/hotel/setup/wifi");
+            if (res.ok) {
+                const data = await res.json();
+                setWifiGuides(data.data || []);
+            }
+        } catch { }
+    };
+    const addWifiGuide = async () => {
+        const name = wifiNameRef.current?.value.trim();
+        if (!name) return;
+        await fetch("/api/hotel/setup/wifi", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ networkName: name })
+        });
+        setShowAddWifiModal(false);
+        fetchWifiGuides();
+    };
+    const deleteWifiGuide = async (id: string) => {
+        await fetch(`/api/hotel/setup/wifi/${id}`, { method: "DELETE" });
+        fetchWifiGuides();
     };
 
     if (status === "loading" || isLoading) {
@@ -105,24 +170,34 @@ export default function HotelProfilePage() {
                     </p>
                 </div>
 
+                {/* Tabs */}
+                <div className="mb-8 border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-8">
+                        <button onClick={() => setActiveTab('info')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'info' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Hotel Info</button>
+                        <button onClick={() => setActiveTab('tv')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'tv' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>TV Guides</button>
+                        <button onClick={() => setActiveTab('wifi')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'wifi' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>WiFi Networks</button>
+                    </nav>
+                </div>
+
                 {error && (
                     <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                         {error}
                     </div>
                 )}
 
-                {hotel ? (
+                {/* Hotel Info Tab */}
+                {activeTab === 'info' && hotel && (
                     <div className="grid lg:grid-cols-3 gap-8">
-                        {/* Hotel Info Card */}
+                        {/* ...existing code for hotel info and subscription... */}
                         <div className="lg:col-span-2">
                             <div className="card-minion">
+                                {/* ...existing code for hotel info... */}
                                 <div className="flex justify-between items-start mb-6">
                                     <h2 className="text-2xl font-bold text-gray-800">Hotel Information</h2>
                                     <Link href="/dashboard/hotel/edit" className="btn-minion">
                                         ✏️ Edit Details
                                     </Link>
                                 </div>
-
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-2">Basic Information</h3>
@@ -137,7 +212,6 @@ export default function HotelProfilePage() {
                                             </div>
                                         </div>
                                     </div>
-
                                     <div>
                                         <h3 className="font-semibold text-gray-800 mb-2">Contact Information</h3>
                                         <div className="space-y-3">
@@ -152,7 +226,6 @@ export default function HotelProfilePage() {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="mt-6">
                                     <h3 className="font-semibold text-gray-800 mb-2">Address</h3>
                                     <div className="text-gray-800">
@@ -169,8 +242,7 @@ export default function HotelProfilePage() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Subscription Card */}
+                        {/* ...existing code for subscription and quick actions... */}
                         <div>
                             <div className="card-minion">
                                 <h2 className="text-xl font-bold text-gray-800 mb-4">Subscription</h2>
@@ -179,8 +251,8 @@ export default function HotelProfilePage() {
                                         <label className="block text-sm font-medium text-gray-600 mb-1">Current Plan</label>
                                         <div className="flex items-center">
                                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionPlan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                                                    hotel.subscriptionPlan === 'premium' ? 'bg-blue-100 text-blue-800' :
-                                                        'bg-green-100 text-green-800'
+                                                hotel.subscriptionPlan === 'premium' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-green-100 text-green-800'
                                                 }`}>
                                                 {hotel.subscriptionPlan.charAt(0).toUpperCase() + hotel.subscriptionPlan.slice(1)}
                                             </span>
@@ -189,8 +261,8 @@ export default function HotelProfilePage() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>
                                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
-                                                hotel.subscriptionStatus === 'trial' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
+                                            hotel.subscriptionStatus === 'trial' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
                                             }`}>
                                             {hotel.subscriptionStatus.charAt(0).toUpperCase() + hotel.subscriptionStatus.slice(1)}
                                         </span>
@@ -202,8 +274,6 @@ export default function HotelProfilePage() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Quick Actions */}
                             <div className="card-minion mt-6">
                                 <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
                                 <div className="space-y-3">
@@ -225,16 +295,75 @@ export default function HotelProfilePage() {
                             </div>
                         </div>
                     </div>
-                ) : (
-                    <div className="card-minion text-center">
-                        <div className="text-6xl mb-4">🏨</div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Hotel Setup Required</h2>
-                        <p className="text-gray-600 mb-6">
-                            Complete your hotel setup to start using all features
-                        </p>
-                        <Link href="/dashboard/hotel/setup" className="btn-minion">
-                            Complete Setup
-                        </Link>
+                )}
+
+                {/* TV Guide Tab */}
+                {activeTab === 'tv' && (
+                    <div className="card-minion">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">TV Guides</h2>
+                            <button className="btn-minion" onClick={() => setShowAddTvModal(true)}>+ Add TV Guide</button>
+                        </div>
+                        {tvGuides.length === 0 ? (
+                            <p className="text-gray-500">No TV guides configured yet.</p>
+                        ) : (
+                            <ul className="divide-y divide-gray-200">
+                                {tvGuides.map((guide: any) => (
+                                    <li key={guide.id} className="py-3 flex justify-between items-center">
+                                        <span className="font-medium text-gray-800">{guide.title}</span>
+                                        <button className="btn-minion-danger" onClick={() => deleteTvGuide(guide.id)}>Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {/* Add TV Guide Modal */}
+                        {showAddTvModal && (
+                            <div className="inset-0 flex items-center justify-center z-50 ">
+                                <div className="bg-white rounded-lg p-6 w-full border border-black">
+                                    <h3 className="text-xl font-bold mb-4">Add TV Guide</h3>
+                                    <input ref={tvTitleRef} className="input-minion w-full mb-4" placeholder="Guide Title" />
+                                    <div className="flex justify-end space-x-2">
+                                        <button className="btn-minion-danger" onClick={() => setShowAddTvModal(false)}>Cancel</button>
+                                        <button className="btn-minion" onClick={addTvGuide}>Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* WiFi Guide Tab */}
+                {activeTab === 'wifi' && (
+                    <div className="card-minion">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">WiFi Networks</h2>
+                            <button className="btn-minion" onClick={() => setShowAddWifiModal(true)}>+ Add WiFi</button>
+                        </div>
+                        {wifiGuides.length === 0 ? (
+                            <p className="text-gray-500">No WiFi networks configured yet.</p>
+                        ) : (
+                            <ul className="divide-y divide-gray-200">
+                                {wifiGuides.map((wifi: any) => (
+                                    <li key={wifi.id} className="py-3 flex justify-between items-center">
+                                        <span className="font-medium text-gray-800">{wifi.networkName}</span>
+                                        <button className="text-red-500 hover:text-red-700" onClick={() => deleteWifiGuide(wifi.id)}>Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {/* Add WiFi Modal */}
+                        {showAddWifiModal && (
+                            <div className="inset-0 flex items-center justify-center">
+                                <div className="bg-white rounded-lg p-6 w-full">
+                                    <h3 className="text-xl font-bold mb-4">Add WiFi Network</h3>
+                                    <input ref={wifiNameRef} className="input-minion w-full mb-4" placeholder="WiFi Network Name" />
+                                    <div className="flex justify-end space-x-2">
+                                        <button className="btn-minion-secondary" onClick={() => setShowAddWifiModal(false)}>Cancel</button>
+                                        <button className="btn-minion" onClick={addWifiGuide}>Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </main>
