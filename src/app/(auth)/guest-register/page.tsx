@@ -103,7 +103,7 @@ function GuestRegisterForm() {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="form-group">
                             <label htmlFor="firstName" className="form-label">
@@ -218,7 +218,7 @@ function GuestRegisterForm() {
                     </div>
 
                     <button
-                        type="submit"
+                        onClick={(e) => handleSubmit(e)}
                         className="btn-minion w-full"
                         disabled={isLoading}
                     >
