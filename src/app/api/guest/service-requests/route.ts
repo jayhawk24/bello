@@ -1,16 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { serviceRequestSchema } from '@/lib/validations';
-import { notifyStaffNewServiceRequest } from '@/lib/notifications';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { serviceRequestSchema } from "@/lib/validations";
+import { notifyStaffNewServiceRequest } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { bookingId, serviceId, title, description, priority = 'medium' } = body;
+        const {
+            bookingId,
+            serviceId,
+            title,
+            description,
+            priority = "medium"
+        } = body;
 
         if (!bookingId || !serviceId || !title) {
             return NextResponse.json(
-                { error: 'Booking ID, service ID, and title are required' },
+                { error: "Booking ID, service ID, and title are required" },
                 { status: 400 }
             );
         }
@@ -25,7 +31,10 @@ export async function POST(request: NextRequest) {
 
         if (!validationResult.success) {
             return NextResponse.json(
-                { error: 'Invalid request data', details: validationResult.error.issues },
+                {
+                    error: "Invalid request data",
+                    details: validationResult.error.issues
+                },
                 { status: 400 }
             );
         }
@@ -41,7 +50,7 @@ export async function POST(request: NextRequest) {
 
         if (!booking) {
             return NextResponse.json(
-                { error: 'Booking not found' },
+                { error: "Booking not found" },
                 { status: 404 }
             );
         }
@@ -54,8 +63,8 @@ export async function POST(request: NextRequest) {
                     email: booking.guestEmail,
                     name: booking.guestName,
                     phone: booking.guestPhone,
-                    role: 'guest',
-                    password: 'temp_password', // Guest users don't need real passwords
+                    role: "guest",
+                    password: "temp_password", // Guest users don't need real passwords
                     hotelId: booking.hotelId
                 }
             });
@@ -74,7 +83,7 @@ export async function POST(request: NextRequest) {
                 title: validationResult.data.title,
                 description: validationResult.data.description,
                 priority: validationResult.data.priority,
-                status: 'pending',
+                status: "pending",
                 serviceId: serviceId,
                 guestId,
                 hotelId: booking.hotelId,
@@ -124,7 +133,7 @@ export async function POST(request: NextRequest) {
             });
         } catch (notificationError) {
             // Don't fail the request if notification fails
-            console.error('Failed to send notifications:', notificationError);
+            console.error("Failed to send notifications:", notificationError);
         }
 
         return NextResponse.json({
@@ -142,11 +151,10 @@ export async function POST(request: NextRequest) {
                 service: serviceRequest.service
             }
         });
-
     } catch (error) {
-        console.error('Service request creation error:', error);
+        console.error("Service request creation error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }
@@ -155,11 +163,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const bookingId = searchParams.get('bookingId');
+        const bookingId = searchParams.get("bookingId");
 
         if (!bookingId) {
             return NextResponse.json(
-                { error: 'Booking ID is required' },
+                { error: "Booking ID is required" },
                 { status: 400 }
             );
         }
@@ -192,7 +200,7 @@ export async function GET(request: NextRequest) {
                 }
             },
             orderBy: {
-                requestedAt: 'desc'
+                requestedAt: "desc"
             }
         });
 
@@ -200,11 +208,10 @@ export async function GET(request: NextRequest) {
             success: true,
             serviceRequests
         });
-
     } catch (error) {
-        console.error('Get service requests error:', error);
+        console.error("Get service requests error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }

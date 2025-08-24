@@ -36,8 +36,12 @@ export function generateQRCodeData(
     accessCode: string
 ): string {
     // Create a URL that guests can access to view room services
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3001';
-    const guestUrl = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(hotelId)}&roomNumber=${encodeURIComponent(roomNumber)}&accessCode=${encodeURIComponent(accessCode)}`;
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3001";
+    const guestUrl = `${baseUrl}/guest/room?hotelId=${encodeURIComponent(
+        hotelId
+    )}&roomNumber=${encodeURIComponent(
+        roomNumber
+    )}&accessCode=${encodeURIComponent(accessCode)}`;
     return guestUrl;
 }
 
@@ -48,14 +52,14 @@ export function parseQRCodeData(qrUrl: string): {
 } | null {
     try {
         const url = new URL(qrUrl);
-        const hotelId = url.searchParams.get('hotelId');
-        const roomNumber = url.searchParams.get('roomNumber');
-        const accessCode = url.searchParams.get('accessCode');
-        
+        const hotelId = url.searchParams.get("hotelId");
+        const roomNumber = url.searchParams.get("roomNumber");
+        const accessCode = url.searchParams.get("accessCode");
+
         if (!hotelId || !roomNumber || !accessCode) {
             return null;
         }
-        
+
         return {
             hotelId,
             roomNumber,
