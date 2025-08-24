@@ -1,15 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { serviceRequestSchema } from '@/lib/validations';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { serviceRequestSchema } from "@/lib/validations";
+import { notifyStaffNewServiceRequest } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { roomId, hotelId, serviceId, title, description, priority = 'medium', guestName, guestEmail } = body;
+        const {
+            roomId,
+            hotelId,
+            serviceId,
+            title,
+            description,
+            priority = "medium",
+            guestName,
+            guestEmail
+        } = body;
 
         if (!roomId || !hotelId || !serviceId || !title) {
             return NextResponse.json(
-                { error: 'Room ID, hotel ID, service ID, and title are required' },
+                {
+                    error: "Room ID, hotel ID, service ID, and title are required"
+                },
                 { status: 400 }
             );
         }
@@ -24,7 +36,10 @@ export async function POST(request: NextRequest) {
 
         if (!validationResult.success) {
             return NextResponse.json(
-                { error: 'Invalid request data', details: validationResult.error.issues },
+                {
+                    error: "Invalid request data",
+                    details: validationResult.error.issues
+                },
                 { status: 400 }
             );
         }
@@ -37,19 +52,19 @@ export async function POST(request: NextRequest) {
 
         if (!room || room.hotelId !== hotelId) {
             return NextResponse.json(
-                { error: 'Invalid room or hotel information' },
+                { error: "Invalid room or hotel information" },
                 { status: 404 }
             );
         }
 
-        // Find the actual service by ID 
+        // Find the actual service by ID
         const service = await prisma.service.findUnique({
             where: { id: serviceId }
         });
 
         if (!service || service.hotelId !== hotelId) {
             return NextResponse.json(
-                { error: 'Service not found or not available for this hotel' },
+                { error: "Service not found or not available for this hotel" },
                 { status: 404 }
             );
         }
@@ -58,7 +73,7 @@ export async function POST(request: NextRequest) {
         let guestUser = null;
         if (guestEmail) {
             guestUser = await prisma.user.findFirst({
-                where: { 
+                where: {
                     email: guestEmail,
                     hotelId: hotelId
                 }
@@ -67,13 +82,21 @@ export async function POST(request: NextRequest) {
 
         // If no guest user found, create a room guest account
         if (!guestUser) {
-            const roomGuestEmail = guestEmail || `room_${roomId}_guest@${room.hotel.name.toLowerCase().replace(/\s+/g, '')}.local`;
+            const timeToCreateGuestUser = Date.now();
+
+            const roomGuestEmail =
+                guestEmail ||
+                `room_${roomId}_guest@${room.hotel.name
+                    .toLowerCase()
+                    .replace(/\s+/g, "")}${timeToCreateGuestUser}.local`;
+            console.log("Creating guest user with email:", roomGuestEmail);
+
             guestUser = await prisma.user.create({
                 data: {
                     email: roomGuestEmail,
                     name: guestName || `Room ${room.roomNumber} Guest`,
-                    role: 'guest',
-                    password: 'room_access_guest', // Temporary password for room guests
+                    role: "guest",
+                    password: "room_access_guest", // Temporary password for room guests
                     hotelId: hotelId
                 }
             });
@@ -85,7 +108,7 @@ export async function POST(request: NextRequest) {
                 title: validationResult.data.title,
                 description: validationResult.data.description,
                 priority: validationResult.data.priority,
-                status: 'pending',
+                status: "pending",
                 serviceId: serviceId,
                 guestId: guestUser.id,
                 hotelId: hotelId,
@@ -115,6 +138,29 @@ export async function POST(request: NextRequest) {
             }
         });
 
+        // Send notifications to all staff members
+        try {
+            await notifyStaffNewServiceRequest({
+                id: serviceRequest.id,
+                title: serviceRequest.title,
+                priority: serviceRequest.priority,
+                hotelId: hotelId,
+                guest: {
+                    name: serviceRequest.guest.name
+                },
+                room: {
+                    roomNumber: serviceRequest.room.roomNumber
+                },
+                service: {
+                    name: serviceRequest.service.name,
+                    category: serviceRequest.service.category
+                }
+            });
+        } catch (notificationError) {
+            // Don't fail the request if notification fails
+            console.error("Failed to send notifications:", notificationError);
+        }
+
         return NextResponse.json({
             success: true,
             serviceRequest: {
@@ -130,11 +176,10 @@ export async function POST(request: NextRequest) {
                 service: serviceRequest.service
             }
         });
-
     } catch (error) {
-        console.error('Room service request creation error:', error);
+        console.error("Room service request creation error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }
@@ -143,12 +188,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const roomId = searchParams.get('roomId');
-        const hotelId = searchParams.get('hotelId');
+        const roomId = searchParams.get("roomId");
+        const hotelId = searchParams.get("hotelId");
 
         if (!roomId || !hotelId) {
             return NextResponse.json(
-                { error: 'Room ID and Hotel ID are required' },
+                { error: "Room ID and Hotel ID are required" },
                 { status: 400 }
             );
         }
@@ -175,7 +220,7 @@ export async function GET(request: NextRequest) {
                 }
             },
             orderBy: {
-                requestedAt: 'desc'
+                requestedAt: "desc"
             }
         });
 
@@ -183,11 +228,10 @@ export async function GET(request: NextRequest) {
             success: true,
             serviceRequests
         });
-
     } catch (error) {
-        console.error('Get room service requests error:', error);
+        console.error("Get room service requests error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }
