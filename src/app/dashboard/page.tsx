@@ -14,7 +14,7 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (status === "loading") return; // Still loading
-        
+
         if (!session) {
             router.push("/login");
             return;
@@ -91,9 +91,9 @@ export default function DashboardPage() {
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-12">
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-4">
+                    <h4 className="text-xl md:text-4xl font-bold text-gray-800 mb-4">
                         Welcome to Your Dashboard! 🎉
-                    </h1>
+                    </h4>
                     <p className="text-xl text-gray-600">
                         {session.user.role === "hotel_admin" ? "Manage your hotel and provide excellent guest experiences." :
                             session.user.role === "hotel_staff" ? `Help guests with their service requests at ${session.user.hotel?.name || 'your hotel'}.` :
