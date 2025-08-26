@@ -10,10 +10,10 @@ interface DashboardNavProps {
     showNotifications?: boolean;
 }
 
-const DashboardNav = ({ 
-    title, 
-    icon = "🏨", 
-    showNotifications = false 
+const DashboardNav = ({
+    title,
+    icon = "🏨",
+    showNotifications = false
 }: DashboardNavProps) => {
     const { data: session } = useSession();
 
@@ -32,7 +32,7 @@ const DashboardNav = ({
                             <div className="w-8 h-8 bg-minion-yellow rounded-full flex items-center justify-center">
                                 <span className="text-lg">{icon}</span>
                             </div>
-                            <h1 className="text-xl font-bold text-gray-800 truncate">{title}</h1>
+                            <p className="text-2xl font-bold text-gray-800 max-w-[calc(100%-3rem)] ">{title}</p>
                         </Link>
                         {showNotifications && <NotificationBell />}
                     </div>
@@ -50,7 +50,7 @@ const DashboardNav = ({
                         <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
                             <span className="text-2xl">{icon}</span>
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+                        <h1 className="text-lg md:text-2xl font-bold text-gray-800 truncate">{title}</h1>
                     </Link>
                     <div className="flex items-center space-x-4">
                         {showNotifications && <NotificationBell />}
