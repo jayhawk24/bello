@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, calculateRoomTier } from "@/lib/utils";
 import { userRegistrationSchema } from "@/lib/validations";
-import { Prisma } from "@prisma/client";
+import { Prisma, SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
     try {
@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
                         contactEmail: email,
                         contactPhone: phone,
                         adminId: user.id,
-                        subscriptionPlan: "free",
-                        subscriptionStatus: "inactive", // Will be activated after payment
+                        subscriptionPlan: SubscriptionPlan.free,
+                        subscriptionStatus: SubscriptionStatus.active, // Will be activated after payment
                         totalRooms: 0 // Will be set during hotel setup
                     }
                 });
