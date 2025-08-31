@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { SubscriptionPlan } from '@/types/subscription';
 import { Switch } from '@headlessui/react';
 import DashboardNav from '@/components/DashboardNav';
 
@@ -8,8 +9,23 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
 
-  const plans = [
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await fetch('/api/subscription-plans');
+        if (!res.ok) throw new Error('Failed to fetch plans');
+        const data = await res.json();
+        setPlans(data);
+      } catch (err: any) {
+        setError(err.message);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const defaultPlans = [
     {
       name: 'Free',
       description: '1-2 Rooms',
@@ -68,14 +84,12 @@ export default function PricingPage() {
     }
   ];
 
-  // Calculate annual price with 20% discount
-  const getPrice = (monthlyPrice: number) => {
+  // Get price based on billing cycle
+  const getPrice = (plan: any) => {
     if (isAnnual) {
-      const annualPrice = monthlyPrice * 12;
-      const discount = annualPrice * 0.2;
-      return Math.floor((annualPrice - discount) / 12);
+      return Math.floor(plan.priceYearly / 100);
     }
-    return monthlyPrice;
+    return Math.floor(plan.priceMonthly / 100);
   };
 
   // Razorpay handler
@@ -151,7 +165,7 @@ export default function PricingPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">Choose Your Plan</h1>
           <p className="text-xl text-gray-600 mb-8">Pay only for the rooms you manage - perfect for hotels of any size</p>
-          
+
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <span className={`text-sm ${!isAnnual ? 'font-bold text-yellow-600' : 'text-gray-500'}`}>Monthly</span>
@@ -174,34 +188,34 @@ export default function PricingPage() {
           {/* Plans Grid */}
           <div className="grid md:grid-cols-4 gap-6">
             {plans.map((plan) => (
-              <div key={plan.name} 
+              <div key={plan.name}
                 className={`card-minion text-center flex flex-col h-full relative
-                  ${plan.popular ? 'border-minion-yellow border-2' : ''}`}
+                  ${plan.priceMonthly > 0 ? '' : 'border-minion-yellow border-2'}`}
               >
-                {plan.popular && (
+                {plan.priceMonthly === 0 && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-minion-yellow text-gray-800 px-4 py-1 rounded-full text-sm font-semibold">
-                    Most Popular
+                    Free Plan
                   </div>
                 )}
                 <div className="flex-grow">
                   <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                   <div className="text-sm text-gray-500 mb-4">{plan.description}</div>
                   <div className="text-3xl font-bold text-minion-yellow mb-4">
-                    ${getPrice(plan.monthlyPrice)}<span className="text-base text-gray-500">/month</span>
+                    ${getPrice(plan)}<span className="text-base text-gray-500">/month</span>
                   </div>
                   <ul className="text-left space-y-2 mb-6 text-sm px-6">
-                    {plan.features.map((feature, idx) => (
+                    {plan.features.map((feature: string, idx: number) => (
                       <li key={idx}>✅ {feature}</li>
                     ))}
                   </ul>
                 </div>
-                {plan.type === 'free' ? (
+                {plan.priceMonthly === 0 ? (
                   <Link href="/register" className="btn-minion w-full">
                     Get Started Free
                   </Link>
                 ) : (
                   <button
-                    onClick={() => handleUpgrade(plan.type)}
+                    onClick={() => handleUpgrade(plan.id)}
                     disabled={loading}
                     className="btn-minion w-full disabled:opacity-60"
                   >

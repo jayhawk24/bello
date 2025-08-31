@@ -6,13 +6,31 @@ export const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET!
 });
 
-// Subscription plans configuration
+// Get subscription plans from database
+import { prisma } from "./prisma";
+
+export async function getSubscriptionPlans(
+    interval: "monthly" | "yearly" = "monthly"
+) {
+    const plans = await prisma.subscriptionPlan.findMany({
+        where: {
+            isActive: true
+        },
+        orderBy: {
+            [interval === "monthly" ? "priceMonthly" : "priceYearly"]: "asc"
+        }
+    });
+
+    return plans;
+}
+
+// Legacy subscription plans - to be removed after migration
 export const SUBSCRIPTION_PLANS = {
     starter: {
         name: "Starter",
         description: "1-20 Rooms",
         price: 4900, // ₹49.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: 20,
@@ -28,7 +46,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Growth",
         description: "21-50 Rooms",
         price: 12900, // ₹129.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: 50,
@@ -45,7 +63,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Professional",
         description: "51-100 Rooms",
         price: 24900, // ₹249.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: 100,
@@ -63,7 +81,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Enterprise",
         description: "100+ Rooms",
         price: 44900, // ₹449.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: -1, // Unlimited
@@ -108,7 +126,7 @@ export async function createSubscription(
 // Helper function to create payment order
 export async function createPaymentOrder(
     amount: number,
-    currency: string = "USD",
+    currency: string = "INR",
     receipt?: string
 ) {
     try {

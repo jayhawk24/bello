@@ -15,15 +15,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { planType, billingCycle, roomTier } = await request.json();
+        const { planId, billingCycle } = await request.json();
 
         // Validate required fields
-        if (!planType || !billingCycle || !roomTier) {
+        if (!planId || !billingCycle) {
             return NextResponse.json(
                 {
-                    error: "Missing required fields: planType, billingCycle, roomTier"
+                    error: "Missing required fields: planId, billingCycle"
                 },
                 { status: 400 }
+            );
+        }
+
+        // Get the subscription plan
+        const plan = await prisma.subscriptionPlan.findUnique({
+            where: { id: planId }
+        });
+
+        if (!plan) {
+            return NextResponse.json(
+                { error: "Subscription plan not found" },
+                { status: 404 }
             );
         }
 
@@ -42,17 +54,8 @@ export async function POST(request: NextRequest) {
 
         const hotel = user.managedHotel;
 
-        // Calculate amount based on plan type and billing cycle
-        const planPricing = {
-            basic: { monthly: 4900, yearly: 52900 }, // ₹49/₹529
-            premium: { monthly: 12900, yearly: 139900 }, // ₹129/₹1399
-            enterprise: { monthly: 24900, yearly: 269900 } // ₹249/₹2699
-        };
-
-        const amount =
-            planPricing[planType as keyof typeof planPricing]?.[
-                billingCycle as keyof typeof planPricing.basic
-            ];
+        // Get amount based on billing cycle
+        const amount = billingCycle === 'yearly' ? plan.priceYearly : plan.priceMonthly;
 
         if (!amount) {
             return NextResponse.json(
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
         // Create Razorpay order
         const orderResponse = await createPaymentOrder(
             amount,
-            "USD",
+            "INR",
             `subscription_${hotel.id}_${Date.now()}`
         );
 
@@ -74,13 +77,14 @@ export async function POST(request: NextRequest) {
                 hotelId: hotel.id,
                 razorpayOrderId: orderResponse.id,
                 amount,
-                currency: "USD",
+                currency: plan.currency,
                 status: "created",
                 receipt: orderResponse.receipt,
                 notes: {
-                    planType,
+                    planId,
                     billingCycle,
-                    roomTier
+                    planName: plan.name,
+                    roomLimit: plan.roomLimit
                 }
             }
         });
@@ -100,16 +104,26 @@ export async function POST(request: NextRequest) {
             where: { hotelId: hotel.id }
         });
 
+        // Map plan name to subscription tier
+        const getTierFromPlanName = (name: string): 'free' | 'basic' | 'premium' | 'enterprise' => {
+            if (name.toLowerCase().includes('free')) return 'free';
+            if (name.toLowerCase().includes('starter')) return 'basic';
+            if (name.toLowerCase().includes('growth')) return 'premium';
+            return 'enterprise';
+        };
+
         let subscription;
         if (existingSubscription) {
             subscription = await prisma.subscription.update({
                 where: { id: existingSubscription.id },
                 data: {
-                    planType,
+                    planType: getTierFromPlanName(plan.name),
                     billingCycle,
-                    roomTier,
+                    roomTier: plan.roomLimit <= 20 ? 'tier_1_20' :
+                             plan.roomLimit <= 50 ? 'tier_21_50' :
+                             plan.roomLimit <= 100 ? 'tier_51_100' : 'tier_100_plus',
                     amount,
-                    currency: "USD",
+                    currency: plan.currency,
                     currentPeriodStart,
                     currentPeriodEnd
                 }
@@ -118,11 +132,13 @@ export async function POST(request: NextRequest) {
             subscription = await prisma.subscription.create({
                 data: {
                     hotelId: hotel.id,
-                    planType,
+                    planType: getTierFromPlanName(plan.name),
                     billingCycle,
-                    roomTier,
+                    roomTier: plan.roomLimit <= 20 ? 'tier_1_20' :
+                             plan.roomLimit <= 50 ? 'tier_21_50' :
+                             plan.roomLimit <= 100 ? 'tier_51_100' : 'tier_100_plus',
                     amount,
-                    currency: "USD",
+                    currency: plan.currency,
                     status: "inactive", // Will be activated on successful payment
                     currentPeriodStart,
                     currentPeriodEnd
@@ -142,9 +158,7 @@ export async function POST(request: NextRequest) {
             currency: orderResponse.currency,
             key: process.env.RAZORPAY_KEY_ID,
             name: "Bello Hotel Concierge",
-            description: `${
-                planType.charAt(0).toUpperCase() + planType.slice(1)
-            } Plan - ${
+            description: `${plan.name} Plan - ${
                 billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1)
             }`,
             prefill: {

@@ -134,7 +134,7 @@ export default function HotelDetailsPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0
     }).format(amount / 100);
   };
@@ -259,8 +259,8 @@ export default function HotelDetailsPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-6 py-3 text-sm font-medium ${activeTab === tab.id
-                      ? 'border-b-2 border-indigo-500 text-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
+                    ? 'border-b-2 border-indigo-500 text-indigo-600'
+                    : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   {tab.label}
@@ -474,8 +474,8 @@ export default function HotelDetailsPage() {
                               {request.status}
                             </span>
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${request.priority === 'high' ? 'bg-red-100 text-red-800' :
-                                request.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-green-100 text-green-800'
+                              request.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
                               }`}>
                               {request.priority}
                             </span>
