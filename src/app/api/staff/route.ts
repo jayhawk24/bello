@@ -94,6 +94,22 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Enforce free plan limit: only 1 staff allowed
+        if (hotel.subscriptionPlan === 'free') {
+            const staffCount = await prisma.user.count({
+                where: {
+                    hotelId: hotel.id,
+                    role: 'hotel_staff',
+                },
+            });
+            if (staffCount >= 1) {
+                return NextResponse.json(
+                    { error: "Free plan allows only 1 staff user. Upgrade to add more.", redirect: "/pricing" },
+                    { status: 403 }
+                );
+            }
+        }
+
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
             where: { email }

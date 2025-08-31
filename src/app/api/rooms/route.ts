@@ -7,7 +7,10 @@ import { generateAccessCode } from "@/lib/utils";
 export async function GET() {
     try {
         const session = await auth();
-        if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
+        if (
+            !session ||
+            !["hotel_admin", "hotel_staff"].includes(session.user.role)
+        ) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -16,12 +19,12 @@ export async function GET() {
 
         // For hotel staff, use their hotelId directly. For admins, find their hotel
         let hotelId = session.user.hotelId;
-        
+
         if (session.user.role === "hotel_admin" && !hotelId) {
             const hotel = await prisma.hotel.findFirst({
                 where: { adminId: session.user.id }
             });
-            
+
             if (!hotel) {
                 return NextResponse.json(
                     { error: "Hotel not found" },
@@ -40,7 +43,7 @@ export async function GET() {
 
         const rooms = await prisma.room.findMany({
             where: { hotelId },
-            orderBy: { roomNumber: 'asc' }
+            orderBy: { roomNumber: "asc" }
         });
 
         return NextResponse.json({
@@ -91,6 +94,22 @@ export async function POST(request: NextRequest) {
                 { error: "Hotel not found" },
                 { status: 404 }
             );
+        }
+
+        // Enforce free plan limit: only 1 room allowed
+        if (!hotel.subscriptionPlan || hotel.subscriptionPlan === "free") {
+            const roomCount = await prisma.room.count({
+                where: { hotelId: hotel.id }
+            });
+            if (roomCount >= 1) {
+                return NextResponse.json(
+                    {
+                        error: "Free plan allows only 1 room. Upgrade to add more.",
+                        redirect: "/pricing"
+                    },
+                    { status: 403 }
+                );
+            }
         }
 
         // Check if room number already exists

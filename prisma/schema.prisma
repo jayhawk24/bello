@@ -299,6 +299,7 @@ enum UserRole {
 }
 
 enum SubscriptionPlan {
+    free
     basic
     premium
     enterprise
