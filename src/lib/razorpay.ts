@@ -144,3 +144,107 @@ export function verifySubscriptionSignature(
 
     return generated_signature === signature;
 }
+
+// Create a Razorpay plan
+export async function createRazorpayPlan(params: {
+    name: string;
+    description: string;
+    amount: number;
+    currency: string;
+    interval: "monthly" | "yearly";
+}) {
+    try {
+        const plan = await razorpay.plans.create({
+            period: params.interval === "monthly" ? "monthly" : "yearly",
+            interval: 1,
+            item: {
+                name: params.name,
+                description: params.description,
+                amount: params.amount,
+                currency: params.currency
+            },
+        });
+        return plan;
+    } catch (error) {
+        console.error("Error creating Razorpay plan:", error);
+        throw error;
+    }
+}
+
+// Razorpay subscription response type
+interface RazorpaySubscription {
+    id: string;
+    entity: string;
+    plan_id: string;
+    customer_id: string;
+    status: string;
+    current_start: number;
+    current_end: number;
+    ended_at: number | null;
+    quantity: number;
+    notes: Record<string, string>;
+    charge_at: number;
+    start_at: number;
+    end_at: number;
+    total_count: number;
+    paid_count: number;
+    customer_notify: boolean;
+    created_at: number;
+    expire_by: number | null;
+    short_url: string;
+    has_scheduled_changes: boolean;
+    change_scheduled_at: number | null;
+    source: string;
+    payment_method: string;
+    offer_id: string | null;
+    remaining_count: number;
+}
+
+// Create a Razorpay subscription
+export async function createRazorpaySubscription(params: {
+    plan_id: string;
+    customer_id: string;
+    total_count: number;
+    quantity?: number;
+    start_at?: number;
+    addons?: Array<{ item: { name: string; amount: number; currency: string } }>;
+    notes?: Record<string, string>;
+}): Promise<RazorpaySubscription> {
+    try {
+        const subscription = await razorpay.subscriptions.create({
+            plan_id: params.plan_id,
+            customer_id: params.customer_id,
+            customer_notify: 1,
+            quantity: params.quantity || 1,
+            total_count: params.total_count,
+            start_at: params.start_at,
+            addons: params.addons || [],
+            notes: params.notes || {}
+        });
+        return subscription;
+    } catch (error) {
+        console.error("Error creating Razorpay subscription:", error);
+        throw error;
+    }
+}
+
+// Create a Razorpay customer
+export async function createRazorpayCustomer(params: {
+    name: string;
+    email: string;
+    contact?: string;
+    notes?: Record<string, string>;
+}) {
+    try {
+        const customer = await razorpay.customers.create({
+            name: params.name,
+            email: params.email,
+            contact: params.contact,
+            notes: params.notes || {}
+        });
+        return customer;
+    } catch (error) {
+        console.error("Error creating Razorpay customer:", error);
+        throw error;
+    }
+}

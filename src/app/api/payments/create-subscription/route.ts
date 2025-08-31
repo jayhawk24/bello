@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createPaymentOrder } from "@/lib/razorpay";
+import { createRazorpayPlan, createRazorpayCustomer, createRazorpaySubscription } from "@/lib/razorpay";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
         const hotel = user.managedHotel;
 
         // Get amount based on billing cycle
-        const amount = billingCycle === 'yearly' ? plan.priceYearly : plan.priceMonthly;
+        const amount =
+            billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
 
         if (!amount) {
             return NextResponse.json(
@@ -64,39 +65,44 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create Razorpay order
-        const orderResponse = await createPaymentOrder(
-            amount,
-            "INR",
-            `subscription_${hotel.id}_${Date.now()}`
-        );
+        // Create subscription plan in Razorpay
+        const razorpayPlan = await createRazorpayPlan({
+            name: plan.name,
+            description: plan.description || plan.name,
+            amount: amount,
+            currency: plan.currency,
+            interval: billingCycle === 'monthly' ? 'monthly' : 'yearly'
+        });
 
-        // Create payment order in database
-        const paymentOrder = await prisma.paymentOrder.create({
-            data: {
-                hotelId: hotel.id,
-                razorpayOrderId: orderResponse.id,
-                amount,
-                currency: plan.currency,
-                status: "created",
-                receipt: orderResponse.receipt,
-                notes: {
-                    planId,
-                    billingCycle,
-                    planName: plan.name,
-                    roomLimit: plan.roomLimit
-                }
+        // Create customer in Razorpay if not exists
+        const razorpayCustomer = await createRazorpayCustomer({
+            name: user.name,
+            email: user.email,
+            contact: hotel.contactPhone
+        });
+
+        // Create subscription
+        const razorpaySubscription = await createRazorpaySubscription({
+            plan_id: razorpayPlan.id,
+            customer_id: razorpayCustomer.id,
+            total_count: billingCycle === 'monthly' ? 12 : 1,
+            quantity: 1,
+            notes: {
+                hotel_id: hotel.id,
+                plan_name: plan.name,
+                billing_cycle: billingCycle
             }
         });
 
-        // Create or update subscription record (initially inactive)
-        const currentPeriodStart = new Date();
-        const currentPeriodEnd = new Date();
-
+        // Calculate subscription period
+        const now = new Date();
+        const currentPeriodStart = new Date(now);
+        const currentPeriodEnd = new Date(now);
+        
         if (billingCycle === "monthly") {
-            currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
+            currentPeriodEnd.setMonth(currentPeriodStart.getMonth() + 1);
         } else {
-            currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
+            currentPeriodEnd.setFullYear(currentPeriodStart.getFullYear() + 1);
         }
 
         // Check if subscription already exists for this hotel
@@ -105,11 +111,13 @@ export async function POST(request: NextRequest) {
         });
 
         // Map plan name to subscription tier
-        const getTierFromPlanName = (name: string): 'free' | 'basic' | 'premium' | 'enterprise' => {
-            if (name.toLowerCase().includes('free')) return 'free';
-            if (name.toLowerCase().includes('starter')) return 'basic';
-            if (name.toLowerCase().includes('growth')) return 'premium';
-            return 'enterprise';
+        const getTierFromPlanName = (
+            name: string
+        ): "free" | "basic" | "premium" | "enterprise" => {
+            if (name.toLowerCase().includes("free")) return "free";
+            if (name.toLowerCase().includes("starter")) return "basic";
+            if (name.toLowerCase().includes("growth")) return "premium";
+            return "enterprise";
         };
 
         let subscription;
@@ -119,9 +127,14 @@ export async function POST(request: NextRequest) {
                 data: {
                     planType: getTierFromPlanName(plan.name),
                     billingCycle,
-                    roomTier: plan.roomLimit <= 20 ? 'tier_1_20' :
-                             plan.roomLimit <= 50 ? 'tier_21_50' :
-                             plan.roomLimit <= 100 ? 'tier_51_100' : 'tier_100_plus',
+                    roomTier:
+                        plan.roomLimit <= 20
+                            ? "tier_1_20"
+                            : plan.roomLimit <= 50
+                            ? "tier_21_50"
+                            : plan.roomLimit <= 100
+                            ? "tier_51_100"
+                            : "tier_100_plus",
                     amount,
                     currency: plan.currency,
                     currentPeriodStart,
@@ -134,9 +147,14 @@ export async function POST(request: NextRequest) {
                     hotelId: hotel.id,
                     planType: getTierFromPlanName(plan.name),
                     billingCycle,
-                    roomTier: plan.roomLimit <= 20 ? 'tier_1_20' :
-                             plan.roomLimit <= 50 ? 'tier_21_50' :
-                             plan.roomLimit <= 100 ? 'tier_51_100' : 'tier_100_plus',
+                    roomTier:
+                        plan.roomLimit <= 20
+                            ? "tier_1_20"
+                            : plan.roomLimit <= 50
+                            ? "tier_21_50"
+                            : plan.roomLimit <= 100
+                            ? "tier_51_100"
+                            : "tier_100_plus",
                     amount,
                     currency: plan.currency,
                     status: "inactive", // Will be activated on successful payment
@@ -146,16 +164,12 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Link payment order to subscription
-        await prisma.paymentOrder.update({
-            where: { id: paymentOrder.id },
-            data: { subscriptionId: subscription.id }
-        });
-
         return NextResponse.json({
-            orderId: orderResponse.id,
-            amount: orderResponse.amount,
-            currency: orderResponse.currency,
+            subscriptionId: razorpaySubscription.id,
+            planId: razorpayPlan.id,
+            customerId: razorpayCustomer.id,
+            amount: amount,
+            currency: plan.currency,
             key: process.env.RAZORPAY_KEY_ID,
             name: "Bello Hotel Concierge",
             description: `${plan.name} Plan - ${
