@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
                         contactPhone: phone,
                         adminId: user.id,
                         subscriptionPlan: SubscriptionPlan.free,
-                        subscriptionStatus: SubscriptionStatus.active, // Will be activated after payment
+                        subscriptionStatus: SubscriptionStatus.inactive, // Will be activated after payment
                         totalRooms: 0 // Will be set during hotel setup
                     }
                 });

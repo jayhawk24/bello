@@ -120,12 +120,12 @@ export default function SuperUserDashboard() {
   // Filter and search logic
   const filteredHotels = hotels.filter(hotel => {
     const matchesSearch = hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hotel.admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hotel.city.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      hotel.admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hotel.city.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = filterStatus === 'all' || hotel.subscriptionStatus === filterStatus;
     const matchesPlan = filterPlan === 'all' || hotel.subscriptionPlan === filterPlan;
-    
+
     return matchesSearch && matchesStatus && matchesPlan;
   });
 
@@ -158,7 +158,7 @@ export default function SuperUserDashboard() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount / 100);
   };
@@ -181,7 +181,7 @@ export default function SuperUserDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100">
       <DashboardNav title="Super Admin Dashboard" icon="👑" showNotifications={false} />
-      
+
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Stats Overview */}
         {stats && (
@@ -357,7 +357,7 @@ export default function SuperUserDashboard() {
                   <tr key={hotel.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <Link 
+                        <Link
                           href={`/dashboard/super-admin/${hotel.id}`}
                           className="text-sm font-medium text-indigo-600 hover:text-indigo-900 hover:underline"
                         >

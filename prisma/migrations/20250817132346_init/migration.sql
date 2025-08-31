@@ -140,7 +140,7 @@ CREATE TABLE "public"."subscriptions" (
     "razorpay_subscription_id" TEXT,
     "razorpay_customer_id" TEXT,
     "amount" INTEGER NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'INR',
+    "currency" TEXT NOT NULL DEFAULT 'USD',
     "status" "public"."SubscriptionStatus" NOT NULL,
     "current_period_start" TIMESTAMP(3) NOT NULL,
     "current_period_end" TIMESTAMP(3) NOT NULL,

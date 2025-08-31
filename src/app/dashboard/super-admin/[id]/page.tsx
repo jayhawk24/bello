@@ -76,7 +76,7 @@ export default function HotelDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const hotelId = params.id as string;
-  
+
   const [hotel, setHotel] = useState<HotelDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -99,7 +99,7 @@ export default function HotelDetailsPage() {
     try {
       setLoading(true);
       const response = await fetch(`/api/super-admin/hotels/${hotelId}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         setHotel(data.hotel);
@@ -134,7 +134,7 @@ export default function HotelDetailsPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount / 100);
   };
@@ -173,7 +173,7 @@ export default function HotelDetailsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100">
       <DashboardNav title="Hotel Details" icon="🏨" showNotifications={false} />
-      
+
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         <div className="mb-6">
@@ -258,11 +258,10 @@ export default function HotelDetailsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === tab.id
+                  className={`px-6 py-3 text-sm font-medium ${activeTab === tab.id
                       ? 'border-b-2 border-indigo-500 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -439,9 +438,8 @@ export default function HotelDetailsPage() {
                             <h4 className="font-semibold text-gray-900">Room {room.roomNumber}</h4>
                             <p className="text-sm text-gray-600">{room.roomType}</p>
                           </div>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            room.isOccupied ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                          }`}>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${room.isOccupied ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                            }`}>
                             {room.isOccupied ? 'Occupied' : 'Available'}
                           </span>
                         </div>
@@ -475,11 +473,10 @@ export default function HotelDetailsPage() {
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(request.status)}`}>
                               {request.status}
                             </span>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              request.priority === 'high' ? 'bg-red-100 text-red-800' : 
-                              request.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
-                              'bg-green-100 text-green-800'
-                            }`}>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${request.priority === 'high' ? 'bg-red-100 text-red-800' :
+                                request.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-green-100 text-green-800'
+                              }`}>
                               {request.priority}
                             </span>
                           </div>
