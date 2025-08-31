@@ -29,6 +29,7 @@
         "billing:run": "curl -X GET http://localhost:3000/api/cron/subscription-billing"
     },
     "dependencies": {
+        "@headlessui/react": "^2.2.7",
         "@prisma/client": "^6.14.0",
         "@sentry/nextjs": "^10.5.0",
         "@sentry/react": "^10.5.0",

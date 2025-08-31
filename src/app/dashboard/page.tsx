@@ -154,6 +154,13 @@ export default function DashboardPage() {
                                 buttonText="Manage Staff"
                                 href="/dashboard/staff"
                             />
+                            <DashboardCard
+                                icon="💳"
+                                title="Subscription"
+                                description="Manage your subscription plan and billing"
+                                buttonText="Manage Plan"
+                                href="/pricing"
+                            />
                         </>
                     )}
 
