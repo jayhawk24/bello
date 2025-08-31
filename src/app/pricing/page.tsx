@@ -38,20 +38,21 @@ export default function PricingPage() {
     return Math.floor(plan.priceMonthly / 100);
   };
 
-  // Razorpay handler
+  // Razorpay subscription handler
   const handleUpgrade = async (selectedPlan: SubscriptionPlan) => {
     setLoading(true);
     setError(null);
     try {
       const billingCycle = isAnnual ? 'yearly' : 'monthly';
 
+      // Create subscription
       const res = await fetch('/api/payments/create-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId: selectedPlan.id, billingCycle })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create order');
+      if (!res.ok) throw new Error(data.error || 'Failed to create subscription');
 
       // Load Razorpay script if not present
       if (!window.Razorpay) {
@@ -65,38 +66,28 @@ export default function PricingPage() {
       }
 
       const options = {
-        key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
-        order_id: data.orderId,
-        name: 'Bello Hotel Concierge',
-        description: `${selectedPlan.name} - ${isAnnual ? 'Annual' : 'Monthly'} Subscription`,
-        handler: async function (response: any) {
-          const verifyRes = await fetch('/api/payments/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature
-            })
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok) {
-            window.location.href = '/dashboard';
-          } else {
-            setError(verifyData.error || 'Payment verification failed');
-          }
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        subscription_id: data.subscriptionId,
+        name: data.name,
+        description: data.description,
+        handler: function () {
+          // Subscription is confirmed, redirect to dashboard
+          window.location.href = '/dashboard';
         },
-        prefill: {},
+        prefill: data.prefill,
         theme: { color: '#FFD700' },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+          }
+        }
       };
-      // @ts-ignore
+
+      // @ts-ignore - Razorpay types are not available
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
-    } finally {
       setLoading(false);
     }
   };

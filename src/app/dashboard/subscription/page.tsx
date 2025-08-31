@@ -35,7 +35,7 @@ const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     ]
   },
   premium: {
-    name: 'Premium', 
+    name: 'Premium',
     description: 'Great for growing hotels',
     monthlyPrice: 129,
     yearlyPrice: 1399,
@@ -68,7 +68,7 @@ const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
 
 const ROOM_TIERS = {
   'tier_1_20': '1-20 rooms',
-  'tier_21_50': '21-50 rooms', 
+  'tier_21_50': '21-50 rooms',
   'tier_51_100': '51-100 rooms',
   'tier_100_plus': '100+ rooms'
 };
@@ -106,26 +106,16 @@ export default function SubscriptionPage() {
 
   const handleSubscribe = async (planType: string) => {
     setLoading(true);
-    
-    try {
-      // Determine room tier based on hotel's total rooms
-      let roomTier = 'tier_1_20';
-      if (hotelData?.totalRooms) {
-        if (hotelData.totalRooms <= 20) roomTier = 'tier_1_20';
-        else if (hotelData.totalRooms <= 50) roomTier = 'tier_21_50';
-        else if (hotelData.totalRooms <= 100) roomTier = 'tier_51_100';
-        else roomTier = 'tier_100_plus';
-      }
 
+    try {
       const response = await fetch('/api/payments/create-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          planType,
-          billingCycle: selectedBilling,
-          roomTier
+          planId: planType,
+          billingCycle: selectedBilling
         }),
       });
 
@@ -138,7 +128,7 @@ export default function SubscriptionPage() {
           script.src = 'https://checkout.razorpay.com/v1/checkout.js';
           script.async = true;
           document.body.appendChild(script);
-          
+
           script.onload = () => {
             initiatePayment(data);
           };
@@ -156,45 +146,21 @@ export default function SubscriptionPage() {
     }
   };
 
-  const initiatePayment = (paymentData: any) => {
-    const options = {
-      key: paymentData.key,
-      amount: paymentData.amount,
-      currency: paymentData.currency,
-      name: paymentData.name,
-      description: paymentData.description,
-      order_id: paymentData.orderId,
-      prefill: paymentData.prefill,
-      theme: paymentData.theme,
-      handler: async function (response: any) {
-        try {
-          const verifyResponse = await fetch('/api/payments/verify', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
 
-          const verifyData = await verifyResponse.json();
-          
-          if (verifyResponse.ok) {
-            alert('Payment successful! Your subscription is now active.');
-            fetchSubscriptionData(); // Refresh subscription data
-          } else {
-            alert('Payment verification failed. Please contact support.');
-          }
-        } catch (error) {
-          console.error('Payment verification error:', error);
-          alert('Payment verification failed. Please contact support.');
-        }
+  const initiatePayment = (subscriptionData: any) => {
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      subscription_id: subscriptionData.subscriptionId,
+      name: subscriptionData.name,
+      description: subscriptionData.description,
+      prefill: subscriptionData.prefill,
+      theme: subscriptionData.theme,
+      handler: async function () {
+        alert('Subscription activated successfully!');
+        fetchSubscriptionData(); // Refresh subscription data
       },
       modal: {
-        ondismiss: function() {
+        ondismiss: function () {
           setLoading(false);
         }
       }
@@ -221,26 +187,24 @@ export default function SubscriptionPage() {
           <p className="text-xl text-gray-600 mb-8">
             Select the perfect plan for your hotel
           </p>
-          
+
           {/* Billing Toggle */}
           <div className="flex justify-center items-center space-x-4 mb-8">
             <button
               onClick={() => setSelectedBilling('monthly')}
-              className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                selectedBilling === 'monthly'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
+              className={`px-6 py-2 rounded-full font-medium transition-colors ${selectedBilling === 'monthly'
+                ? 'bg-amber-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
             >
               Monthly
             </button>
             <button
               onClick={() => setSelectedBilling('yearly')}
-              className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                selectedBilling === 'yearly'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
+              className={`px-6 py-2 rounded-full font-medium transition-colors ${selectedBilling === 'yearly'
+                ? 'bg-amber-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
             >
               Yearly (Save 10%)
             </button>
@@ -258,9 +222,8 @@ export default function SubscriptionPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Status</p>
-                <p className={`font-semibold capitalize ${
-                  currentSubscription.status === 'active' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <p className={`font-semibold capitalize ${currentSubscription.status === 'active' ? 'text-green-600' : 'text-red-600'
+                  }`}>
                   {currentSubscription.status}
                 </p>
               </div>
@@ -289,13 +252,12 @@ export default function SubscriptionPage() {
           {Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => {
             const price = selectedBilling === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
             const isCurrentPlan = currentSubscription?.planType === key;
-            
+
             return (
               <div
                 key={key}
-                className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105 ${
-                  isCurrentPlan ? 'ring-4 ring-amber-500' : ''
-                }`}
+                className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105 ${isCurrentPlan ? 'ring-4 ring-amber-500' : ''
+                  }`}
               >
                 <div className="p-8">
                   <div className="text-center mb-6">
@@ -332,11 +294,10 @@ export default function SubscriptionPage() {
                   <button
                     onClick={() => handleSubscribe(key)}
                     disabled={loading || isCurrentPlan}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                      isCurrentPlan
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        : 'bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50'
-                    }`}
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${isCurrentPlan
+                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      : 'bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50'
+                      }`}
                   >
                     {loading ? 'Processing...' : isCurrentPlan ? 'Current Plan' : 'Subscribe Now'}
                   </button>
