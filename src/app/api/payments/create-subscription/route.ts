@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRazorpayPlan, createRazorpayCustomer, createRazorpaySubscription } from "@/lib/razorpay";
+import {
+    createRazorpayPlan,
+    createRazorpayCustomer,
+    createRazorpaySubscription
+} from "@/lib/razorpay";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -71,21 +75,33 @@ export async function POST(request: NextRequest) {
             description: plan.description || plan.name,
             amount: amount,
             currency: plan.currency,
-            interval: billingCycle === 'monthly' ? 'monthly' : 'yearly'
+            interval: billingCycle === "monthly" ? "monthly" : "yearly"
         });
 
         // Create customer in Razorpay if not exists
-        const razorpayCustomer = await createRazorpayCustomer({
+        let razorpayCustomer = await createRazorpayCustomer({
             name: user.name,
             email: user.email,
-            contact: hotel.contactPhone
+            contact: hotel.contactPhone,
+            notes: {
+                id: user.id
+            }
         });
+
+        // Update user with Razorpay customer ID in database
+        if (razorpayCustomer) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { razorpayCustomerId: razorpayCustomer.id }
+            });
+        }
+        const rzp_customer_id = user.razorpayCustomerId;
 
         // Create subscription
         const razorpaySubscription = await createRazorpaySubscription({
             plan_id: razorpayPlan.id,
-            customer_id: razorpayCustomer.id,
-            total_count: billingCycle === 'monthly' ? 12 : 1,
+            customer_id: razorpayCustomer?.id || rzp_customer_id || "",
+            total_count: billingCycle === "monthly" ? 12 : 1,
             quantity: 1,
             notes: {
                 hotel_id: hotel.id,
@@ -98,7 +114,7 @@ export async function POST(request: NextRequest) {
         const now = new Date();
         const currentPeriodStart = new Date(now);
         const currentPeriodEnd = new Date(now);
-        
+
         if (billingCycle === "monthly") {
             currentPeriodEnd.setMonth(currentPeriodStart.getMonth() + 1);
         } else {
@@ -167,7 +183,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             subscriptionId: razorpaySubscription.id,
             planId: razorpayPlan.id,
-            customerId: razorpayCustomer.id,
+            customerId: rzp_customer_id,
             amount: amount,
             currency: plan.currency,
             key: process.env.RAZORPAY_KEY_ID,

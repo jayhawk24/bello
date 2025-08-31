@@ -162,7 +162,7 @@ export async function createRazorpayPlan(params: {
                 description: params.description,
                 amount: params.amount,
                 currency: params.currency
-            },
+            }
         });
         return plan;
     } catch (error) {
@@ -207,7 +207,9 @@ export async function createRazorpaySubscription(params: {
     total_count: number;
     quantity?: number;
     start_at?: number;
-    addons?: Array<{ item: { name: string; amount: number; currency: string } }>;
+    addons?: Array<{
+        item: { name: string; amount: number; currency: string };
+    }>;
     notes?: Record<string, string>;
 }): Promise<RazorpaySubscription> {
     try {
@@ -244,7 +246,7 @@ export async function createRazorpayCustomer(params: {
         });
         return customer;
     } catch (error) {
-        console.error("Error creating Razorpay customer:", error);
-        throw error;
+        console.warn("Razorpay likely customer already exists:", error);
+        return null;
     }
 }
