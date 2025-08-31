@@ -97,33 +97,6 @@ export const SUBSCRIPTION_PLANS = {
     }
 };
 
-// Helper function to create subscription
-export async function createSubscription(
-    planId: keyof typeof SUBSCRIPTION_PLANS
-) {
-    const plan = SUBSCRIPTION_PLANS[planId];
-
-    try {
-        const subscription = await razorpay.subscriptions.create({
-            plan_id: planId,
-            customer_notify: 1,
-            quantity: 1,
-            total_count: 12, // 12 months
-            addons: [],
-            notes: {
-                plan_name: plan.name,
-                room_limit: plan.roomLimit.toString()
-            }
-        });
-
-        return subscription;
-    } catch (error) {
-        console.error("Error creating subscription:", error);
-        throw error;
-    }
-}
-
-// Helper function to create payment order
 export async function createPaymentOrder(
     amount: number,
     currency: string = "INR",

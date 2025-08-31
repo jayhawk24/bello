@@ -25,64 +25,10 @@ export default function PricingPage() {
     fetchPlans();
   }, []);
 
-  const defaultPlans = [
-    {
-      name: 'Free',
-      description: '1-2 Rooms',
-      monthlyPrice: 0,
-      features: [
-        'Up to 2 rooms',
-        'Up to 2 staff users',
-        'QR code access',
-        'Basic service requests',
-        'Notifications'
-      ],
-      type: 'free'
-    },
-    {
-      name: 'Starter',
-      description: '1-20 Rooms',
-      monthlyPrice: 49,
-      features: [
-        'Up to 20 rooms',
-        'QR code access',
-        'Basic service requests',
-        'Email support',
-        'Basic analytics'
-      ],
-      type: 'basic'
-    },
-    {
-      name: 'Growth',
-      description: '21-50 Rooms',
-      monthlyPrice: 129,
-      features: [
-        'Up to 50 rooms',
-        'QR code access',
-        'Full service requests',
-        'Priority support',
-        'Advanced analytics',
-        'Custom branding'
-      ],
-      popular: true,
-      type: 'premium'
-    },
-    {
-      name: 'Professional',
-      description: '51-100 Rooms',
-      monthlyPrice: 249,
-      features: [
-        'Up to 100 rooms',
-        'QR code access',
-        'Premium service suite',
-        'Phone & chat support',
-        'Full analytics dashboard',
-        'Multi-location support',
-        'API access'
-      ],
-      type: 'enterprise'
-    }
-  ];
+  // Function to determine if a plan is popular (Growth plan)
+  const isPopularPlan = (plan: SubscriptionPlan): boolean => {
+    return plan.roomLimit > 20 && plan.roomLimit <= 50;
+  };
 
   // Get price based on billing cycle
   const getPrice = (plan: any) => {
@@ -93,19 +39,16 @@ export default function PricingPage() {
   };
 
   // Razorpay handler
-  const handleUpgrade = async (planType: string) => {
+  const handleUpgrade = async (selectedPlan: SubscriptionPlan) => {
     setLoading(true);
     setError(null);
     try {
       const billingCycle = isAnnual ? 'yearly' : 'monthly';
-      let roomTier = 'tier_1_20';
-      if (planType === 'premium') roomTier = 'tier_21_50';
-      if (planType === 'enterprise') roomTier = 'tier_51_100';
 
       const res = await fetch('/api/payments/create-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planType, billingCycle, roomTier })
+        body: JSON.stringify({ planId: selectedPlan.id, billingCycle })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create order');
@@ -127,7 +70,7 @@ export default function PricingPage() {
         currency: data.currency,
         order_id: data.orderId,
         name: 'Bello Hotel Concierge',
-        description: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan Subscription`,
+        description: `${selectedPlan.name} - ${isAnnual ? 'Annual' : 'Monthly'} Subscription`,
         handler: async function (response: any) {
           const verifyRes = await fetch('/api/payments/verify', {
             method: 'POST',
@@ -190,11 +133,11 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <div key={plan.name}
                 className={`card-minion text-center flex flex-col h-full relative
-                  ${plan.priceMonthly > 0 ? '' : 'border-minion-yellow border-2'}`}
+                  ${isPopularPlan(plan) ? 'border-minion-yellow border-2' : ''}`}
               >
-                {plan.priceMonthly === 0 && (
+                {isPopularPlan(plan) && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-minion-yellow text-gray-800 px-4 py-1 rounded-full text-sm font-semibold">
-                    Free Plan
+                    Most Popular
                   </div>
                 )}
                 <div className="flex-grow">
@@ -215,7 +158,7 @@ export default function PricingPage() {
                   </Link>
                 ) : (
                   <button
-                    onClick={() => handleUpgrade(plan.id)}
+                    onClick={() => handleUpgrade(plan)}
                     disabled={loading}
                     className="btn-minion w-full disabled:opacity-60"
                   >
