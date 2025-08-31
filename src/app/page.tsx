@@ -106,6 +106,24 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-6">
             <div className="card-minion text-center flex flex-col h-full">
               <div className="flex-grow">
+                <h3 className="text-2xl font-bold mb-2">Free</h3>
+                <div className="text-sm text-gray-500 mb-4">1 Room</div>
+                <div className="text-3xl font-bold text-minion-yellow mb-4">$0<span className="text-base text-gray-500">/month</span></div>
+                <ul className="text-left space-y-2 mb-6 text-sm">
+                  <li>✅ Up to 2 rooms</li>
+                  <li>✅ Up to 2 staff users</li>
+                  <li>✅ QR code access</li>
+                  <li>✅ Basic service requests</li>
+                  <li>✅ Notifications </li>
+                </ul>
+              </div>
+              <Link href="/register?plan=starter" className="btn-minion w-full mt-auto">
+                Get Started
+              </Link>
+            </div>
+
+            <div className="card-minion text-center flex flex-col h-full">
+              <div className="flex-grow">
                 <h3 className="text-2xl font-bold mb-2">Starter</h3>
                 <div className="text-sm text-gray-500 mb-4">1-20 Rooms</div>
                 <div className="text-3xl font-bold text-minion-yellow mb-4">$49<span className="text-base text-gray-500">/month</span></div>
@@ -161,26 +179,6 @@ export default function Home() {
               </div>
               <Link href="/register?plan=professional" className="btn-minion w-full mt-auto">
                 Get Started
-              </Link>
-            </div>
-
-            <div className="card-minion text-center flex flex-col h-full">
-              <div className="flex-grow">
-                <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                <div className="text-sm text-gray-500 mb-4">100+ Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$449<span className="text-base text-gray-500">/month</span></div>
-                <ul className="text-left space-y-2 mb-6 text-sm">
-                  <li>✅ Unlimited rooms</li>
-                  <li>✅ White-label solution</li>
-                  <li>✅ Enterprise integrations</li>
-                  <li>✅ 24/7 dedicated support</li>
-                  <li>✅ Custom analytics</li>
-                  <li>✅ Multi-property management</li>
-                  <li>✅ SLA guarantee</li>
-                </ul>
-              </div>
-              <Link href="/register?plan=enterprise" className="btn-minion w-full mt-auto">
-                Contact Sales
               </Link>
             </div>
           </div>
