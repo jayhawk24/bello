@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // TODO : Create during seed process
         // Create subscription plan in Razorpay
         const razorpayPlan = await createRazorpayPlan({
             name: plan.name,

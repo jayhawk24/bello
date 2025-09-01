@@ -149,6 +149,7 @@ model Subscription {
     id                     String             @id @default(cuid())
     hotelId                String             @map("hotel_id")
     planType               SubscriptionTier   @map("plan_type")
+    planId                 String             @map("plan_id")
     billingCycle           BillingCycle       @map("billing_cycle")
     roomTier               RoomTier           @map("room_tier")
     razorpaySubscriptionId String?            @map("razorpay_subscription_id")
@@ -309,8 +310,10 @@ model SubscriptionPlan {
     roomLimit    Int      @map("room_limit")
     features     String[]
     isActive     Boolean  @default(true) @map("is_active")
-    createdAt    DateTime @default(now()) @map("created_at")
-    updatedAt    DateTime @updatedAt @map("updated_at")
+
+    razorpayPlanId String   @map("razorpay_plan_id")
+    createdAt      DateTime @default(now()) @map("created_at")
+    updatedAt      DateTime @updatedAt @map("updated_at")
 
     @@map("subscription_plans")
 }

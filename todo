@@ -1,0 +1,9 @@
+When creating an account create subscription and populate plan_id
+
+When populating data create subscription plan on razorpay
+
+When creating a subscription in razorpay fetch plan ID from local and pass it to newly created subscription.
+
+Webhook needs to have cancelled subscription handling.
+
+Get subscription plan ID from webhook and update subscription plan ID in local.
