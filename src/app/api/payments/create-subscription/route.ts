@@ -59,25 +59,17 @@ export async function POST(request: NextRequest) {
         const hotel = user.managedHotel;
 
         // Get amount based on billing cycle
-        const amount =
-            billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
+        const amount = plan.price;
 
-        if (!amount) {
+        // Get Razorpay plan ID from our database
+        if (!plan.razorpayPlanId) {
             return NextResponse.json(
-                { error: "Invalid plan type or billing cycle" },
+                {
+                    error: "Razorpay plan not found. Please ensure plan is set up in Razorpay."
+                },
                 { status: 400 }
             );
         }
-
-        // TODO : Create during seed process
-        // Create subscription plan in Razorpay
-        const razorpayPlan = await createRazorpayPlan({
-            name: plan.name,
-            description: plan.description || plan.name,
-            amount: amount,
-            currency: plan.currency,
-            interval: billingCycle === "monthly" ? "monthly" : "yearly"
-        });
 
         // Create customer in Razorpay if not exists
         let razorpayCustomer = await createRazorpayCustomer({
@@ -98,9 +90,9 @@ export async function POST(request: NextRequest) {
         }
         const rzp_customer_id = user.razorpayCustomerId;
 
-        // Create subscription
+        // Create subscription in Razorpay using existing plan ID
         const razorpaySubscription = await createRazorpaySubscription({
-            plan_id: razorpayPlan.id,
+            plan_id: plan.razorpayPlanId!,
             customer_id: razorpayCustomer?.id || rzp_customer_id || "",
             total_count: billingCycle === "monthly" ? 12 : 1,
             quantity: 1,
@@ -163,6 +155,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     hotelId: hotel.id,
                     planType: getTierFromPlanName(plan.name),
+                    planId: plan.id,
                     billingCycle,
                     roomTier:
                         plan.roomLimit <= 20
@@ -176,16 +169,17 @@ export async function POST(request: NextRequest) {
                     currency: plan.currency,
                     status: "inactive", // Will be activated on successful payment
                     currentPeriodStart,
-                    currentPeriodEnd
+                    currentPeriodEnd,
+                    razorpaySubscriptionId: razorpaySubscription.id
                 }
             });
         }
 
         return NextResponse.json({
             subscriptionId: razorpaySubscription.id,
-            planId: razorpayPlan.id,
+            planId: plan.razorpayPlanId,
             customerId: rzp_customer_id,
-            amount: amount,
+            amount,
             currency: plan.currency,
             key: process.env.RAZORPAY_KEY_ID,
             name: "Bello Hotel Concierge",

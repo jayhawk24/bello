@@ -83,11 +83,28 @@ export async function POST(request: NextRequest) {
             id: razorpaySubscriptionId,
             status,
             current_start,
-            current_end
+            current_end,
+            plan_id: razorpayPlanId,
+            notes
         } = payload.payload.subscription.entity;
 
         // Get payment details
         const payment = payload.payload.payment.entity;
+
+        // Find the local subscription plan by razorpayPlanId
+        const subscriptionPlan = await prisma.subscriptionPlan.findFirst({
+            where: { razorpayPlanId }
+        });
+
+        if (!subscriptionPlan) {
+            console.error(
+                `No subscription plan found for Razorpay plan ID: ${razorpayPlanId}`
+            );
+            return NextResponse.json(
+                { error: "Subscription plan not found" },
+                { status: 404 }
+            );
+        }
 
         // Find and update the subscription in our database
         const subscription = await prisma.subscription.findFirst({
@@ -110,7 +127,30 @@ export async function POST(request: NextRequest) {
                 data: {
                     status: status === "active" ? "active" : "past_due",
                     currentPeriodStart: new Date(current_start * 1000),
-                    currentPeriodEnd: new Date(current_end * 1000)
+                    currentPeriodEnd: new Date(current_end * 1000),
+                    planId: subscriptionPlan.id,
+                    planType: subscriptionPlan.name
+                        .toLowerCase()
+                        .includes("free")
+                        ? "free"
+                        : subscriptionPlan.name
+                              .toLowerCase()
+                              .includes("starter")
+                        ? "basic"
+                        : subscriptionPlan.name.toLowerCase().includes("growth")
+                        ? "premium"
+                        : "enterprise",
+                    billingCycle: subscriptionPlan.period,
+                    roomTier:
+                        subscriptionPlan.roomLimit <= 20
+                            ? "tier_1_20"
+                            : subscriptionPlan.roomLimit <= 50
+                            ? "tier_21_50"
+                            : subscriptionPlan.roomLimit <= 100
+                            ? "tier_51_100"
+                            : "tier_100_plus",
+                    amount: payment.amount,
+                    currency: payment.currency
                 }
             }),
             // Create payment order
@@ -129,7 +169,18 @@ export async function POST(request: NextRequest) {
                 where: { id: subscription.hotelId },
                 data: {
                     subscriptionStatus:
-                        status === "active" ? "active" : "past_due"
+                        status === "active" ? "active" : "past_due",
+                    subscriptionTier: subscriptionPlan.name
+                        .toLowerCase()
+                        .includes("free")
+                        ? "free"
+                        : subscriptionPlan.name
+                              .toLowerCase()
+                              .includes("starter")
+                        ? "basic"
+                        : subscriptionPlan.name.toLowerCase().includes("growth")
+                        ? "premium"
+                        : "enterprise"
                 }
             })
         ]);
