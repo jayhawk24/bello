@@ -301,17 +301,17 @@ enum UserRole {
 }
 
 model SubscriptionPlan {
-    id           String   @id @default(cuid())
-    name         String   @unique
-    description  String
-    priceMonthly Int      @map("price_monthly")
-    priceYearly  Int      @map("price_yearly")
-    currency     String   @default("INR")
-    roomLimit    Int      @map("room_limit")
-    features     String[]
-    isActive     Boolean  @default(true) @map("is_active")
+    id          String       @id @default(cuid())
+    name        String       @unique
+    description String
+    price       Int          @map("price")
+    period      BillingCycle
+    currency    String       @default("INR")
+    roomLimit   Int          @map("room_limit")
+    features    String[]
+    isActive    Boolean      @default(true) @map("is_active")
 
-    razorpayPlanId String   @map("razorpay_plan_id")
+    razorpayPlanId String?  @map("razorpay_plan_id")
     createdAt      DateTime @default(now()) @map("created_at")
     updatedAt      DateTime @updatedAt @map("updated_at")
 
