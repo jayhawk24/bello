@@ -14,28 +14,26 @@ export default function PricingPage() {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const res = await fetch('/api/subscription-plans');
+        const interval = isAnnual ? 'yearly' : 'monthly';
+        const res = await fetch(`/api/subscription-plans?interval=${interval}`);
         if (!res.ok) throw new Error('Failed to fetch plans');
         const data = await res.json();
-        setPlans(data);
+        setPlans(data.plans);
       } catch (err: any) {
         setError(err.message);
       }
     };
     fetchPlans();
-  }, []);
+  }, [isAnnual]);
 
   // Function to determine if a plan is popular (Growth plan)
   const isPopularPlan = (plan: SubscriptionPlan): boolean => {
     return plan.roomLimit > 20 && plan.roomLimit <= 50;
   };
 
-  // Get price based on billing cycle
-  const getPrice = (plan: any) => {
-    if (isAnnual) {
-      return Math.floor(plan.priceYearly / 100);
-    }
-    return Math.floor(plan.priceMonthly / 100);
+  // Get price in display format
+  const getPrice = (plan: SubscriptionPlan) => {
+    return Math.floor(plan.price / 100);
   };
 
   // Razorpay subscription handler
@@ -143,7 +141,7 @@ export default function PricingPage() {
                     ))}
                   </ul>
                 </div>
-                {plan.priceMonthly === 0 ? (
+                {plan.price === 0 ? (
                   <Link href="/register" className="btn-minion w-full">
                     Get Started Free
                   </Link>
