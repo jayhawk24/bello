@@ -47,27 +47,27 @@ export async function POST(request: NextRequest) {
         // Get the raw body and signature
         const rawBody = await request.text();
         const signature = request.headers.get("x-razorpay-signature");
-        console.log(rawBody);
+        console.log(rawBody, signature);
 
         // Verify webhook signature
-        // if (!webhookSecret || !signature) {
-        //     return NextResponse.json(
-        //         { error: "Missing webhook secret or signature" },
-        //         { status: 401 }
-        //     );
-        // }
+        if (!webhookSecret || !signature) {
+            return NextResponse.json(
+                { error: "Missing webhook secret or signature" },
+                { status: 401 }
+            );
+        }
 
-        // const isValid = validateWebhookSignature(
-        //     JSON.stringify(rawBody),
-        //     signature,
-        //     webhookSecret
-        // );
-        // if (!isValid) {
-        //     return NextResponse.json(
-        //         { error: "Invalid webhook signature" },
-        //         { status: 401 }
-        //     );
-        // }
+        const isValid = validateWebhookSignature(
+            rawBody,
+            signature,
+            webhookSecret
+        );
+        if (!isValid) {
+            return NextResponse.json(
+                { error: "Invalid webhook signature" },
+                { status: 401 }
+            );
+        }
 
         // Parse the webhook payload
         const payload = JSON.parse(rawBody) as RazorpaySubscriptionCharged;
