@@ -2,7 +2,22 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import type { SubscriptionPlan } from '@/types/subscription';
+import type { BillingCycle, SubscriptionTier } from '@prisma/client';
 import { Switch } from '@headlessui/react';
+
+interface CurrentSubscription {
+  id: string;
+  planType: SubscriptionTier;
+  planId: string;
+  billingCycle: BillingCycle;
+  roomTier: string;
+  status: string;
+  amount: number;
+  currency: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  createdAt: string;
+};
 import DashboardNav from '@/components/DashboardNav';
 
 export default function PricingPage() {
@@ -10,20 +25,29 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
 
   useEffect(() => {
-    const fetchPlans = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch plans
         const interval = isAnnual ? 'yearly' : 'monthly';
-        const res = await fetch(`/api/subscription-plans?interval=${interval}`);
-        if (!res.ok) throw new Error('Failed to fetch plans');
-        const data = await res.json();
-        setPlans(data.plans);
+        const plansRes = await fetch(`/api/subscription-plans?interval=${interval}`);
+        if (!plansRes.ok) throw new Error('Failed to fetch plans');
+        const plansData = await plansRes.json();
+        setPlans(plansData.plans);
+
+        // Fetch current subscription
+        const subsRes = await fetch('/api/subscription/current');
+        if (subsRes.ok) {
+          const subsData = await subsRes.json();
+          setCurrentSubscription(subsData.subscription);
+        }
       } catch (err: any) {
         setError(err.message);
       }
     };
-    fetchPlans();
+    fetchData();
   }, [isAnnual]);
 
   // Function to determine if a plan is popular (Growth plan)
@@ -123,7 +147,16 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <div key={plan.name}
                 className={`card-minion text-center flex flex-col h-full relative
-                  ${isPopularPlan(plan) ? 'border-minion-yellow border-2' : ''}`}
+                  ${isPopularPlan(plan) ? 'border-minion-yellow border-2' : ''}
+                  ${currentSubscription && (
+                    currentSubscription.planId === plan.id ||
+                    currentSubscription.planType === (
+                      plan.name.toLowerCase().includes('free') ? 'free' :
+                        plan.name.toLowerCase().includes('starter') ? 'basic' :
+                          plan.name.toLowerCase().includes('growth') ? 'premium' :
+                            'enterprise'
+                    )
+                  ) ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}
               >
                 {isPopularPlan(plan) && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-minion-yellow text-gray-800 px-4 py-1 rounded-full text-sm font-semibold">
@@ -142,7 +175,24 @@ export default function PricingPage() {
                     ))}
                   </ul>
                 </div>
-                {plan.price === 0 ? (
+                {currentSubscription && (
+                  currentSubscription.planId === plan.id ||
+                  currentSubscription.planType === (
+                    plan.name.toLowerCase().includes('free') ? 'free' :
+                      plan.name.toLowerCase().includes('starter') ? 'basic' :
+                        plan.name.toLowerCase().includes('growth') ? 'premium' :
+                          'enterprise'
+                  )
+                ) ? (
+                  <button
+                    disabled
+                    className="btn-minion w-full disabled:opacity-60 bg-green-100 text-green-800"
+                  >
+                    {currentSubscription.billingCycle === (isAnnual ? 'yearly' : 'monthly')
+                      ? 'Current Plan'
+                      : `Current Plan (${currentSubscription.billingCycle})`}
+                  </button>
+                ) : plan.price === 0 ? (
                   <Link href="/register" className="btn-minion w-full">
                     Get Started Free
                   </Link>

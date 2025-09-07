@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils";
+import { SubscriptionTier } from "@prisma/client";
 
 // Webhook secret key from Razorpay dashboard
 const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -175,17 +176,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     subscriptionStatus:
                         status === "active" ? "active" : "past_due",
-                    subscriptionTier: subscriptionPlan.name
-                        .toLowerCase()
-                        .includes("free")
-                        ? "free"
-                        : subscriptionPlan.name
-                              .toLowerCase()
-                              .includes("starter")
-                        ? "basic"
-                        : subscriptionPlan.name.toLowerCase().includes("growth")
-                        ? "premium"
-                        : "enterprise"
+                    subscriptionTier: subscription.planType
                 }
             })
         ]);
