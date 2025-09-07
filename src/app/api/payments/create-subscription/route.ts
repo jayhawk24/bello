@@ -114,11 +114,6 @@ export async function POST(request: NextRequest) {
             currentPeriodEnd.setFullYear(currentPeriodStart.getFullYear() + 1);
         }
 
-        // Check if subscription already exists for this hotel
-        const existingSubscription = await prisma.subscription.findFirst({
-            where: { hotelId: hotel.id }
-        });
-
         // Map plan name to subscription tier
         const getTierFromPlanName = (
             name: string
@@ -129,54 +124,29 @@ export async function POST(request: NextRequest) {
             return "enterprise";
         };
 
-        let subscription;
-        if (existingSubscription) {
-            subscription = await prisma.subscription.update({
-                where: { id: existingSubscription.id },
-                data: {
-                    planType: getTierFromPlanName(plan.name),
-                    billingCycle,
-                    roomTier:
-                        plan.roomLimit <= 20
-                            ? "tier_1_20"
-                            : plan.roomLimit <= 50
-                            ? "tier_21_50"
-                            : plan.roomLimit <= 100
-                            ? "tier_51_100"
-                            : "tier_100_plus",
-                    amount,
-                    currency: plan.currency,
-                    currentPeriodStart,
-                    currentPeriodEnd,
-                    razorpaySubscriptionId: razorpaySubscription.id,
-                    razorpayCustomerId: rzp_customer_id
-                }
-            });
-        } else {
-            subscription = await prisma.subscription.create({
-                data: {
-                    hotelId: hotel.id,
-                    planType: getTierFromPlanName(plan.name),
-                    planId: plan.id,
-                    billingCycle,
-                    roomTier:
-                        plan.roomLimit <= 20
-                            ? "tier_1_20"
-                            : plan.roomLimit <= 50
-                            ? "tier_21_50"
-                            : plan.roomLimit <= 100
-                            ? "tier_51_100"
-                            : "tier_100_plus",
-                    amount,
-                    currency: plan.currency,
-                    status: "inactive", // Will be activated on successful payment
-                    currentPeriodStart,
-                    currentPeriodEnd,
-                    razorpaySubscriptionId: razorpaySubscription.id,
-                    razorpayCustomerId: rzp_customer_id
-                }
-            });
-        }
+        await prisma.subscription.create({
+            data: {
+                hotelId: hotel.id,
+                planType: getTierFromPlanName(plan.name),
+                planId: plan.id,
+                billingCycle,
+                roomTier:
+                    plan.roomLimit <= 20
+                        ? "tier_1_20"
+                        : plan.roomLimit <= 50
+                        ? "tier_21_50"
+                        : plan.roomLimit <= 100
+                        ? "tier_51_100"
+                        : "tier_100_plus",
+                amount,
+                currency: plan.currency,
+                status: "inactive", // Will be activated on successful payment
+                currentPeriodStart,
+                currentPeriodEnd,
+                razorpaySubscriptionId: razorpaySubscription.id,
+                razorpayCustomerId: rzp_customer_id
+            }
+        });
 
         return NextResponse.json({
             subscriptionId: razorpaySubscription.id,

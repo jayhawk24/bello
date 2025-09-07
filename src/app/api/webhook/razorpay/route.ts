@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
 import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils";
-import { SubscriptionTier } from "@prisma/client";
 
 // Webhook secret key from Razorpay dashboard
 const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -177,6 +175,14 @@ export async function POST(request: NextRequest) {
                     subscriptionStatus:
                         status === "active" ? "active" : "past_due",
                     subscriptionTier: subscription.planType
+                }
+            }),
+            // Delete all other active subscriptions for the same hotel
+            prisma.subscription.deleteMany({
+                where: {
+                    hotelId: subscription.hotelId,
+                    id: { not: subscription.id },
+                    status: "active"
                 }
             })
         ]);
