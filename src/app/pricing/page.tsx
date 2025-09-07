@@ -78,7 +78,8 @@ export default function PricingPage() {
           ondismiss: function () {
             setLoading(false);
           }
-        }
+        },
+        callback_url: `${window.location.origin}/api/razorpay/webhook`
       };
 
       // @ts-ignore - Razorpay types are not available

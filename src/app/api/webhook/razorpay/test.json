@@ -1,0 +1,88 @@
+{
+    "subscription": {
+        "entity": {
+            "id": "sub_REkP9oRoEfzXfp",
+            "entity": "subscription",
+            "plan_id": "plan_RCR7hsEkUYNIky",
+            "customer_id": "cust_REezCOLiqnUEex",
+            "status": "active",
+            "current_start": 1757255949,
+            "current_end": 1759775400,
+            "ended_at": null,
+            "quantity": 1,
+            "notes": {
+                "hotel_id": "cmf9gxv910002glu40dgem7im",
+                "plan_name": "Starter Monthly",
+                "billing_cycle": "monthly"
+            },
+            "charge_at": 1759775400,
+            "start_at": 1757255949,
+            "end_at": 1786041000,
+            "auth_attempts": 0,
+            "total_count": 12,
+            "paid_count": 1,
+            "customer_notify": true,
+            "created_at": 1757255921,
+            "expire_by": null,
+            "short_url": null,
+            "has_scheduled_changes": false,
+            "change_scheduled_at": null,
+            "source": "api",
+            "payment_method": "card",
+            "offer_id": null,
+            "remaining_count": 11
+        }
+    },
+    "payment": {
+        "entity": {
+            "id": "pay_REkPdUO6VpL0PR",
+            "entity": "payment",
+            "amount": 490000,
+            "currency": "INR",
+            "status": "captured",
+            "order_id": "order_REkPAYaQTDQTXx",
+            "invoice_id": "inv_REkPANZkn4EEoJ",
+            "international": false,
+            "method": "card",
+            "amount_refunded": 0,
+            "amount_transferred": 0,
+            "refund_status": null,
+            "captured": "1",
+            "description": "Starter Monthly Plan - Monthly",
+            "card_id": "card_REkPdqdIqktskS",
+            "card": {
+                "id": "card_REkPdqdIqktskS",
+                "entity": "card",
+                "name": "",
+                "last4": "4366",
+                "network": "VISA",
+                "type": "credit",
+                "issuer": "UTIB",
+                "international": false,
+                "emi": true,
+                "expiry_month": "01",
+                "expiry_year": "2099",
+                "sub_type": "consumer",
+                "token_iin": null,
+                "number": "**** **** **** 4366",
+                "color": "#C15482"
+            },
+            "bank": null,
+            "wallet": null,
+            "vpa": null,
+            "email": "test@test.com",
+            "contact": "+919453106183",
+            "customer_id": "cust_REezCOLiqnUEex",
+            "token_id": "token_REkPe60zfbIxzX",
+            "notes": [],
+            "fee": 16768,
+            "tax": 2558,
+            "error_code": null,
+            "error_description": null,
+            "acquirer_data": {
+                "auth_code": "458322"
+            },
+            "created_at": 1757255949
+        }
+    }
+}

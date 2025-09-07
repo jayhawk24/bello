@@ -147,7 +147,9 @@ export async function POST(request: NextRequest) {
                     amount,
                     currency: plan.currency,
                     currentPeriodStart,
-                    currentPeriodEnd
+                    currentPeriodEnd,
+                    razorpaySubscriptionId: razorpaySubscription.id,
+                    razorpayCustomerId: rzp_customer_id
                 }
             });
         } else {
@@ -170,7 +172,8 @@ export async function POST(request: NextRequest) {
                     status: "inactive", // Will be activated on successful payment
                     currentPeriodStart,
                     currentPeriodEnd,
-                    razorpaySubscriptionId: razorpaySubscription.id
+                    razorpaySubscriptionId: razorpaySubscription.id,
+                    razorpayCustomerId: rzp_customer_id
                 }
             });
         }
