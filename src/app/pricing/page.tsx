@@ -94,6 +94,7 @@ export default function PricingPage() {
         description: data.description,
         handler: function () {
           // Subscription is confirmed, redirect to dashboard
+          alert('Subscription successful! Please wait while we verify your payment.');
           window.location.href = '/dashboard';
         },
         prefill: data.prefill,
