@@ -20,7 +20,7 @@ async function createRazorpayPlan(
             item: {
                 name,
                 amount: amount * 100, // Convert to paise
-                currency: "INR",
+                currency: "USD",
                 description
             }
         });
@@ -38,7 +38,7 @@ async function main() {
             description: "1-2 Rooms",
             price: 0,
             period: BillingCycle.monthly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 2,
             features: [
                 "Up to 2 rooms",
@@ -54,7 +54,7 @@ async function main() {
             description: "1-20 Rooms",
             price: 4900, // $49.00
             period: BillingCycle.monthly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 20,
             features: [
                 "Up to 20 rooms",
@@ -70,7 +70,7 @@ async function main() {
             description: "1-20 Rooms",
             price: 47040, // $470.40 (20% discount)
             period: BillingCycle.yearly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 20,
             features: [
                 "Up to 20 rooms",
@@ -86,7 +86,7 @@ async function main() {
             description: "21-50 Rooms",
             price: 9900,
             period: BillingCycle.monthly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 50,
             features: [
                 "Up to 50 rooms",
@@ -103,7 +103,7 @@ async function main() {
             description: "21-50 Rooms",
             price: 18800, // $188.00
             period: BillingCycle.yearly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 50,
             features: [
                 "Up to 50 rooms",
@@ -121,7 +121,7 @@ async function main() {
             description: "51-100 Rooms",
             price: 24900, // $249.00
             period: BillingCycle.monthly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 100,
             features: [
                 "Up to 100 rooms",
@@ -139,7 +139,7 @@ async function main() {
             description: "51-100 Rooms",
             price: 298800,
             period: BillingCycle.yearly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 100,
             features: [
                 "Up to 100 rooms",

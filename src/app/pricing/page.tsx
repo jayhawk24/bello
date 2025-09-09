@@ -41,7 +41,7 @@ export default function PricingPage() {
         const subsRes = await fetch('/api/subscription/current');
         if (subsRes.ok) {
           const subsData = await subsRes.json();
-          setCurrentSubscription(subsData.subscription);
+          setCurrentSubscription(subsData);
         }
       } catch (err: any) {
         setError(err.message);

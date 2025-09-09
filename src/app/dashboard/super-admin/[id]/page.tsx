@@ -134,7 +134,7 @@ export default function HotelDetailsPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'USD',
       minimumFractionDigits: 0
     }).format(amount / 100);
   };

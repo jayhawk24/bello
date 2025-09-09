@@ -11,7 +11,7 @@ const planSchema = z.object({
     description: z.string().min(1),
     price: z.number().int().positive(),
     period: z.enum(["monthly", "yearly"]),
-    currency: z.string().length(3).default("INR"),
+    currency: z.string().length(3).default("USD"),
     roomLimit: z.number().int().positive(),
     features: z.array(z.string()),
     razorpayPlanId: z.string().optional()

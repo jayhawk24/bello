@@ -15,53 +15,30 @@ export async function GET() {
         }
 
         // Get user's hotel and subscription
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            include: {
-                managedHotel: {
-                    include: {
-                        subscriptions: {
-                            orderBy: { createdAt: "desc" },
-                            take: 1
-                        }
-                    }
-                }
-            }
+        const subscription = await prisma.subscription.findFirst({
+            where: { hotelId: session.user.hotelId || "", status: "active" },
+            orderBy: { createdAt: "desc" }
         });
 
-        if (!user?.managedHotel) {
+        if (!subscription) {
             return NextResponse.json(
-                { error: "Hotel not found for user" },
+                { error: "Subscription not found for user" },
                 { status: 404 }
             );
         }
 
-        const hotel = user.managedHotel;
-        const subscription = hotel.subscriptions[0] || null;
-
         return NextResponse.json({
-            hotel: {
-                id: hotel.id,
-                name: hotel.name,
-                totalRooms: hotel.totalRooms,
-                subscriptionTier: hotel.subscriptionTier,
-                subscriptionStatus: hotel.subscriptionStatus
-            },
-            subscription: subscription
-                ? {
-                      id: subscription.id,
-                      planType: subscription.planType,
-                      planId: subscription.planId,
-                      billingCycle: subscription.billingCycle,
-                      roomTier: subscription.roomTier,
-                      status: subscription.status,
-                      amount: subscription.amount,
-                      currency: subscription.currency,
-                      currentPeriodStart: subscription.currentPeriodStart,
-                      currentPeriodEnd: subscription.currentPeriodEnd,
-                      createdAt: subscription.createdAt
-                  }
-                : null
+            id: subscription.id,
+            planType: subscription.planType,
+            planId: subscription.planId,
+            billingCycle: subscription.billingCycle,
+            roomTier: subscription.roomTier,
+            status: subscription.status,
+            amount: subscription.amount,
+            currency: subscription.currency,
+            currentPeriodStart: subscription.currentPeriodStart,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            createdAt: subscription.createdAt
         });
     } catch (error) {
         console.error("Get subscription error:", error);

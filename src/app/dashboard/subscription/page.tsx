@@ -96,8 +96,10 @@ export default function SubscriptionPage() {
       const response = await fetch('/api/subscription/current');
       if (response.ok) {
         const data = await response.json();
-        setCurrentSubscription(data.subscription);
-        setHotelData(data.hotel);
+        setCurrentSubscription(data);
+        setHotelData(
+          session?.user?.hotel
+        );
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);

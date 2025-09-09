@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
                         billingCycle: freePlan.period,
                         roomTier: "tier_1_20",
                         amount: 0,
-                        currency: "INR",
+                        currency: "USD",
                         status: SubscriptionStatus.active,
                         currentPeriodStart: new Date(),
                         currentPeriodEnd: new Date(
