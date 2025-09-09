@@ -1,7 +1,21 @@
+"use client"
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from 'react';
+import { Switch } from '@headlessui/react';
 
 export default function Home() {
+  const [isAnnual, setIsAnnual] = useState(false);
+
+  // Helper function to calculate pricing
+  const getPrice = (monthlyPrice: number) => {
+    if (isAnnual) {
+      return Math.floor(monthlyPrice * 12 * 0.8); // 20% discount for annual (full year price)
+    }
+    return monthlyPrice;
+  };
+
+  const getPeriod = () => isAnnual ? '/year' : '/month';
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
       {/* Navigation */}
@@ -98,9 +112,28 @@ export default function Home() {
             <h2 className="text-4xl font-bold text-gray-800 mb-4">
               Simple, Room-Based Pricing
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 mb-8">
               Pay only for the rooms you manage - perfect for hotels of any size
             </p>
+
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <span className={`text-sm ${!isAnnual ? 'font-bold text-yellow-600' : 'text-gray-500'}`}>Monthly</span>
+              <Switch
+                checked={isAnnual}
+                onChange={setIsAnnual}
+                className={`${isAnnual ? 'bg-yellow-600' : 'bg-gray-400'}
+                  relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
+              >
+                <span
+                  className={`${isAnnual ? 'translate-x-6' : 'translate-x-1'}
+                    inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+              </Switch>
+              <span className={`text-sm ${isAnnual ? 'font-bold text-yellow-600' : 'text-gray-500'}`}>
+                Annual <span className="text-green-500 text-xs">(Save 20%)</span>
+              </span>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
@@ -108,7 +141,7 @@ export default function Home() {
               <div className="flex-grow">
                 <h3 className="text-2xl font-bold mb-2">Free</h3>
                 <div className="text-sm text-gray-500 mb-4">1 Room</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$0<span className="text-base text-gray-500">/month</span></div>
+                <div className="text-3xl font-bold text-minion-yellow mb-4">$0<span className="text-base text-gray-500">{getPeriod()}</span></div>
                 <ul className="text-left space-y-2 mb-6 text-sm">
                   <li>✅ Up to 2 rooms</li>
                   <li>✅ Up to 2 staff users</li>
@@ -126,7 +159,7 @@ export default function Home() {
               <div className="flex-grow">
                 <h3 className="text-2xl font-bold mb-2">Starter</h3>
                 <div className="text-sm text-gray-500 mb-4">1-20 Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$49<span className="text-base text-gray-500">/month</span></div>
+                <div className="text-3xl font-bold text-minion-yellow mb-4">${getPrice(49)}<span className="text-base text-gray-500">{getPeriod()}</span></div>
                 <ul className="text-left space-y-2 mb-6 text-sm">
                   <li>✅ Up to 20 rooms</li>
                   <li>✅ QR code access</li>
@@ -147,7 +180,7 @@ export default function Home() {
               <div className="flex-grow">
                 <h3 className="text-2xl font-bold mb-2">Growth</h3>
                 <div className="text-sm text-gray-500 mb-4">21-50 Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$129<span className="text-base text-gray-500">/month</span></div>
+                <div className="text-3xl font-bold text-minion-yellow mb-4">${getPrice(129)}<span className="text-base text-gray-500">{getPeriod()}</span></div>
                 <ul className="text-left space-y-2 mb-6 text-sm">
                   <li>✅ Up to 50 rooms</li>
                   <li>✅ QR code access</li>
@@ -166,7 +199,7 @@ export default function Home() {
               <div className="flex-grow">
                 <h3 className="text-2xl font-bold mb-2">Professional</h3>
                 <div className="text-sm text-gray-500 mb-4">51-100 Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$249<span className="text-base text-gray-500">/month</span></div>
+                <div className="text-3xl font-bold text-minion-yellow mb-4">${getPrice(249)}<span className="text-base text-gray-500">{getPeriod()}</span></div>
                 <ul className="text-left space-y-2 mb-6 text-sm">
                   <li>✅ Up to 100 rooms</li>
                   <li>✅ QR code access</li>
