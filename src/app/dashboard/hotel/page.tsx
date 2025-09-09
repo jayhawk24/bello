@@ -27,14 +27,19 @@ export default function HotelProfilePage() {
     const [hotel, setHotel] = useState<HotelData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
-    // TV Guide & WiFi state
-    const [activeTab, setActiveTab] = useState<'info' | 'tv' | 'wifi'>("info");
+    // TV Guide, WiFi & Food Menu state
+    const [activeTab, setActiveTab] = useState<'info' | 'tv' | 'wifi' | 'food'>("info");
     const [tvGuides, setTvGuides] = useState<any[]>([]);
     const [wifiGuides, setWifiGuides] = useState<any[]>([]);
+    const [foodMenus, setFoodMenus] = useState<any[]>([]);
     const [showAddTvModal, setShowAddTvModal] = useState(false);
     const [showAddWifiModal, setShowAddWifiModal] = useState(false);
+    const [showAddFoodModal, setShowAddFoodModal] = useState(false);
     const tvTitleRef = useRef<HTMLInputElement>(null);
     const wifiNameRef = useRef<HTMLInputElement>(null);
+    const foodNameRef = useRef<HTMLInputElement>(null);
+    const foodDescriptionRef = useRef<HTMLTextAreaElement>(null);
+    const foodCategoryRef = useRef<HTMLSelectElement>(null);
 
 
     useEffect(() => {
@@ -50,6 +55,7 @@ export default function HotelProfilePage() {
         fetchHotelData();
         fetchTvGuides();
         fetchWifiGuides();
+        fetchFoodMenus();
     }, [session, status, router]);
 
 
@@ -121,6 +127,39 @@ export default function HotelProfilePage() {
         fetchWifiGuides();
     };
 
+    // --- Food Menu CRUD ---
+    const fetchFoodMenus = async () => {
+        try {
+            const res = await fetch("/api/hotel/setup/food-menu");
+            if (res.ok) {
+                const data = await res.json();
+                setFoodMenus(data.data || []);
+            }
+        } catch { }
+    };
+    const addFoodMenu = async () => {
+        const name = foodNameRef.current?.value.trim();
+        const description = foodDescriptionRef.current?.value.trim();
+        const category = foodCategoryRef.current?.value;
+        if (!name) return;
+        await fetch("/api/hotel/setup/food-menu", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                name, 
+                description: description || null,
+                category: category || null,
+                isActive: true
+            })
+        });
+        setShowAddFoodModal(false);
+        fetchFoodMenus();
+    };
+    const deleteFoodMenu = async (id: string) => {
+        await fetch(`/api/hotel/setup/food-menu/${id}`, { method: "DELETE" });
+        fetchFoodMenus();
+    };
+
     if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
@@ -176,6 +215,7 @@ export default function HotelProfilePage() {
                         <button onClick={() => setActiveTab('info')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'info' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Hotel Info</button>
                         <button onClick={() => setActiveTab('tv')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'tv' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>TV Guides</button>
                         <button onClick={() => setActiveTab('wifi')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'wifi' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>WiFi Networks</button>
+                        <button onClick={() => setActiveTab('food')} className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'food' ? 'border-minion-blue text-minion-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Food Menus</button>
                     </nav>
                 </div>
 
@@ -360,6 +400,88 @@ export default function HotelProfilePage() {
                                     <div className="flex justify-end space-x-2">
                                         <button className="btn-minion-secondary" onClick={() => setShowAddWifiModal(false)}>Cancel</button>
                                         <button className="btn-minion" onClick={addWifiGuide}>Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Food Menu Tab */}
+                {activeTab === 'food' && (
+                    <div className="card-minion">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">Food Menus</h2>
+                            <button className="btn-minion" onClick={() => setShowAddFoodModal(true)}>+ Add Food Menu</button>
+                        </div>
+                        {foodMenus.length === 0 ? (
+                            <p className="text-gray-500">No food menus configured yet.</p>
+                        ) : (
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {foodMenus.map((menu: any) => (
+                                    <div key={menu.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800">{menu.name}</h3>
+                                                {menu.category && (
+                                                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mt-1">
+                                                        {menu.category}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className={`w-2 h-2 rounded-full ${menu.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                                                <button 
+                                                    className="text-red-500 hover:text-red-700 text-sm"
+                                                    onClick={() => deleteFoodMenu(menu.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {menu.description && (
+                                            <p className="text-gray-600 text-sm mb-3">{menu.description}</p>
+                                        )}
+                                        <div className="flex justify-between items-center text-sm text-gray-500">
+                                            <span>{menu.menuItems?.length || 0} items</span>
+                                            {menu.availableFrom && menu.availableTo && (
+                                                <span>{menu.availableFrom} - {menu.availableTo}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {/* Add Food Menu Modal */}
+                        {showAddFoodModal && (
+                            <div className="inset-0 flex items-center justify-center z-50 mt-6">
+                                <div className="bg-white rounded-lg p-6 w-full border border-black">
+                                    <h3 className="text-xl font-bold mb-4">Add Food Menu</h3>
+                                    <div className="space-y-4">
+                                        <input 
+                                            ref={foodNameRef} 
+                                            className="input-minion w-full" 
+                                            placeholder="Menu Name (e.g., Room Service, Restaurant Menu)" 
+                                        />
+                                        <textarea 
+                                            ref={foodDescriptionRef} 
+                                            className="input-minion w-full h-20" 
+                                            placeholder="Menu Description (optional)" 
+                                        />
+                                        <select ref={foodCategoryRef} className="input-minion w-full">
+                                            <option value="">Select Category (optional)</option>
+                                            <option value="Room Service">Room Service</option>
+                                            <option value="Restaurant">Restaurant</option>
+                                            <option value="Bar">Bar</option>
+                                            <option value="Breakfast">Breakfast</option>
+                                            <option value="Lunch">Lunch</option>
+                                            <option value="Dinner">Dinner</option>
+                                            <option value="Snacks">Snacks</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex justify-end space-x-2 mt-6">
+                                        <button className="btn-minion-danger" onClick={() => setShowAddFoodModal(false)}>Cancel</button>
+                                        <button className="btn-minion" onClick={addFoodMenu}>Add Menu</button>
                                     </div>
                                 </div>
                             </div>
