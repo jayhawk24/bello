@@ -16,7 +16,7 @@ interface HotelDetails {
   contactEmail: string;
   contactPhone: string;
   totalRooms: number;
-  subscriptionPlan: string;
+  subscriptionTier: string;
   subscriptionStatus: string;
   createdAt: string;
   updatedAt: string;
@@ -199,7 +199,7 @@ export default function HotelDetailsPage() {
                   {hotel.subscriptionStatus}
                 </span>
                 <span className="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
-                  {hotel.subscriptionPlan}
+                  {hotel.subscriptionTier}
                 </span>
               </div>
               <div className="space-x-2">

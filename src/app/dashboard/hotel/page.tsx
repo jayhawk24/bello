@@ -15,7 +15,7 @@ interface HotelData {
     country: string;
     contactEmail: string;
     contactPhone: string;
-    subscriptionPlan: string;
+    subscriptionTier: string;
     subscriptionStatus: string;
     totalRooms: number;
     createdAt: string;
@@ -250,11 +250,11 @@ export default function HotelProfilePage() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 mb-1">Current Plan</label>
                                         <div className="flex items-center">
-                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionPlan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                                                hotel.subscriptionPlan === 'premium' ? 'bg-blue-100 text-blue-800' :
+                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionTier === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                                                hotel.subscriptionTier === 'premium' ? 'bg-blue-100 text-blue-800' :
                                                     'bg-green-100 text-green-800'
                                                 }`}>
-                                                {hotel.subscriptionPlan.charAt(0).toUpperCase() + hotel.subscriptionPlan.slice(1)}
+                                                {hotel.subscriptionTier?.charAt(0).toUpperCase() + hotel.subscriptionTier?.slice(1)}
                                             </span>
                                         </div>
                                     </div>

@@ -16,7 +16,7 @@ interface Hotel {
   contactEmail: string;
   contactPhone: string;
   totalRooms: number;
-  subscriptionPlan: string;
+  subscriptionTier: string;
   subscriptionStatus: string;
   createdAt: string;
   admin: {
@@ -124,7 +124,7 @@ export default function SuperUserDashboard() {
       hotel.city.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = filterStatus === 'all' || hotel.subscriptionStatus === filterStatus;
-    const matchesPlan = filterPlan === 'all' || hotel.subscriptionPlan === filterPlan;
+    const matchesPlan = filterPlan === 'all' || hotel.subscriptionTier === filterPlan;
 
     return matchesSearch && matchesStatus && matchesPlan;
   });
@@ -380,8 +380,8 @@ export default function SuperUserDashboard() {
                       {hotel.totalRooms}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPlanBadge(hotel.subscriptionPlan)}`}>
-                        {hotel.subscriptionPlan}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPlanBadge(hotel.subscriptionTier)}`}>
+                        {hotel.subscriptionTier}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
