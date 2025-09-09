@@ -150,13 +150,7 @@ export default function PricingPage() {
                 className={`card-minion text-center flex flex-col h-full relative
                   ${isPopularPlan(plan) ? 'border-minion-yellow border-2' : ''}
                   ${currentSubscription && (
-                    currentSubscription.planId === plan.id ||
-                    currentSubscription.planType === (
-                      plan.name.toLowerCase().includes('free') ? 'free' :
-                        plan.name.toLowerCase().includes('starter') ? 'basic' :
-                          plan.name.toLowerCase().includes('growth') ? 'premium' :
-                            'enterprise'
-                    )
+                    currentSubscription.planId === plan.id
                   ) ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}
               >
                 {isPopularPlan(plan) && (
@@ -177,13 +171,7 @@ export default function PricingPage() {
                   </ul>
                 </div>
                 {currentSubscription && (
-                  currentSubscription.planId === plan.id ||
-                  currentSubscription.planType === (
-                    plan.name.toLowerCase().includes('free') ? 'free' :
-                      plan.name.toLowerCase().includes('starter') ? 'basic' :
-                        plan.name.toLowerCase().includes('growth') ? 'premium' :
-                          'enterprise'
-                  )
+                  currentSubscription.planId === plan.id
                 ) ? (
                   <button
                     disabled
