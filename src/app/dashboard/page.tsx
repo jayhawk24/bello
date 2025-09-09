@@ -11,6 +11,7 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [hotelName, setHotelName] = useState<string>("");
+    const [currentSubscription, setCurrentSubscription] = useState<any>(null);
 
     useEffect(() => {
         if (status === "loading") return; // Still loading
@@ -55,9 +56,21 @@ export default function DashboardPage() {
                 }
             }
         };
+        const fetchSubscriptionData = async () => {
+            try {
+                const response = await fetch('/api/subscription/current');
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentSubscription(data);
+                }
+            } catch (error) {
+                console.error('Error fetching subscription:', error);
+            }
+        };
 
         if (session) {
             fetchHotelInfo();
+            fetchSubscriptionData()
         }
     }, [session]);
 
@@ -206,7 +219,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
                         <div className="text-2xl font-bold text-warning">
-                            {session.user.hotel?.subscriptionPlan || "N/A"}
+                            {currentSubscription?.planType.toUpperCase() || "N/A"}
                         </div>
                         <div className="text-gray-600">Current Plan</div>
                     </div>

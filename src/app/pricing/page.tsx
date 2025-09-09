@@ -26,6 +26,7 @@ export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,9 +94,16 @@ export default function PricingPage() {
         name: data.name,
         description: data.description,
         handler: function () {
-          // Subscription is confirmed, redirect to dashboard
-          alert('Subscription successful! Please wait while we verify your payment.');
-          window.location.href = '/dashboard';
+          // Show capturing state
+          setIsCapturing(true);
+          setLoading(false);
+
+          // Hold for 10 seconds with loading message
+          setTimeout(() => {
+            // Subscription is confirmed, redirect to dashboard
+            alert('Subscription successful! Redirecting to dashboard...');
+            window.location.href = '/dashboard';
+          }, 10000);
         },
         prefill: data.prefill,
         theme: { color: '#FFD700' },
@@ -118,6 +126,17 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
+      {/* Payment Capturing Loading Screen */}
+      {isCapturing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Payment is being captured</h3>
+            <p className="text-gray-600">Please wait while we process your payment...</p>
+          </div>
+        </div>
+      )}
+
       <DashboardNav title="Subscription Plans" showNotifications={true} />
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
