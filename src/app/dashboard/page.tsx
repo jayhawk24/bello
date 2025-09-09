@@ -206,7 +206,9 @@ export default function DashboardPage() {
                 {/* Quick Stats */}
                 <div className="grid md:grid-cols-4 gap-4">
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
-                        <div className="text-2xl font-bold text-minion-yellow">0</div>
+                        <div className="text-2xl font-bold text-minion-yellow">
+                            {session?.user?.hotel?.totalRooms || 0}
+                        </div>
                         <div className="text-gray-600">Total Rooms</div>
                     </div>
                     <div className="bg-white rounded-lg p-6 border border-gray-200">

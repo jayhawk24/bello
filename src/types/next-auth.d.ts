@@ -10,7 +10,7 @@ export interface ExtendedUser {
     hotel?: {
         id: string;
         name: string;
-        subscriptionPlan: SubscriptionPlan;
+        totalRooms: number;
     } | null;
 }
 
