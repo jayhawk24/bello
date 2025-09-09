@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Enforce free plan limit: only 1 room allowed
-        if (!hotel.subscriptionPlan || hotel.subscriptionPlan === "free") {
+        if (!hotel.subscriptionTier || hotel.subscriptionTier === "free") {
             const roomCount = await prisma.room.count({
                 where: { hotelId: hotel.id }
             });

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create customer in Razorpay if not exists
-        let razorpayCustomer = await createRazorpayCustomer({
+        const razorpayCustomer = await createRazorpayCustomer({
             name: user.name,
             email: user.email,
             contact: hotel.contactPhone,

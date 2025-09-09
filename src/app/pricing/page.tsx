@@ -44,8 +44,8 @@ export default function PricingPage() {
           const subsData = await subsRes.json();
           setCurrentSubscription(subsData);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError((err as Error).message);
       }
     };
     fetchData();
@@ -115,11 +115,10 @@ export default function PricingPage() {
         callback_url: `${window.location.origin}/api/razorpay/webhook`
       };
 
-      // @ts-ignore - Razorpay types are not available
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Something went wrong');
       setLoading(false);
     }
   };

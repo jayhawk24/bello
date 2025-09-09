@@ -1,4 +1,4 @@
-import { UserRole, SubscriptionPlan } from "@prisma/client";
+import { UserRole, SubscriptionTier } from "@prisma/client";
 import type { DefaultSession } from "next-auth";
 
 export interface ExtendedUser {
@@ -26,10 +26,5 @@ declare module "next-auth/jwt" {
     interface JWT {
         role: UserRole;
         hotelId: string | null;
-        hotel?: {
-            id: string;
-            name: string;
-            subscriptionPlan: SubscriptionPlan;
-        } | null;
     }
 }

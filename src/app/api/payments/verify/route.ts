@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         where: { id: paymentOrder.hotelId },
         data: {
           subscriptionStatus: 'active',
-          subscriptionPlan: paymentOrder.subscription.planType
+          subscriptionTier: paymentOrder.subscription.planType
         }
       });
     }

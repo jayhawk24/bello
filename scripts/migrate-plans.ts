@@ -9,14 +9,14 @@ async function main() {
     for (const [key, plan] of Object.entries(SUBSCRIPTION_PLANS)) {
         console.log(`Migrating plan: ${plan.name}`);
 
-        await prisma.subscriptionTier.upsert({
+        await prisma.subscriptionPlan.upsert({
             where: {
                 name: plan.name
             },
             update: {
                 description: plan.description,
-                priceMonthly: plan.price,
-                priceYearly: Math.floor(plan.price * 10), // 2 months free
+                price: plan.price,
+                period: 'monthly', // Default to monthly
                 currency: plan.currency,
                 roomLimit: plan.roomLimit,
                 features: plan.features
@@ -24,8 +24,8 @@ async function main() {
             create: {
                 name: plan.name,
                 description: plan.description,
-                priceMonthly: plan.price,
-                priceYearly: Math.floor(plan.price * 10), // 2 months free
+                price: plan.price,
+                period: 'monthly', // Default to monthly
                 currency: plan.currency,
                 roomLimit: plan.roomLimit,
                 features: plan.features

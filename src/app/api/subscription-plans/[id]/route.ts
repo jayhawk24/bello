@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const plan = await prisma.subscriptionPlan.findUnique({
             where: {
                 id: params.id
@@ -31,9 +32,10 @@ export async function GET(
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const data = await request.json();
 
         const plan = await prisma.subscriptionPlan.update({
@@ -43,8 +45,8 @@ export async function PATCH(
             data: {
                 name: data.name,
                 description: data.description,
-                priceMonthly: data.priceMonthly,
-                priceYearly: data.priceYearly,
+                price: data.price,
+                period: data.period,
                 currency: data.currency,
                 roomLimit: data.roomLimit,
                 features: data.features,
@@ -64,9 +66,10 @@ export async function PATCH(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         await prisma.subscriptionPlan.delete({
             where: {
                 id: params.id

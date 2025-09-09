@@ -33,14 +33,14 @@ export async function GET() {
 
     // Get plan distribution
     const planDistribution = await prisma.hotel.groupBy({
-      by: ['subscriptionPlan'],
+      by: ['subscriptionTier'],
       _count: {
-        subscriptionPlan: true
+        subscriptionTier: true
       }
     });
 
     const planDistributionMap = planDistribution.reduce((acc, plan) => {
-      acc[plan.subscriptionPlan] = plan._count.subscriptionPlan;
+      acc[plan.subscriptionTier] = plan._count.subscriptionTier;
       return acc;
     }, {} as Record<string, number>);
 

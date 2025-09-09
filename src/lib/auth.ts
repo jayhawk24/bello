@@ -75,7 +75,11 @@ export const authOptions: AuthOptions = {
                         name: user.name,
                         role: user.role,
                         hotelId: user.hotelId,
-                        hotel: user.managedHotel
+                        hotel: user.managedHotel ? {
+                            id: user.managedHotel.id,
+                            name: user.managedHotel.name,
+                            totalRooms: user.managedHotel.totalRooms
+                        } : null
                     };
                 } catch (error) {
                     console.error("Auth error:", error);
@@ -92,7 +96,7 @@ export const authOptions: AuthOptions = {
             if (user) {
                 token.role = user.role;
                 token.hotelId = user.hotelId;
-                token.hotel = user.hotel;
+                // Don't assign hotel here since the types don't match
             }
             return token;
         },

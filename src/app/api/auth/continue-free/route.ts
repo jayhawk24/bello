@@ -20,7 +20,7 @@ export async function POST() {
     // Set the hotel to free plan
     await prisma.hotel.update({
         where: { id: user.hotelId },
-        data: { subscriptionPlan: "free", subscriptionStatus: "active" }
+        data: { subscriptionTier: "free", subscriptionStatus: "active" }
     });
     return NextResponse.redirect("/dashboard");
 }

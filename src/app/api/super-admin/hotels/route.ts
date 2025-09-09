@@ -44,7 +44,7 @@ export async function GET() {
       contactEmail: hotel.contactEmail,
       contactPhone: hotel.contactPhone,
       totalRooms: hotel.totalRooms,
-      subscriptionPlan: hotel.subscriptionPlan,
+      subscriptionTier: hotel.subscriptionTier,
       subscriptionStatus: hotel.subscriptionStatus,
       createdAt: hotel.createdAt,
       admin: hotel.admin,

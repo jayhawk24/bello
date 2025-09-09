@@ -1,4 +1,5 @@
 import Razorpay from "razorpay";
+import crypto from "crypto";
 
 // Initialize Razorpay instance
 export const razorpay = new Razorpay({
@@ -123,7 +124,6 @@ export function verifyPaymentSignature(
     orderId: string,
     signature: string
 ): boolean {
-    const crypto = require("crypto");
     const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!);
     hmac.update(orderId + "|" + paymentId);
     const generated_signature = hmac.digest("hex");
@@ -137,7 +137,6 @@ export function verifySubscriptionSignature(
     paymentId: string,
     signature: string
 ): boolean {
-    const crypto = require("crypto");
     const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!);
     hmac.update(subscriptionId + "|" + paymentId);
     const generated_signature = hmac.digest("hex");
@@ -222,8 +221,8 @@ export async function createRazorpaySubscription(params: {
             start_at: params.start_at,
             addons: params.addons || [],
             notes: params.notes || {}
-        });
-        return subscription;
+        } as any);
+        return subscription as unknown as RazorpaySubscription;
     } catch (error) {
         console.error("Error creating Razorpay subscription:", error);
         throw error;

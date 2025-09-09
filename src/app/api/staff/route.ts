@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Enforce free plan limit: only 1 staff allowed
-        if (hotel.subscriptionPlan === "free") {
+        if (hotel.subscriptionTier === "free") {
             const staffCount = await prisma.user.count({
                 where: {
                     hotelId: hotel.id,
