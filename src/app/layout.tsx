@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+  <html lang="en">
       <body className={`${raleway.variable} ${montserrat.variable} antialiased font-raleway`}>
         <Providers>
           {children}
@@ -50,6 +50,8 @@ export default function RootLayout({
             }
           `}
         </Script>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#FFD700" />
       </body>
     </html>
   );

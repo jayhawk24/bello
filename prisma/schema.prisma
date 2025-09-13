@@ -29,6 +29,7 @@ model User {
     assignedRequests        ServiceRequest[]         @relation("AssignedStaff")
     guestRequests           ServiceRequest[]         @relation("GuestRequests")
     hotel                   Hotel?                   @relation("HotelAdmin", fields: [hotelId], references: [id])
+    pushSubscriptions       PushSubscription[]
 
     @@map("users")
 }
@@ -174,10 +175,12 @@ model Notification {
     message   String
     isRead    Boolean  @default(false) @map("is_read")
     data      Json?
+    eventKey  String?  @map("event_key")
     createdAt DateTime @default(now()) @map("created_at")
     user      User     @relation(fields: [userId], references: [id])
 
     @@map("notifications")
+    @@unique([userId, eventKey])
 }
 
 model AnalyticsEvent {
@@ -509,4 +512,21 @@ model MenuItem {
     menu FoodMenu @relation(fields: [menuId], references: [id], onDelete: Cascade)
 
     @@map("menu_items")
+}
+
+// Web Push Subscriptions for VAPID
+model PushSubscription {
+    id         String   @id @default(cuid())
+    userId     String   @map("user_id")
+    endpoint   String   @unique
+    p256dh     String
+    auth       String
+    userAgent  String?  @map("user_agent")
+    isActive   Boolean  @default(true) @map("is_active")
+    createdAt  DateTime @default(now()) @map("created_at")
+    updatedAt  DateTime @updatedAt @map("updated_at")
+    lastUsedAt DateTime? @map("last_used_at")
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("push_subscriptions")
 }

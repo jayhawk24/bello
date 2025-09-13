@@ -124,18 +124,45 @@ export async function notifyStaffNewServiceRequest(serviceRequest: {
     };
 
     try {
-        // Create database notifications for all staff
-        const notifications = await notifyHotelStaff(serviceRequest.hotelId, notificationData);
+        const staffUsers = await getHotelStaff(serviceRequest.hotelId);
+        const eventKey = `service_request:${serviceRequest.id}:created`;
 
-        // Send push notifications (in production)
-        await sendPushNotificationToStaff(serviceRequest.hotelId, {
-            title: notificationData.title,
-            message: notificationData.message,
-            data: notificationData.data
-        });
+        // Idempotent create per user (unique [userId, eventKey])
+        const createdNotifications = [] as any[];
+        for (const user of staffUsers) {
+            try {
+                const n = await prisma.notification.create({
+                    data: {
+                        userId: user.id,
+                        type: notificationData.type,
+                        title: notificationData.title,
+                        message: notificationData.message,
+                        data: notificationData.data || {},
+                        isRead: false,
+                        eventKey,
+                    }
+                });
+                createdNotifications.push(n);
+            } catch (e: any) {
+                // Unique violation → already exists, skip
+                continue;
+            }
+        }
 
-        console.log(`Created ${notifications.length} notifications for new service request`);
-        return notifications;
+        // Send push only for users where we just created a row
+        const { sendPushToUsers } = await import('./push');
+        await sendPushToUsers(
+            createdNotifications.map((n: any) => n.userId),
+            {
+                title: notificationData.title,
+                body: notificationData.message,
+                data: { ...notificationData.data, target: '/dashboard/staff-requests' },
+                eventKey,
+            }
+        );
+
+        console.log(`Created ${createdNotifications.length} notifications for new service request`);
+        return createdNotifications;
     } catch (error) {
         console.error('Failed to notify staff of new service request:', error);
         throw error;
