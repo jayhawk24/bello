@@ -66,12 +66,6 @@ const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   }
 };
 
-const ROOM_TIERS = {
-  'tier_1_20': '1-20 rooms',
-  'tier_21_50': '21-50 rooms',
-  'tier_51_100': '51-100 rooms',
-  'tier_100_plus': '100+ rooms'
-};
 
 export default function SubscriptionPage() {
   const { data: session, status } = useSession();

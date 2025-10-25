@@ -50,7 +50,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
         try {
             const notificationService = NotificationService.getInstance();
             const initialized = await notificationService.initialize();
-            
+
             setIsInitialized(initialized);
             setHasPermission(initialized);
 
@@ -84,10 +84,10 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ endpoint: sub.endpoint }),
                         });
-                    } catch {}
+                    } catch { }
                     await sub.unsubscribe();
                 }
-            } catch {}
+            } catch { }
         })();
     }, [session]);
 

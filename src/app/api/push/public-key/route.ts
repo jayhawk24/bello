@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
-import { getPublicVapidKey } from '@/lib/push'
+import { NextResponse } from "next/server";
+import { getPublicVapidKey } from "@/lib/push";
 
 export async function GET() {
-  const publicKey = getPublicVapidKey()
-  return NextResponse.json({ publicKey })
+    const publicKey = getPublicVapidKey();
+    return NextResponse.json({ publicKey });
 }

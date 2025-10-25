@@ -9,7 +9,7 @@
         "start": "next start",
         "lint": "next lint",
         "type-check": "tsc --noEmit",
-    "icons:gen": "node scripts/generate-icons.js",
+        "icons:gen": "node scripts/generate-icons.js",
         "db:generate": "prisma generate",
         "db:push": "prisma db push",
         "db:studio": "prisma studio",
@@ -44,8 +44,8 @@
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "react-hot-toast": "^2.6.0",
-    "web-push": "^3.6.7",
-    "sharp": "^0.33.4",
+        "web-push": "^3.6.7",
+        "sharp": "^0.33.4",
         "zod": "^4.0.17"
     },
     "devDependencies": {

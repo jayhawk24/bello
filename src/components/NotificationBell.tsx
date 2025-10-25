@@ -65,7 +65,7 @@ const NotificationBell = () => {
                     const reg = await navigator.serviceWorker.ready;
                     const sub = await reg.pushManager.getSubscription();
                     setPushEnabled(!!sub);
-                } catch {}
+                } catch { }
             }
         } catch (e) {
             console.log(e);
@@ -84,7 +84,7 @@ const NotificationBell = () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ endpoint: sub.endpoint }),
                     });
-                } catch {}
+                } catch { }
                 await sub.unsubscribe();
                 setPushEnabled(false);
             }
