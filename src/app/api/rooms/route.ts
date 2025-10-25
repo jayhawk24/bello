@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { roomSchema } from "@/lib/validations";
-import { generateAccessCode } from "@/lib/utils";
+import { generateAccessCode, getRoomLimitFromTier } from "@/lib/utils";
 
 export async function GET() {
     try {
@@ -96,20 +96,56 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Enforce free plan limit: only 1 room allowed
-        if (!hotel.subscriptionTier || hotel.subscriptionTier === "free") {
-            const roomCount = await prisma.room.count({
-                where: { hotelId: hotel.id }
-            });
-            if (roomCount >= 1) {
-                return NextResponse.json(
-                    {
-                        error: "Free plan allows only 1 room. Upgrade to add more.",
-                        redirect: "/pricing"
-                    },
-                    { status: 403 }
-                );
-            }
+        // Get current active subscription to check room limits
+        const subscription = await prisma.subscription.findFirst({
+            where: {
+                hotelId: hotel.id,
+                status: "active"
+            },
+            orderBy: { createdAt: "desc" }
+        });
+
+        // Default to free plan limits if no active subscription
+        let roomLimit = 1; // Free plan default
+
+        if (subscription) {
+            roomLimit = getRoomLimitFromTier(subscription.roomTier);
+        } else if (
+            !hotel.subscriptionTier ||
+            hotel.subscriptionTier === "free"
+        ) {
+            roomLimit = 1; // Free plan allows only 1 room
+        }
+
+        // Check current room count against subscription limit
+        const currentRoomCount = await prisma.room.count({
+            where: { hotelId: hotel.id }
+        });
+
+        if (currentRoomCount >= roomLimit) {
+            const planName = subscription?.planType || "free";
+            const tierName =
+                subscription?.roomTier?.replace(/_/g, " ") || "free tier";
+
+            return NextResponse.json(
+                {
+                    error: `${
+                        planName.charAt(0).toUpperCase() + planName.slice(1)
+                    } plan (${tierName}) allows maximum ${
+                        roomLimit === Infinity ? "unlimited" : roomLimit
+                    } room${
+                        roomLimit !== 1 ? "s" : ""
+                    }. You currently have ${currentRoomCount} room${
+                        currentRoomCount !== 1 ? "s" : ""
+                    }. Upgrade to add more.`,
+                    redirect: "/pricing",
+                    currentCount: currentRoomCount,
+                    limit: roomLimit === Infinity ? null : roomLimit,
+                    planType: planName,
+                    roomTier: subscription?.roomTier
+                },
+                { status: 403 }
+            );
         }
 
         // Check if room number already exists
