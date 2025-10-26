@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import NotificationService from '@/lib/notificationService';
 
 interface NotificationType {
     id: string;
@@ -20,6 +21,7 @@ const NotificationBell = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+    const [pushEnabled, setPushEnabled] = useState(false);
     // Check notification permission on mount
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -27,16 +29,67 @@ const NotificationBell = () => {
         }
     }, []);
 
+    // Detect if a push subscription currently exists on this device
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    if (mounted) setPushEnabled(false);
+                    return;
+                }
+                const reg = await navigator.serviceWorker.ready;
+                const sub = await reg.pushManager.getSubscription();
+                if (mounted) setPushEnabled(!!sub);
+            } catch {
+                if (mounted) setPushEnabled(false);
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, [notificationPermission]);
+
     // Handler to request notification permission
     const handleEnableNotifications = async () => {
-        if (typeof window !== 'undefined' && 'Notification' in window) {
-            try {
-                const permission = await Notification.requestPermission();
-                setNotificationPermission(permission);
-            } catch (e) {
-                console.log(e)
-                // ignore
+        if (typeof window === 'undefined' || !('Notification' in window)) return;
+        try {
+            // Use centralized service to register SW and subscribe
+            const service = NotificationService.getInstance();
+            const initialized = await service.initialize();
+            setNotificationPermission(Notification.permission);
+            if (initialized) {
+                await service.ensureSubscribed();
+                // refresh local flag
+                try {
+                    const reg = await navigator.serviceWorker.ready;
+                    const sub = await reg.pushManager.getSubscription();
+                    setPushEnabled(!!sub);
+                } catch { }
             }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const handleDisablePush = async () => {
+        if (typeof window === 'undefined') return;
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                try {
+                    await fetch('/api/push/unsubscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ endpoint: sub.endpoint }),
+                    });
+                } catch { }
+                await sub.unsubscribe();
+                setPushEnabled(false);
+            }
+        } catch (e) {
+            console.log(e);
         }
     };
 
@@ -182,6 +235,11 @@ const NotificationBell = () => {
                                 </button>
                             )}
                         </div>
+                        <div className="mt-2 flex items-center gap-2 text-xs">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${pushEnabled ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-700 border border-gray-200'}`}>
+                                {pushEnabled ? '🔔 Push enabled on this device' : '🔕 Push disabled on this device'}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="max-h-96 overflow-y-auto">
@@ -247,7 +305,7 @@ const NotificationBell = () => {
                         </div>
                     )}
 
-                    {/* Show enable notifications option if not granted */}
+                    {/* Enable notifications prompt when permission not granted */}
                     {notificationPermission === 'default' || notificationPermission === 'denied' ? (
                         <div className=" ml-2 mr-2 mb-2 flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded p-2">
                             <span className="text-yellow-600">🔔</span>
@@ -257,6 +315,20 @@ const NotificationBell = () => {
                                 className="ml-auto px-2 py-1 text-xs bg-yellow-400 text-yellow-800 rounded hover:bg-yellow-500"
                             >
                                 Enable
+                            </button>
+                        </div>
+                    ) : null}
+
+                    {/* Disable push on this device (permission stays granted) */}
+                    {notificationPermission === 'granted' && pushEnabled ? (
+                        <div className=" ml-2 mr-2 mb-2 flex items-center gap-2 bg-gray-50 border border-gray-200 rounded p-2">
+                            <span className="text-gray-600">🛑</span>
+                            <span className="text-sm text-gray-800">Disable push on this device (you can re-enable anytime).</span>
+                            <button
+                                onClick={handleDisablePush}
+                                className="ml-auto px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                            >
+                                Disable
                             </button>
                         </div>
                     ) : null}

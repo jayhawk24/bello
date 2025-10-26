@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, calculateRoomTier } from "@/lib/utils";
 import { userRegistrationSchema } from "@/lib/validations";
-import { Prisma } from "@prisma/client";
+import { Prisma, SubscriptionTier, SubscriptionStatus } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
     try {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { hotelName, email, password, firstName, lastName, phone, plan } =
+        const { hotelName, email, password, firstName, lastName, phone } =
             validatedFields.data;
 
         // Check if user already exists
@@ -53,6 +53,18 @@ export async function POST(request: NextRequest) {
                     }
                 });
 
+                // Get the free plan
+                const freePlan = await tx.subscriptionPlan.findFirst({
+                    where: {
+                        name: "Free Monthly", // Name from our seed
+                        isActive: true
+                    }
+                });
+
+                if (!freePlan) {
+                    throw new Error("Free plan not found in the database");
+                }
+
                 // Create hotel with the user as admin
                 const hotel = await tx.hotel.create({
                     data: {
@@ -64,14 +76,29 @@ export async function POST(request: NextRequest) {
                         contactEmail: email,
                         contactPhone: phone,
                         adminId: user.id,
-                        subscriptionPlan:
-                            plan === "basic"
-                                ? "basic"
-                                : plan === "premium"
-                                ? "premium"
-                                : "enterprise",
-                        subscriptionStatus: "inactive", // Will be activated after payment
+                        subscriptionTier: SubscriptionTier.free,
+                        subscriptionStatus: SubscriptionStatus.active, // Free plan is active immediately
                         totalRooms: 0 // Will be set during hotel setup
+                    }
+                });
+
+                // Create subscription for the free plan
+                await tx.subscription.create({
+                    data: {
+                        hotelId: hotel.id,
+                        planType: SubscriptionTier.free,
+                        planId: freePlan.id,
+                        billingCycle: freePlan.period,
+                        roomTier: "tier_1_20",
+                        amount: 0,
+                        currency: "USD",
+                        status: SubscriptionStatus.active,
+                        currentPeriodStart: new Date(),
+                        currentPeriodEnd: new Date(
+                            new Date().setFullYear(
+                                new Date().getFullYear() + 100
+                            )
+                        ) // Set far future for free plan
                     }
                 });
 
@@ -85,13 +112,15 @@ export async function POST(request: NextRequest) {
                 const defaultServices = [
                     {
                         name: "Room Service",
-                        description: "Order food and beverages directly to your room",
+                        description:
+                            "Order food and beverages directly to your room",
                         category: "room_service" as const,
                         icon: "🍽️"
                     },
                     {
                         name: "Housekeeping",
-                        description: "Request cleaning services, towels, and amenities",
+                        description:
+                            "Request cleaning services, towels, and amenities",
                         category: "housekeeping" as const,
                         icon: "🧹"
                     },
@@ -109,14 +138,15 @@ export async function POST(request: NextRequest) {
                     },
                     {
                         name: "Laundry Service",
-                        description: "Professional cleaning and pressing services",
+                        description:
+                            "Professional cleaning and pressing services",
                         category: "laundry" as const,
                         icon: "👔"
                     }
                 ];
 
                 await tx.service.createMany({
-                    data: defaultServices.map(service => ({
+                    data: defaultServices.map((service) => ({
                         ...service,
                         hotelId: hotel.id,
                         isActive: true

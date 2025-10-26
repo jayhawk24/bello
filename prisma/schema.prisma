@@ -1,13 +1,299 @@
-// Bello Hotel Concierge Service Database Schema
-// Based on PROJECT_REQUIREMENTS.md specifications
-
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
+    provider = "postgres"
     url      = env("DATABASE_URL")
+}
+
+model User {
+    id                      String                   @id @default(cuid())
+    email                   String                   @unique
+    password                String
+    role                    UserRole
+    name                    String
+    phone                   String?
+    hotelId                 String?                  @map("hotel_id")
+    createdAt               DateTime                 @default(now()) @map("created_at")
+    updatedAt               DateTime                 @updatedAt @map("updated_at")
+    lastLogin               DateTime?                @map("last_login")
+    razorpayCustomerId      String?
+    guestBookings           Booking[]                @relation("GuestBookings")
+    chat_messages           chat_messages[]
+    emailVerificationTokens EmailVerificationToken[]
+    guestSessions           GuestSession[]
+    managedHotel            Hotel?                   @relation("HotelManager")
+    notifications           Notification[]
+    passwordResetTokens     PasswordResetToken[]
+    assignedRequests        ServiceRequest[]         @relation("AssignedStaff")
+    guestRequests           ServiceRequest[]         @relation("GuestRequests")
+    hotel                   Hotel?                   @relation("HotelAdmin", fields: [hotelId], references: [id])
+    pushSubscriptions       PushSubscription[]
+
+    @@map("users")
+}
+
+model Hotel {
+    id                 String             @id @default(cuid())
+    name               String
+    address            String
+    city               String
+    state              String
+    country            String
+    contactEmail       String             @map("contact_email")
+    contactPhone       String             @map("contact_phone")
+    adminId            String             @unique @map("admin_id")
+    subscriptionTier   SubscriptionTier   @map("subscription_tier")
+    subscriptionStatus SubscriptionStatus @map("subscription_status")
+    totalRooms         Int                @map("total_rooms")
+    createdAt          DateTime           @default(now()) @map("created_at")
+    updatedAt          DateTime           @updatedAt @map("updated_at")
+    analyticsEvents    AnalyticsEvent[]
+    bookings           Booking[]
+    chat_messages      chat_messages[]
+    guestSessions      GuestSession[]
+    admin              User               @relation("HotelManager", fields: [adminId], references: [id])
+    rooms              Room[]
+    serviceRequests    ServiceRequest[]
+    services           Service[]
+    subscriptions      Subscription[]
+    paymentOrders      PaymentOrder[]
+    staff              User[]             @relation("HotelAdmin")
+    HotelInfo          HotelInfo?
+
+    @@map("hotels")
+}
+
+model Room {
+    id               String           @id @default(cuid())
+    hotelId          String           @map("hotel_id")
+    roomNumber       String           @map("room_number")
+    roomType         String           @map("room_type")
+    qrCodeUrl        String?          @map("qr_code_url")
+    accessCode       String           @unique @map("access_code")
+    currentBookingId String?          @map("current_booking_id")
+    isOccupied       Boolean          @default(false) @map("is_occupied")
+    createdAt        DateTime         @default(now()) @map("created_at")
+    updatedAt        DateTime         @updatedAt @map("updated_at")
+    bookings         Booking[]
+    chat_messages    chat_messages[]
+    guestSessions    GuestSession[]
+    hotel            Hotel            @relation(fields: [hotelId], references: [id])
+    serviceRequests  ServiceRequest[]
+
+    @@unique([hotelId, roomNumber])
+    @@map("rooms")
+}
+
+model Booking {
+    id               String        @id @default(cuid())
+    hotelId          String        @map("hotel_id")
+    roomId           String        @map("room_id")
+    guestId          String?       @map("guest_id")
+    bookingReference String        @unique @map("booking_reference")
+    checkInDate      DateTime      @map("check_in_date")
+    checkOutDate     DateTime      @map("check_out_date")
+    guestName        String        @map("guest_name")
+    guestEmail       String        @map("guest_email")
+    guestPhone       String        @map("guest_phone")
+    status           BookingStatus
+    createdAt        DateTime      @default(now()) @map("created_at")
+    guest            User?         @relation("GuestBookings", fields: [guestId], references: [id])
+    hotel            Hotel         @relation(fields: [hotelId], references: [id])
+    room             Room          @relation(fields: [roomId], references: [id])
+
+    @@map("bookings")
+}
+
+model Service {
+    id              String           @id @default(cuid())
+    name            String
+    description     String
+    category        ServiceCategory
+    icon            String?
+    isActive        Boolean          @default(true) @map("is_active")
+    hotelId         String?          @map("hotel_id")
+    createdAt       DateTime         @default(now()) @map("created_at")
+    serviceRequests ServiceRequest[]
+    hotel           Hotel?           @relation(fields: [hotelId], references: [id])
+
+    @@map("services")
+}
+
+model ServiceRequest {
+    id              String               @id @default(cuid())
+    guestId         String               @map("guest_id")
+    hotelId         String               @map("hotel_id")
+    roomId          String               @map("room_id")
+    serviceId       String               @map("service_id")
+    title           String
+    description     String?
+    priority        Priority             @default(medium)
+    status          ServiceRequestStatus @default(pending)
+    assignedStaffId String?              @map("assigned_staff_id")
+    requestedAt     DateTime             @default(now()) @map("requested_at")
+    startedAt       DateTime?            @map("started_at")
+    completedAt     DateTime?            @map("completed_at")
+    guestRating     Int?                 @map("guest_rating")
+    guestFeedback   String?              @map("guest_feedback")
+    assignedStaff   User?                @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
+    guest           User                 @relation("GuestRequests", fields: [guestId], references: [id])
+    hotel           Hotel                @relation(fields: [hotelId], references: [id])
+    room            Room                 @relation(fields: [roomId], references: [id])
+    service         Service              @relation(fields: [serviceId], references: [id])
+
+    @@map("service_requests")
+}
+
+model Subscription {
+    id                     String             @id @default(cuid())
+    hotelId                String             @map("hotel_id")
+    planType               SubscriptionTier   @map("plan_type")
+    planId                 String             @map("plan_id")
+    billingCycle           BillingCycle       @map("billing_cycle")
+    roomTier               RoomTier           @map("room_tier")
+    razorpaySubscriptionId String?            @map("razorpay_subscription_id")
+    razorpayCustomerId     String?            @map("razorpay_customer_id")
+    amount                 Int
+    currency               String             @default("USD")
+    status                 SubscriptionStatus
+    currentPeriodStart     DateTime           @map("current_period_start")
+    currentPeriodEnd       DateTime           @map("current_period_end")
+    createdAt              DateTime           @default(now()) @map("created_at")
+    hotel                  Hotel              @relation(fields: [hotelId], references: [id])
+    paymentOrders          PaymentOrder[]
+
+    @@map("subscriptions")
+}
+
+model Notification {
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    type      String
+    title     String
+    message   String
+    isRead    Boolean  @default(false) @map("is_read")
+    data      Json?
+    eventKey  String?  @map("event_key")
+    createdAt DateTime @default(now()) @map("created_at")
+    user      User     @relation(fields: [userId], references: [id])
+
+    @@unique([userId, eventKey])
+    @@map("notifications")
+}
+
+model AnalyticsEvent {
+    id        String   @id @default(cuid())
+    hotelId   String   @map("hotel_id")
+    eventType String   @map("event_type")
+    eventData Json     @map("event_data")
+    timestamp DateTime @default(now())
+    hotel     Hotel    @relation(fields: [hotelId], references: [id])
+
+    @@map("analytics_events")
+}
+
+model GuestSession {
+    id           String   @id @default(cuid())
+    guestId      String   @map("guest_id")
+    hotelId      String   @map("hotel_id")
+    roomId       String   @map("room_id")
+    sessionToken String   @unique @map("session_token")
+    expiresAt    DateTime @map("expires_at")
+    createdAt    DateTime @default(now()) @map("created_at")
+    guest        User     @relation(fields: [guestId], references: [id])
+    hotel        Hotel    @relation(fields: [hotelId], references: [id])
+    room         Room     @relation(fields: [roomId], references: [id])
+
+    @@map("guest_sessions")
+}
+
+model PasswordResetToken {
+    id        String    @id @default(cuid())
+    userId    String    @map("user_id")
+    token     String    @unique
+    expiresAt DateTime  @map("expires_at")
+    createdAt DateTime  @default(now()) @map("created_at")
+    usedAt    DateTime? @map("used_at")
+    user      User      @relation(fields: [userId], references: [id])
+
+    @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+    id        String    @id @default(cuid())
+    userId    String    @map("user_id")
+    token     String    @unique
+    expiresAt DateTime  @map("expires_at")
+    createdAt DateTime  @default(now()) @map("created_at")
+    usedAt    DateTime? @map("used_at")
+    user      User      @relation(fields: [userId], references: [id])
+
+    @@map("email_verification_tokens")
+}
+
+model chat_messages {
+    id         String          @id
+    message    String
+    sender_id  String
+    hotel_id   String
+    room_id    String?
+    type       ChatMessageType @default(guest_to_staff)
+    is_read    Boolean         @default(false)
+    created_at DateTime        @default(now())
+    hotels     Hotel           @relation(fields: [hotel_id], references: [id])
+    rooms      Room?           @relation(fields: [room_id], references: [id])
+    users      User            @relation(fields: [sender_id], references: [id])
+}
+
+model PaymentOrder {
+    id              String        @id @default(cuid())
+    hotelId         String        @map("hotel_id")
+    subscriptionId  String?       @map("subscription_id")
+    razorpayOrderId String        @unique @map("razorpay_order_id")
+    amount          Int // in paise (Indian currency)
+    currency        String        @default("USD")
+    status          PaymentStatus @default(created)
+    receipt         String?
+    notes           Json? // Additional notes as JSON
+    createdAt       DateTime      @default(now()) @map("created_at")
+    updatedAt       DateTime      @updatedAt @map("updated_at")
+
+    // Relationships
+    hotel        Hotel         @relation(fields: [hotelId], references: [id])
+    subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+    payments     Payment[]
+
+    @@map("payment_orders")
+}
+
+model Payment {
+    id                String        @id @default(cuid())
+    paymentOrderId    String        @map("payment_order_id")
+    razorpayPaymentId String        @unique @map("razorpay_payment_id")
+    razorpayOrderId   String        @map("razorpay_order_id")
+    razorpaySignature String        @map("razorpay_signature")
+    amount            Int // in paise (Indian currency)
+    currency          String        @default("USD")
+    status            PaymentStatus
+    method            String? // card, netbanking, wallet, upi
+    bank              String? // bank name if applicable
+    description       String?
+    captured          Boolean       @default(false)
+    fee               Int? // fees charged by Razorpay in paise
+    tax               Int? // tax on fees in paise
+    errorCode         String?       @map("error_code")
+    errorDescription  String?       @map("error_description")
+    refundStatus      String?       @map("refund_status")
+    refundAmount      Int?          @map("refund_amount")
+    createdAt         DateTime      @default(now()) @map("created_at")
+    updatedAt         DateTime      @updatedAt @map("updated_at")
+
+    // Relationships
+    paymentOrder PaymentOrder @relation(fields: [paymentOrderId], references: [id])
+
+    @@map("payments")
 }
 
 enum UserRole {
@@ -17,7 +303,26 @@ enum UserRole {
     guest
 }
 
-enum SubscriptionPlan {
+model SubscriptionPlan {
+    id          String       @id @default(cuid())
+    name        String       @unique
+    description String
+    price       Int          @map("price")
+    period      BillingCycle
+    currency    String       @default("USD")
+    roomLimit   Int          @map("room_limit")
+    features    String[]
+    isActive    Boolean      @default(true) @map("is_active")
+
+    razorpayPlanId String?  @map("razorpay_plan_id")
+    createdAt      DateTime @default(now()) @map("created_at")
+    updatedAt      DateTime @updatedAt @map("updated_at")
+
+    @@map("subscription_plans")
+}
+
+enum SubscriptionTier {
+    free
     basic
     premium
     enterprise
@@ -29,10 +334,10 @@ enum BillingCycle {
 }
 
 enum RoomTier {
-    tier_1_20 // 1-20 rooms
-    tier_21_50 // 21-50 rooms  
-    tier_51_100 // 51-100 rooms
-    tier_100_plus // 100+ rooms
+    tier_1_20
+    tier_21_50
+    tier_51_100
+    tier_100_plus
 }
 
 enum SubscriptionStatus {
@@ -40,6 +345,14 @@ enum SubscriptionStatus {
     inactive
     cancelled
     past_due
+}
+
+enum PaymentStatus {
+    created
+    authorized
+    captured
+    refunded
+    failed
 }
 
 enum BookingStatus {
@@ -75,244 +388,147 @@ enum Priority {
     urgent
 }
 
-model User {
-    id        String    @id @default(cuid())
-    email     String    @unique
-    password  String
-    role      UserRole
-    name      String
-    phone     String?
-    hotelId   String?   @map("hotel_id")
-    createdAt DateTime  @default(now()) @map("created_at")
-    updatedAt DateTime  @updatedAt @map("updated_at")
-    lastLogin DateTime? @map("last_login")
-
-    // Relationships
-    hotel                   Hotel?                   @relation(name: "HotelAdmin", fields: [hotelId], references: [id])
-    managedHotel            Hotel?                   @relation(name: "HotelManager")
-    assignedRequests        ServiceRequest[]         @relation(name: "AssignedStaff")
-    guestRequests           ServiceRequest[]         @relation(name: "GuestRequests")
-    guestBookings           Booking[]                @relation(name: "GuestBookings")
-    guestSessions           GuestSession[]
-    notifications           Notification[]
-    passwordResetTokens     PasswordResetToken[]
-    emailVerificationTokens EmailVerificationToken[]
-
-    @@map("users")
+enum ChatMessageType {
+    guest_to_staff
+    staff_to_guest
+    staff_to_staff
+    system
 }
 
-model Hotel {
-    id                 String             @id @default(cuid())
-    name               String
-    address            String
-    city               String
-    state              String
-    country            String
-    contactEmail       String             @map("contact_email")
-    contactPhone       String             @map("contact_phone")
-    adminId            String             @unique @map("admin_id")
-    subscriptionPlan   SubscriptionPlan   @map("subscription_plan")
-    subscriptionStatus SubscriptionStatus @map("subscription_status")
-    totalRooms         Int                @map("total_rooms")
-    createdAt          DateTime           @default(now()) @map("created_at")
-    updatedAt          DateTime           @updatedAt @map("updated_at")
-
-    // Relationships
-    admin           User             @relation(name: "HotelManager", fields: [adminId], references: [id])
-    staff           User[]           @relation(name: "HotelAdmin")
-    rooms           Room[]
-    bookings        Booking[]
-    services        Service[]
-    serviceRequests ServiceRequest[]
-    subscriptions   Subscription[]
-    analyticsEvents AnalyticsEvent[]
-    guestSessions   GuestSession[]
-    hotelInfo       HotelInfo?
-
-    @@map("hotels")
-}
-
-model Room {
+// Hotel Setup Information Models
+model HotelInfo {
     id               String   @id @default(cuid())
-    hotelId          String   @map("hotel_id")
-    roomNumber       String   @map("room_number")
-    roomType         String   @map("room_type")
-    qrCodeUrl        String?  @map("qr_code_url")
-    accessCode       String   @unique @map("access_code")
-    currentBookingId String?  @map("current_booking_id")
-    isOccupied       Boolean  @default(false) @map("is_occupied")
+    hotelId          String   @unique @map("hotel_id")
+    receptionNumber  String?  @map("reception_number")
+    emergencyNumber  String?  @map("emergency_number")
+    checkInTime      String?  @map("check_in_time") // e.g., "3:00 PM"
+    checkOutTime     String?  @map("check_out_time") // e.g., "11:00 AM"
+    hotelDescription String?  @map("hotel_description")
+    amenities        String[] // Array of amenity names
     createdAt        DateTime @default(now()) @map("created_at")
     updatedAt        DateTime @updatedAt @map("updated_at")
 
     // Relationships
-    hotel           Hotel            @relation(fields: [hotelId], references: [id])
-    bookings        Booking[]
-    serviceRequests ServiceRequest[]
-    guestSessions   GuestSession[]
+    hotel     Hotel       @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+    wifiInfos HotelWifi[]
+    tvGuides  TvGuide[]
+    foodMenus FoodMenu[]
 
-    @@unique([hotelId, roomNumber])
-    @@map("rooms")
+    @@map("hotel_info")
 }
 
-model Booking {
-    id               String        @id @default(cuid())
-    hotelId          String        @map("hotel_id")
-    roomId           String        @map("room_id")
-    guestId          String?       @map("guest_id")
-    bookingReference String        @unique @map("booking_reference")
-    checkInDate      DateTime      @map("check_in_date")
-    checkOutDate     DateTime      @map("check_out_date")
-    guestName        String        @map("guest_name")
-    guestEmail       String        @map("guest_email")
-    guestPhone       String        @map("guest_phone")
-    status           BookingStatus
-    createdAt        DateTime      @default(now()) @map("created_at")
-
-    // Relationships
-    hotel Hotel @relation(fields: [hotelId], references: [id])
-    room  Room  @relation(fields: [roomId], references: [id])
-    guest User? @relation(name: "GuestBookings", fields: [guestId], references: [id])
-
-    @@map("bookings")
-}
-
-model Service {
-    id          String          @id @default(cuid())
-    name        String
-    description String
-    category    ServiceCategory
-    icon        String?
-    isActive    Boolean         @default(true) @map("is_active")
-    hotelId     String?         @map("hotel_id") // null for default services
-    createdAt   DateTime        @default(now()) @map("created_at")
-
-    // Relationships
-    hotel           Hotel?           @relation(fields: [hotelId], references: [id])
-    serviceRequests ServiceRequest[]
-
-    @@map("services")
-}
-
-model ServiceRequest {
-    id              String               @id @default(cuid())
-    guestId         String               @map("guest_id")
-    hotelId         String               @map("hotel_id")
-    roomId          String               @map("room_id")
-    serviceId       String               @map("service_id")
-    title           String
-    description     String?
-    priority        Priority             @default(medium)
-    status          ServiceRequestStatus @default(pending)
-    assignedStaffId String?              @map("assigned_staff_id")
-    requestedAt     DateTime             @default(now()) @map("requested_at")
-    startedAt       DateTime?            @map("started_at")
-    completedAt     DateTime?            @map("completed_at")
-    guestRating     Int?                 @map("guest_rating") // 1-5 stars
-    guestFeedback   String?              @map("guest_feedback")
-
-    // Relationships
-    guest         User    @relation(name: "GuestRequests", fields: [guestId], references: [id])
-    hotel         Hotel   @relation(fields: [hotelId], references: [id])
-    room          Room    @relation(fields: [roomId], references: [id])
-    service       Service @relation(fields: [serviceId], references: [id])
-    assignedStaff User?   @relation(name: "AssignedStaff", fields: [assignedStaffId], references: [id])
-
-    @@map("service_requests")
-}
-
-model Subscription {
-    id                     String             @id @default(cuid())
-    hotelId                String             @map("hotel_id")
-    planType               SubscriptionPlan   @map("plan_type")
-    billingCycle           BillingCycle       @map("billing_cycle")
-    roomTier               RoomTier           @map("room_tier")
-    razorpaySubscriptionId String?            @map("razorpay_subscription_id")
-    razorpayCustomerId     String?            @map("razorpay_customer_id")
-    amount                 Int // in paise (Indian currency) or cents
-    currency               String             @default("INR")
-    status                 SubscriptionStatus
-    currentPeriodStart     DateTime           @map("current_period_start")
-    currentPeriodEnd       DateTime           @map("current_period_end")
-    createdAt              DateTime           @default(now()) @map("created_at")
-
-    // Relationships
-    hotel Hotel @relation(fields: [hotelId], references: [id])
-
-    @@map("subscriptions")
-}
-
-model Notification {
-    id        String   @id @default(cuid())
-    userId    String   @map("user_id")
-    type      String
-    title     String
-    message   String
-    isRead    Boolean  @default(false) @map("is_read")
-    data      Json? // Additional data as JSON
-    createdAt DateTime @default(now()) @map("created_at")
-
-    // Relationships
-    user User @relation(fields: [userId], references: [id])
-
-    @@map("notifications")
-}
-
-model AnalyticsEvent {
-    id        String   @id @default(cuid())
-    hotelId   String   @map("hotel_id")
-    eventType String   @map("event_type")
-    eventData Json     @map("event_data")
-    timestamp DateTime @default(now())
-
-    // Relationships
-    hotel Hotel @relation(fields: [hotelId], references: [id])
-
-    @@map("analytics_events")
-}
-
-model GuestSession {
+model HotelWifi {
     id           String   @id @default(cuid())
-    guestId      String   @map("guest_id")
-    hotelId      String   @map("hotel_id")
-    roomId       String   @map("room_id")
-    sessionToken String   @unique @map("session_token")
-    expiresAt    DateTime @map("expires_at")
+    hotelInfoId  String   @map("hotel_info_id")
+    networkName  String   @map("network_name")
+    password     String?
+    description  String? // e.g., "Main Lobby", "Guest Rooms", "Conference Hall"
+    isPublic     Boolean  @default(false) @map("is_public")
+    bandwidth    String? // e.g., "High Speed", "Standard"
+    coverage     String? // e.g., "Entire Hotel", "Lobby Only"
+    instructions String? // Additional connection instructions
     createdAt    DateTime @default(now()) @map("created_at")
+    updatedAt    DateTime @updatedAt @map("updated_at")
 
     // Relationships
-    guest User  @relation(fields: [guestId], references: [id])
-    hotel Hotel @relation(fields: [hotelId], references: [id])
-    room  Room  @relation(fields: [roomId], references: [id])
+    hotelInfo HotelInfo @relation(fields: [hotelInfoId], references: [id], onDelete: Cascade)
 
-    @@map("guest_sessions")
+    @@map("hotel_wifi")
 }
 
-model PasswordResetToken {
-    id        String    @id @default(cuid())
-    userId    String    @map("user_id")
-    token     String    @unique
-    expiresAt DateTime  @map("expires_at")
-    createdAt DateTime  @default(now()) @map("created_at")
-    usedAt    DateTime? @map("used_at")
+model TvGuide {
+    id          String      @id @default(cuid())
+    hotelInfoId String      @map("hotel_info_id")
+    title       String
+    description String?
+    category    String? // e.g., "News", "Entertainment", "Sports"
+    channels    TvChannel[]
+    createdAt   DateTime    @default(now()) @map("created_at")
+    updatedAt   DateTime    @updatedAt @map("updated_at")
 
     // Relationships
-    user User @relation(fields: [userId], references: [id])
+    hotelInfo HotelInfo @relation(fields: [hotelInfoId], references: [id], onDelete: Cascade)
 
-    @@map("password_reset_tokens")
+    @@map("tv_guides")
 }
 
-model EmailVerificationToken {
-    id        String    @id @default(cuid())
-    userId    String    @map("user_id")
-    token     String    @unique
-    expiresAt DateTime  @map("expires_at")
-    createdAt DateTime  @default(now()) @map("created_at")
-    usedAt    DateTime? @map("used_at")
+model TvChannel {
+    id          String   @id @default(cuid())
+    tvGuideId   String   @map("tv_guide_id")
+    number      Int
+    name        String
+    category    String? // e.g., "News", "Movies", "Sports"
+    language    String? // e.g., "English", "Hindi"
+    isHd        Boolean  @default(false) @map("is_hd")
+    logo        String? // URL to channel logo
+    description String?
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
 
     // Relationships
-    user User @relation(fields: [userId], references: [id])
+    tvGuide TvGuide @relation(fields: [tvGuideId], references: [id], onDelete: Cascade)
 
-    @@map("email_verification_tokens")
+    @@map("tv_channels")
+}
+
+model FoodMenu {
+    id            String     @id @default(cuid())
+    hotelInfoId   String     @map("hotel_info_id")
+    name          String // e.g., "Room Service", "Restaurant Menu", "Bar Menu"
+    description   String?
+    category      String? // e.g., "Room Service", "Restaurant", "Bar", "Breakfast"
+    isActive      Boolean    @default(true) @map("is_active")
+    availableFrom String?    @map("available_from") // e.g., "6:00 AM"
+    availableTo   String?    @map("available_to") // e.g., "11:00 PM"
+    menuItems     MenuItem[]
+    createdAt     DateTime   @default(now()) @map("created_at")
+    updatedAt     DateTime   @updatedAt @map("updated_at")
+
+    // Relationships
+    hotelInfo HotelInfo @relation(fields: [hotelInfoId], references: [id], onDelete: Cascade)
+
+    @@map("food_menus")
+}
+
+model MenuItem {
+    id           String   @id @default(cuid())
+    menuId       String   @map("menu_id")
+    name         String
+    description  String?
+    price        Float?
+    category     String? // e.g., "Appetizer", "Main Course", "Dessert", "Beverage"
+    isVegetarian Boolean  @default(false) @map("is_vegetarian")
+    isVegan      Boolean  @default(false) @map("is_vegan")
+    allergens    String[] // Array of allergen names
+    spiceLevel   String?  @map("spice_level") // e.g., "Mild", "Medium", "Spicy"
+    isAvailable  Boolean  @default(true) @map("is_available")
+    image        String? // URL to food image
+    prepTime     String?  @map("prep_time") // e.g., "15-20 minutes"
+    calories     Int?
+    createdAt    DateTime @default(now()) @map("created_at")
+    updatedAt    DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    menu FoodMenu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+    @@map("menu_items")
+}
+
+// Web Push Subscriptions for VAPID
+model PushSubscription {
+    id         String    @id @default(cuid())
+    userId     String    @map("user_id")
+    endpoint   String    @unique
+    p256dh     String
+    auth       String
+    userAgent  String?   @map("user_agent")
+    isActive   Boolean   @default(true) @map("is_active")
+    createdAt  DateTime  @default(now()) @map("created_at")
+    updatedAt  DateTime  @updatedAt @map("updated_at")
+    lastUsedAt DateTime? @map("last_used_at")
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("push_subscriptions")
 }
 
 // Hotel Setup Information Models

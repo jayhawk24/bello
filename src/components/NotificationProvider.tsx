@@ -50,13 +50,15 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
         try {
             const notificationService = NotificationService.getInstance();
             const initialized = await notificationService.initialize();
-            
+
             setIsInitialized(initialized);
             setHasPermission(initialized);
 
             if (initialized) {
-                // Start polling for notifications
-                notificationService.startPolling(30000); // Poll every 30 seconds
+                // Ensure a push subscription exists on this device
+                notificationService.ensureSubscribed();
+                // Optional: keep polling for in-app UI updates only (no OS toasts)
+                notificationService.startPolling(30000);
             }
         } catch (error) {
             console.error('Failed to initialize notifications:', error);
@@ -65,6 +67,28 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
 
     useEffect(() => {
         initializeNotifications();
+    }, [session]);
+
+    // On logout, best-effort deactivate this device's subscription
+    useEffect(() => {
+        if (session?.user) return;
+        (async () => {
+            try {
+                if (!('serviceWorker' in navigator)) return;
+                const reg = await navigator.serviceWorker.ready;
+                const sub = await reg.pushManager.getSubscription();
+                if (sub) {
+                    try {
+                        await fetch('/api/push/unsubscribe', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ endpoint: sub.endpoint }),
+                        });
+                    } catch { }
+                    await sub.unsubscribe();
+                }
+            } catch { }
+        })();
     }, [session]);
 
     const value: NotificationContextType = {

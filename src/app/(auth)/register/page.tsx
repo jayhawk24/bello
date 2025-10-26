@@ -30,7 +30,7 @@ function RegisterForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        return toast.error("Registration of hotels has not started yet please email belloo@gmail.com for early access.")
+        // return toast.error("Registration of hotels has not started yet please email belloohotels@gmail.com for early access.")
 
         if (formData.password !== formData.confirmPassword) {
             toast.error("Passwords don't match!");

@@ -22,7 +22,7 @@ export interface Hotel {
     contactEmail: string;
     contactPhone: string;
     totalRooms: number;
-    subscriptionPlan: "basic" | "premium" | "enterprise";
+    subscriptionTier: "free" | "basic" | "premium" | "enterprise";
     subscriptionStatus: "active" | "inactive" | "cancelled" | "past_due";
     adminId: string;
     createdAt: Date;
@@ -318,7 +318,7 @@ export interface SessionUser {
     hotel?: {
         id: string;
         name: string;
-        subscriptionPlan: string;
+        subscriptionTier: string;
     };
 }
 

@@ -1,0 +1,5 @@
+Add plan ID to subscription model and When creating an account create subscription and populate plan_id with free plan ID.
+
+When creating a subscription in razorpay fetch plan ID from local and pass it to newly created subscription.
+
+Get subscription plan ID from webhook and update subscription plan ID in local.

@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { RoomTier } from "@prisma/client";
 
 export async function hashPassword(password: string): Promise<string> {
     const saltRounds = 12;
@@ -71,13 +72,28 @@ export function parseQRCodeData(qrUrl: string): {
     }
 }
 
-export function calculateRoomTier(
-    totalRooms: number
-): "tier_1_20" | "tier_21_50" | "tier_51_100" | "tier_100_plus" {
+export function calculateRoomTier(totalRooms: number): RoomTier {
     if (totalRooms <= 20) return "tier_1_20";
     if (totalRooms <= 50) return "tier_21_50";
     if (totalRooms <= 100) return "tier_51_100";
     return "tier_100_plus";
+}
+
+export function getRoomLimitFromTier(
+    roomTier: RoomTier | null | undefined
+): number {
+    switch (roomTier) {
+        case "tier_1_20":
+            return 20;
+        case "tier_21_50":
+            return 50;
+        case "tier_51_100":
+            return 100;
+        case "tier_100_plus":
+            return Infinity; // No limit for top tier
+        default:
+            return 1; // Default fallback for free plan or null values
+    }
 }
 
 export function getSubscriptionPrice(

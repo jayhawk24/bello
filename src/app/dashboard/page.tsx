@@ -11,6 +11,7 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [hotelName, setHotelName] = useState<string>("");
+    const [currentSubscription, setCurrentSubscription] = useState<any>(null);
 
     useEffect(() => {
         if (status === "loading") return; // Still loading
@@ -55,9 +56,21 @@ export default function DashboardPage() {
                 }
             }
         };
+        const fetchSubscriptionData = async () => {
+            try {
+                const response = await fetch('/api/subscription/current');
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentSubscription(data);
+                }
+            } catch (error) {
+                console.error('Error fetching subscription:', error);
+            }
+        };
 
         if (session) {
             fetchHotelInfo();
+            fetchSubscriptionData()
         }
     }, [session]);
 
@@ -102,7 +115,10 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Dashboard Cards */}
-                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
+                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" :
+                    session.user.role === "super_admin" ? "md:grid-cols-2 lg:grid-cols-2" :
+                        "md:grid-cols-3"
+                    }`}>
                     {session.user.role === "hotel_admin" && (
                         <DashboardCard
                             icon="🏨"
@@ -151,14 +167,48 @@ export default function DashboardPage() {
                                 buttonText="Manage Staff"
                                 href="/dashboard/staff"
                             />
+                            <DashboardCard
+                                icon="💳"
+                                title="Subscription"
+                                description="Manage your subscription plan and billing"
+                                buttonText="Manage Plan"
+                                href="/pricing"
+                            />
                         </>
+                    )}
+
+                    {session.user.role === "super_admin" && (
+                        <div>
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">👑</div>
+                                <h3 className="text-xl font-semibold mb-2">Super Admin</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Manage all hotels and subscriptions
+                                </p>
+                                <Link href="/dashboard/super-admin" className="btn-minion">
+                                    Admin Dashboard
+                                </Link>
+                            </div>
+                            <div className="card-minion text-center">
+                                <div className="text-4xl mb-4">💳</div>
+                                <h3 className="text-xl font-semibold mb-2">Subscription</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Manage your subscription plan and billing
+                                </p>
+                                <Link href="/dashboard/subscription" className="btn-minion">
+                                    View Plans
+                                </Link>
+                            </div>
+                        </div>
                     )}
                 </div>
 
                 {/* Quick Stats */}
                 <div className="grid md:grid-cols-4 gap-4">
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
-                        <div className="text-2xl font-bold text-minion-yellow">0</div>
+                        <div className="text-2xl font-bold text-minion-yellow">
+                            {session?.user?.hotel?.totalRooms || 0}
+                        </div>
                         <div className="text-gray-600">Total Rooms</div>
                     </div>
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -171,7 +221,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
                         <div className="text-2xl font-bold text-warning">
-                            {session.user.hotel?.subscriptionPlan || "N/A"}
+                            {currentSubscription?.planType.toUpperCase() || "N/A"}
                         </div>
                         <div className="text-gray-600">Current Plan</div>
                     </div>

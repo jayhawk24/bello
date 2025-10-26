@@ -25,25 +25,26 @@ export async function GET() {
             );
         }
 
-  // Get all staff members for the hotel
-  const staff = await prisma.user.findMany({
-    where: {
-      hotelId: hotel.id,
-      role: "hotel_staff",
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      role: true,
-      createdAt: true,
-      lastLogin: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });        return NextResponse.json({
+        // Get all staff members for the hotel
+        const staff = await prisma.user.findMany({
+            where: {
+                hotelId: hotel.id,
+                role: "hotel_staff"
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+                createdAt: true,
+                lastLogin: true
+            },
+            orderBy: {
+                name: "asc"
+            }
+        });
+        return NextResponse.json({
             success: true,
             staff
         });
@@ -94,6 +95,25 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Enforce free plan limit: only 1 staff allowed
+        if (hotel.subscriptionTier === "free") {
+            const staffCount = await prisma.user.count({
+                where: {
+                    hotelId: hotel.id,
+                    role: "hotel_staff"
+                }
+            });
+            if (staffCount >= 1) {
+                return NextResponse.json(
+                    {
+                        error: "Free plan allows only 1 staff user. Upgrade to add more.",
+                        redirect: "/pricing"
+                    },
+                    { status: 403 }
+                );
+            }
+        }
+
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
             where: { email }
@@ -117,7 +137,7 @@ export async function POST(request: NextRequest) {
                 phone,
                 password: hashedPassword,
                 role: role as "hotel_admin" | "hotel_staff",
-                hotelId: hotel.id,
+                hotelId: hotel.id
             },
             select: {
                 id: true,
