@@ -27,15 +27,15 @@
         "setup:cleanup": "bash scripts/setup-cleanup.sh"
     },
     "dependencies": {
-        "@prisma/client": "^6.14.0",
+        "@prisma/client": "^6.19.0",
         "@sentry/nextjs": "^10.5.0",
         "@sentry/react": "^10.5.0",
         "@types/bcryptjs": "^2.4.6",
         "@zxing/library": "^0.21.3",
         "bcryptjs": "^3.0.2",
+        "jose": "^5.9.6",
         "next": "15.4.6",
         "next-auth": "^4.24.10",
-        "prisma": "^6.14.0",
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "react-hot-toast": "^2.6.0",
@@ -51,6 +51,7 @@
         "critters": "^0.0.23",
         "eslint": "^9",
         "eslint-config-next": "15.4.6",
+        "prisma": "^6.19.0",
         "tailwindcss": "^4",
         "typescript": "^5"
     },

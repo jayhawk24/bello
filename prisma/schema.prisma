@@ -97,6 +97,8 @@ model User {
     notifications           Notification[]
     passwordResetTokens     PasswordResetToken[]
     emailVerificationTokens EmailVerificationToken[]
+    deviceTokens            DeviceToken[]
+    refreshTokens           RefreshToken[]
 
     @@map("users")
 }
@@ -255,6 +257,34 @@ model Notification {
     user User @relation(fields: [userId], references: [id])
 
     @@map("notifications")
+}
+
+model DeviceToken {
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    token     String   @unique
+    platform  String
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("device_tokens")
+}
+
+model RefreshToken {
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    token     String   @unique
+    expiresAt DateTime @map("expires_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    revokedAt DateTime? @map("revoked_at")
+
+    // Relationships
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("refresh_tokens")
 }
 
 model AnalyticsEvent {
