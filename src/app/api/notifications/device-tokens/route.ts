@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { verifyAccessToken } from "@/lib/jwt";
+
+async function getUserIdFromRequest(request: NextRequest) {
+    // Try NextAuth session
+    const session = await auth();
+    if (session?.user?.id) return session.user.id;
+
+    // Fallback to Bearer JWT
+    const authHeader =
+        request.headers.get("authorization") ||
+        request.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.slice(7);
+        try {
+            const payload = await verifyAccessToken<{
+                role: string;
+                hotelId?: string;
+            }>(token);
+            return payload.sub;
+        } catch (_) {
+            return null;
+        }
+    }
+    return null;
+}
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await auth();
-        if (!session?.user) {
+        const userId = await getUserIdFromRequest(request);
+        if (!userId) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -24,13 +49,12 @@ export async function POST(request: NextRequest) {
         const normalizedPlatform =
             typeof platform === "string" ? platform : "android";
 
-        // @ts-expect-error Prisma client types not yet generated for DeviceToken model
         const record = await prisma.deviceToken.upsert({
             where: { token: deviceToken },
-            update: { userId: session.user.id, platform: normalizedPlatform },
+            update: { userId, platform: normalizedPlatform },
             create: {
                 token: deviceToken,
-                userId: session.user.id,
+                userId,
                 platform: normalizedPlatform
             }
         });
@@ -47,8 +71,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     try {
-        const session = await auth();
-        if (!session?.user) {
+        const userId = await getUserIdFromRequest(request);
+        if (!userId) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -62,7 +86,6 @@ export async function DELETE(request: NextRequest) {
                 { status: 400 }
             );
         }
-        // @ts-expect-error Prisma client types not yet generated for DeviceToken model
         await prisma.deviceToken
             .delete({ where: { token: deviceToken } })
             .catch(() => {});
