@@ -1,13 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { verifyAccessToken } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
 import { roomSchema } from "@/lib/validations";
 import { generateAccessCode } from "@/lib/utils";
 
-export async function GET() {
+async function getAuthContext(request: NextRequest) {
+    // Prefer middleware-injected headers
+    const headerUserId = request.headers.get("x-user-id");
+    const headerRole = request.headers.get("x-user-role");
+    const headerHotelId = request.headers.get("x-hotel-id");
+    if (headerUserId && headerRole) {
+        return {
+            userId: headerUserId,
+            role: headerRole,
+            hotelId: headerHotelId
+        } as const;
+    }
+    // Fallback to NextAuth session
+    const session = await auth();
+    if (session?.user) {
+        return {
+            userId: session.user.id,
+            role: session.user.role,
+            hotelId: session.user.hotelId ?? null
+        } as const;
+    }
+    // Fallback to manual Bearer verification
+    const authHeader =
+        request.headers.get("authorization") ||
+        request.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.slice(7);
+        try {
+            const payload = await verifyAccessToken<{
+                role: string;
+                hotelId?: string | null;
+            }>(token);
+            return {
+                userId: payload.sub,
+                role: payload.role,
+                hotelId: payload.hotelId ?? null
+            } as const;
+        } catch {}
+    }
+    return { userId: null, role: null, hotelId: null } as const;
+}
+
+export async function GET(request: NextRequest) {
     try {
-        const session = await auth();
-        if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
+        const {
+            role,
+            userId,
+            hotelId: headerHotelId
+        } = await getAuthContext(request);
+        if (!role || !["hotel_admin", "hotel_staff"].includes(role)) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -15,13 +62,12 @@ export async function GET() {
         }
 
         // For hotel staff, use their hotelId directly. For admins, find their hotel
-        let hotelId = session.user.hotelId;
-        
-        if (session.user.role === "hotel_admin" && !hotelId) {
+        let hotelId = headerHotelId as string | null;
+        if (role === "hotel_admin" && !hotelId) {
             const hotel = await prisma.hotel.findFirst({
-                where: { adminId: session.user.id }
+                where: { adminId: userId as string }
             });
-            
+
             if (!hotel) {
                 return NextResponse.json(
                     { error: "Hotel not found" },
@@ -40,7 +86,7 @@ export async function GET() {
 
         const rooms = await prisma.room.findMany({
             where: { hotelId },
-            orderBy: { roomNumber: 'asc' }
+            orderBy: { roomNumber: "asc" }
         });
 
         return NextResponse.json({
@@ -58,8 +104,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await auth();
-        if (!session || session.user.role !== "hotel_admin") {
+        const { role, userId } = await getAuthContext(request);
+        if (!role || role !== "hotel_admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -83,7 +129,7 @@ export async function POST(request: NextRequest) {
         const { roomNumber, roomType } = validatedFields.data;
 
         const hotel = await prisma.hotel.findFirst({
-            where: { adminId: session.user.id }
+            where: { adminId: userId as string }
         });
 
         if (!hotel) {

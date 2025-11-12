@@ -1,10 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { verifyAccessToken } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
 
 interface RoomUpdateData {
     roomNumber: string;
     roomType: string;
+}
+
+async function getAuthContext(request: NextRequest) {
+    const headerUserId = request.headers.get("x-user-id");
+    const headerRole = request.headers.get("x-user-role");
+    const headerHotelId = request.headers.get("x-hotel-id");
+    if (headerUserId && headerRole) {
+        return {
+            userId: headerUserId,
+            role: headerRole,
+            hotelId: headerHotelId
+        } as const;
+    }
+    const session = await auth();
+    if (session?.user) {
+        return {
+            userId: session.user.id,
+            role: session.user.role,
+            hotelId: session.user.hotelId ?? null
+        } as const;
+    }
+    const authHeader =
+        request.headers.get("authorization") ||
+        request.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.slice(7);
+        try {
+            const payload = await verifyAccessToken<{
+                role: string;
+                hotelId?: string | null;
+            }>(token);
+            return {
+                userId: payload.sub,
+                role: payload.role,
+                hotelId: payload.hotelId ?? null
+            } as const;
+        } catch {}
+    }
+    return { userId: null, role: null, hotelId: null } as const;
 }
 
 export async function GET(
@@ -13,8 +53,12 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const session = await auth();
-        if (!session || !['hotel_admin', 'hotel_staff'].includes(session.user.role)) {
+        const {
+            role,
+            userId,
+            hotelId: headerHotelId
+        } = await getAuthContext(request);
+        if (!role || !["hotel_admin", "hotel_staff"].includes(role)) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -22,13 +66,12 @@ export async function GET(
         }
 
         // For hotel staff, use their hotelId directly. For admins, find their hotel
-        let hotelId = session.user.hotelId;
-        
-        if (session.user.role === "hotel_admin" && !hotelId) {
+        let hotelId = headerHotelId as string | null;
+        if (role === "hotel_admin" && !hotelId) {
             const hotel = await prisma.hotel.findFirst({
-                where: { adminId: session.user.id }
+                where: { adminId: userId as string }
             });
-            
+
             if (!hotel) {
                 return NextResponse.json(
                     { error: "Hotel not found" },
@@ -79,8 +122,11 @@ export async function PUT(
     try {
         const { id } = await params;
         const session = await auth();
-        
-        if (!session || session.user.role !== "hotel_admin") {
+        const headerRole =
+            (request as any).headers?.get?.("x-user-role") || null;
+        const role = headerRole || session?.user?.role;
+        const userId = session?.user?.id;
+        if (!role || role !== "hotel_admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -91,7 +137,7 @@ export async function PUT(
         const { roomNumber, roomType } = body as RoomUpdateData;
 
         const hotel = await prisma.hotel.findFirst({
-            where: { adminId: session.user.id }
+            where: { adminId: userId as string }
         });
 
         if (!hotel) {
@@ -136,11 +182,11 @@ export async function PUT(
 
         // Prepare update data
         const updateData: Partial<RoomUpdateData> = {};
-        
+
         if (roomNumber !== undefined) {
             updateData.roomNumber = roomNumber.trim();
         }
-        
+
         if (roomType !== undefined) {
             updateData.roomType = roomType.trim();
         }
@@ -156,7 +202,6 @@ export async function PUT(
             message: "Room updated successfully",
             room: updatedRoom
         });
-
     } catch (error) {
         console.error("Room update error:", error);
         return NextResponse.json(
@@ -172,8 +217,8 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const session = await auth();
-        if (!session || session.user.role !== "hotel_admin") {
+        const { role, userId } = await getAuthContext(request);
+        if (!role || role !== "hotel_admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -181,7 +226,7 @@ export async function DELETE(
         }
 
         const hotel = await prisma.hotel.findFirst({
-            where: { adminId: session.user.id }
+            where: { adminId: userId as string }
         });
 
         if (!hotel) {
