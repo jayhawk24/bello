@@ -1,47 +1,79 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { verifyAccessToken } from "@/lib/jwt";
 
 // Define protected routes
-const protectedRoutes = ['/dashboard', '/hotel', '/room', '/staff'];
-const authRoutes = ['/login', '/register'];
-const guestRoutes = ['/guest'];
+const protectedRoutes = ["/dashboard", "/hotel", "/room", "/staff"];
+const authRoutes = ["/login", "/register"];
+const guestRoutes = ["/guest"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    
+    // For API routes: accept Authorization: Bearer <JWT> and inject user headers
+    if (pathname.startsWith("/api")) {
+        const authHeader =
+            request.headers.get("authorization") ||
+            request.headers.get("Authorization");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.slice(7);
+            try {
+                const payload = await verifyAccessToken<{
+                    role: string;
+                    hotelId?: string | null;
+                }>(token);
+                const headers = new Headers(request.headers);
+                headers.set("x-user-id", payload.sub);
+                if (payload.role) headers.set("x-user-role", payload.role);
+                if (payload.hotelId)
+                    headers.set("x-hotel-id", String(payload.hotelId));
+                return NextResponse.next({ request: { headers } });
+            } catch {
+                // invalid bearer token; proceed as unauthenticated
+                return NextResponse.next();
+            }
+        }
+        return NextResponse.next();
+    }
+
     // Get the token from the request
     const token = await getToken({
         req: request,
-        secret: process.env.NEXTAUTH_SECRET,
+        secret: process.env.NEXTAUTH_SECRET
     });
 
     // Check if the current path is protected
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-    const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-    const isGuestRoute = guestRoutes.some(route => pathname.startsWith(route));
+    const isProtectedRoute = protectedRoutes.some((route) =>
+        pathname.startsWith(route)
+    );
+    const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+    const isGuestRoute = guestRoutes.some((route) =>
+        pathname.startsWith(route)
+    );
 
-    // Handle protected routes
+    // Handle protected routes (pages)
     if (isProtectedRoute) {
         if (!token) {
             // Redirect to login if no token
-            const loginUrl = new URL('/login', request.url);
-            loginUrl.searchParams.set('callbackUrl', pathname);
+            const loginUrl = new URL("/login", request.url);
+            loginUrl.searchParams.set("callbackUrl", pathname);
             return NextResponse.redirect(loginUrl);
         }
 
         // Role-based access control
         const userRole = token.role as string;
-        
+
         // Check if staff users are trying to access admin-only routes
-        if (userRole === 'hotel_staff') {
-            const staffRestrictedRoutes = ['/staff'];
-            const isStaffRestricted = staffRestrictedRoutes.some(route => 
+        if (userRole === "hotel_staff") {
+            const staffRestrictedRoutes = ["/staff"];
+            const isStaffRestricted = staffRestrictedRoutes.some((route) =>
                 pathname.startsWith(route)
             );
-            
+
             if (isStaffRestricted) {
                 // Redirect staff users to dashboard
-                return NextResponse.redirect(new URL('/dashboard', request.url));
+                return NextResponse.redirect(
+                    new URL("/dashboard", request.url)
+                );
             }
         }
 
@@ -53,7 +85,7 @@ export async function middleware(request: NextRequest) {
     // Handle auth routes (login, register)
     if (isAuthRoute && token) {
         // Redirect authenticated users away from auth pages
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
     // Handle guest routes
@@ -78,6 +110,6 @@ export const config = {
          * - favicon.ico (favicon file)
          * - public folder files
          */
-        '/((?!api/auth|_next/static|_next/image|favicon.ico|public).*)',
-    ],
+        "/((?!api/auth|_next/static|_next/image|favicon.ico|public).*)"
+    ]
 };

@@ -5,6 +5,18 @@ import { prisma } from "@/lib/prisma";
 import { ServiceRequestStatus, Priority } from "@prisma/client";
 
 async function getAuthContext(request: NextRequest) {
+    // Prefer headers injected by middleware for performance
+    const headerUserId = request.headers.get("x-user-id");
+    const headerRole = request.headers.get("x-user-role");
+    const headerHotelId = request.headers.get("x-hotel-id");
+    if (headerUserId && headerRole) {
+        return {
+            userId: headerUserId,
+            role: headerRole,
+            hotelId: headerHotelId
+        } as const;
+    }
+    // Fallback to NextAuth or manual Bearer parsing
     const session = await auth();
     if (session?.user) {
         return {

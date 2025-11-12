@@ -4,11 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/jwt";
 
 async function getUserIdFromRequest(request: NextRequest) {
-    // Try NextAuth session
+    // Middleware-injected user id first
+    const headerUserId = request.headers.get("x-user-id");
+    if (headerUserId) return headerUserId;
+
     const session = await auth();
     if (session?.user?.id) return session.user.id;
 
-    // Fallback to Bearer JWT
     const authHeader =
         request.headers.get("authorization") ||
         request.headers.get("Authorization");

@@ -10,10 +10,13 @@ import {
 // Get user notifications
 async function getUserId(request: NextRequest) {
     // Prefer NextAuth session
+    // Middleware-injected headers first
+    const headerUserId = request.headers.get("x-user-id");
+    if (headerUserId) return headerUserId;
+
     const session = await auth();
     if (session?.user?.id) return session.user.id;
 
-    // Fallback to Bearer JWT for mobile
     const authHeader =
         request.headers.get("authorization") ||
         request.headers.get("Authorization");
