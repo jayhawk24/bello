@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // @ts-expect-error Prisma client types not yet generated for RefreshToken model
         const stored = await prisma.refreshToken.findUnique({
             where: { token: refreshToken }
         });

@@ -1,30 +1,63 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { ServiceRequestStatus, Priority } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { verifyAccessToken } from "@/lib/jwt";
+import { prisma } from "@/lib/prisma";
+import { ServiceRequestStatus, Priority } from "@prisma/client";
+
+async function getAuthContext(request: NextRequest) {
+    const session = await auth();
+    if (session?.user) {
+        return {
+            userId: session.user.id,
+            role: session.user.role,
+            hotelId: session.user.hotelId
+        } as const;
+    }
+    const authHeader =
+        request.headers.get("authorization") ||
+        request.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.slice(7);
+        try {
+            const payload = await verifyAccessToken<{
+                role: string;
+                hotelId?: string;
+            }>(token);
+            return {
+                userId: payload.sub,
+                role: payload.role,
+                hotelId: payload.hotelId ?? null
+            } as const;
+        } catch {}
+    }
+    return { userId: null, role: null, hotelId: null } as const;
+}
 
 export async function GET(request: NextRequest) {
     try {
-        const session = await auth();
-        
-        if (!session?.user || !['hotel_staff', 'hotel_admin'].includes(session.user.role) || !session.user.hotelId) {
+        const { role, hotelId } = await getAuthContext(request);
+        if (
+            !role ||
+            !["hotel_staff", "hotel_admin"].includes(role) ||
+            !hotelId
+        ) {
             return NextResponse.json(
-                { error: 'Unauthorized' },
+                { error: "Unauthorized" },
                 { status: 401 }
             );
         }
 
         const { searchParams } = new URL(request.url);
-        const status = searchParams.get('status');
-        const priority = searchParams.get('priority');
-        
+        const status = searchParams.get("status");
+        const priority = searchParams.get("priority");
+
         // Build where clause
         const whereClause: {
             hotelId: string;
             status?: ServiceRequestStatus;
             priority?: Priority;
         } = {
-            hotelId: session.user.hotelId
+            hotelId
         };
 
         if (status) {
@@ -69,21 +102,17 @@ export async function GET(request: NextRequest) {
                     }
                 }
             },
-            orderBy: [
-                { priority: 'desc' },
-                { requestedAt: 'desc' }
-            ]
+            orderBy: [{ priority: "desc" }, { requestedAt: "desc" }]
         });
 
         return NextResponse.json({
             success: true,
             serviceRequests
         });
-
     } catch (error) {
-        console.error('Get staff service requests error:', error);
+        console.error("Get staff service requests error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }
@@ -91,11 +120,14 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
     try {
-        const session = await auth();
-        
-        if (!session?.user || !['hotel_staff', 'hotel_admin'].includes(session.user.role) || !session.user.hotelId) {
+        const { role, hotelId } = await getAuthContext(request);
+        if (
+            !role ||
+            !["hotel_staff", "hotel_admin"].includes(role) ||
+            !hotelId
+        ) {
             return NextResponse.json(
-                { error: 'Unauthorized' },
+                { error: "Unauthorized" },
                 { status: 401 }
             );
         }
@@ -105,7 +137,7 @@ export async function PATCH(request: NextRequest) {
 
         if (!requestId) {
             return NextResponse.json(
-                { error: 'Request ID is required' },
+                { error: "Request ID is required" },
                 { status: 400 }
             );
         }
@@ -114,13 +146,13 @@ export async function PATCH(request: NextRequest) {
         const serviceRequest = await prisma.serviceRequest.findFirst({
             where: {
                 id: requestId,
-                hotelId: session.user.hotelId
+                hotelId
             }
         });
 
         if (!serviceRequest) {
             return NextResponse.json(
-                { error: 'Service request not found or unauthorized' },
+                { error: "Service request not found or unauthorized" },
                 { status: 404 }
             );
         }
@@ -132,12 +164,12 @@ export async function PATCH(request: NextRequest) {
             completedAt?: Date;
             assignedStaffId?: string | null;
         } = {};
-        
+
         if (status) {
             updateData.status = status;
-            if (status === 'in_progress') {
+            if (status === "in_progress") {
                 updateData.startedAt = new Date();
-            } else if (status === 'completed') {
+            } else if (status === "completed") {
                 updateData.completedAt = new Date();
             }
         }
@@ -185,11 +217,10 @@ export async function PATCH(request: NextRequest) {
             success: true,
             serviceRequest: updatedRequest
         });
-
     } catch (error) {
-        console.error('Update service request error:', error);
+        console.error("Update service request error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }
@@ -197,31 +228,30 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     try {
-        const session = await auth();
-        
-        if (!session?.user || session.user.role !== 'hotel_admin' || !session.user.hotelId) {
+        const { role, hotelId } = await getAuthContext(request);
+        if (!role || role !== "hotel_admin" || !hotelId) {
             return NextResponse.json(
-                { error: 'Unauthorized - Admin access required' },
+                { error: "Unauthorized - Admin access required" },
                 { status: 401 }
             );
         }
 
         const { searchParams } = new URL(request.url);
-        const requestId = searchParams.get('requestId');
-        const roomId = searchParams.get('roomId');
+        const requestId = searchParams.get("requestId");
+        const roomId = searchParams.get("roomId");
 
         if (requestId) {
             // Delete a specific service request
             const serviceRequest = await prisma.serviceRequest.findFirst({
                 where: {
                     id: requestId,
-                    hotelId: session.user.hotelId
+                    hotelId
                 }
             });
 
             if (!serviceRequest) {
                 return NextResponse.json(
-                    { error: 'Service request not found or unauthorized' },
+                    { error: "Service request not found or unauthorized" },
                     { status: 404 }
                 );
             }
@@ -232,15 +262,14 @@ export async function DELETE(request: NextRequest) {
 
             return NextResponse.json({
                 success: true,
-                message: 'Service request deleted successfully'
+                message: "Service request deleted successfully"
             });
-
         } else if (roomId) {
             // Delete all service requests for a specific room
             const deleteResult = await prisma.serviceRequest.deleteMany({
                 where: {
                     roomId,
-                    hotelId: session.user.hotelId
+                    hotelId
                 }
             });
 
@@ -248,18 +277,16 @@ export async function DELETE(request: NextRequest) {
                 success: true,
                 message: `Deleted ${deleteResult.count} service requests for the room`
             });
-
         } else {
             return NextResponse.json(
-                { error: 'Either requestId or roomId is required' },
+                { error: "Either requestId or roomId is required" },
                 { status: 400 }
             );
         }
-
     } catch (error) {
-        console.error('Delete service request error:', error);
+        console.error("Delete service request error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }

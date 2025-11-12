@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
 
         // Store refresh token (30 days)
         const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-        // @ts-expect-error Prisma client types not yet generated for RefreshToken model
         await prisma.refreshToken.create({
             data: { userId: user.id, token: refreshToken, expiresAt }
         });
@@ -61,7 +60,6 @@ export async function POST(request: NextRequest) {
         if (body.deviceToken && typeof body.deviceToken === "string") {
             const platform =
                 typeof body.platform === "string" ? body.platform : "android";
-            // @ts-expect-error Prisma client types not yet generated for DeviceToken model
             await prisma.deviceToken.upsert({
                 where: { token: body.deviceToken },
                 update: { userId: user.id, platform },
