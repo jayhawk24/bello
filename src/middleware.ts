@@ -27,8 +27,15 @@ export async function middleware(request: NextRequest) {
                 if (payload.hotelId)
                     headers.set("x-hotel-id", String(payload.hotelId));
                 return NextResponse.next({ request: { headers } });
-            } catch {
-                // invalid bearer token; proceed as unauthenticated
+            } catch (e: any) {
+                const code = e?.code || e?.name;
+                if (code === "ERR_JWT_EXPIRED" || code === "JWTExpired") {
+                    return NextResponse.json(
+                        { error: "token_expired" },
+                        { status: 401 }
+                    );
+                }
+                // invalid bearer token; proceed as unauthenticated so route can return 401
                 return NextResponse.next();
             }
         }
