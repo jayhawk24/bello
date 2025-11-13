@@ -5,16 +5,26 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const headerUserId = request.headers.get("x-user-id");
+        const headerRole = request.headers.get("x-user-role");
+        const session =
+            !headerUserId || headerRole !== "hotel_admin"
+                ? await getServerSession(authOptions)
+                : null;
 
-        if (!session || session.user.role !== "hotel_admin") {
+        if (
+            headerRole !== "hotel_admin" &&
+            (!session || session.user.role !== "hotel_admin")
+        ) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
             );
         }
 
-        const hotelId = session.user.hotelId;
+        const hotelId = headerUserId
+            ? (request.headers.get("x-hotel-id") as string | null)
+            : session!.user.hotelId;
         if (!hotelId) {
             return NextResponse.json(
                 { error: "Hotel not found" },
@@ -84,18 +94,28 @@ export async function POST(request: NextRequest) {
     }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const headerUserId = request.headers.get("x-user-id");
+        const headerRole = request.headers.get("x-user-role");
+        const session =
+            !headerUserId || headerRole !== "hotel_admin"
+                ? await getServerSession(authOptions)
+                : null;
 
-        if (!session || session.user.role !== "hotel_admin") {
+        if (
+            headerRole !== "hotel_admin" &&
+            (!session || session.user.role !== "hotel_admin")
+        ) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
             );
         }
 
-        const hotelId = session.user.hotelId;
+        const hotelId = headerUserId
+            ? (request.headers.get("x-hotel-id") as string | null)
+            : session!.user.hotelId;
         if (!hotelId) {
             return NextResponse.json(
                 { error: "Hotel not found" },

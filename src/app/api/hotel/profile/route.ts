@@ -4,10 +4,19 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hotelDetailsSchema } from "@/lib/validations";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "hotel_admin") {
+        // Prefer middleware-injected headers (for mobile Bearer auth)
+        const headerUserId = request.headers.get("x-user-id");
+        const headerRole = request.headers.get("x-user-role");
+        let session = null as any;
+        if (!headerUserId || headerRole !== "hotel_admin") {
+            session = await getServerSession(authOptions);
+        }
+        if (
+            headerRole !== "hotel_admin" &&
+            (!session || session.user.role !== "hotel_admin")
+        ) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -15,8 +24,9 @@ export async function GET() {
         }
 
         // Get the user with hotel information
+        const userId = headerUserId || session.user.id;
         const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
+            where: { id: userId },
             include: {
                 managedHotel: {
                     include: {
@@ -38,7 +48,7 @@ export async function GET() {
         if (!hotel) {
             // Try finding by adminId as fallback
             hotel = await prisma.hotel.findFirst({
-                where: { adminId: session.user.id },
+                where: { adminId: userId },
                 include: {
                     _count: {
                         select: {
