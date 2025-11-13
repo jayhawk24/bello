@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from "@/lib/prisma";
+import { sendWebPush } from "@/lib/webPush";
 
 export interface NotificationData {
     userId: string;
@@ -24,7 +25,7 @@ export async function createNotification(notificationData: NotificationData) {
 
         return notification;
     } catch (error) {
-        console.error('Failed to create notification:', error);
+        console.error("Failed to create notification:", error);
         throw error;
     }
 }
@@ -36,7 +37,7 @@ export async function getHotelStaff(hotelId: string) {
             where: {
                 hotelId,
                 role: {
-                    in: ['hotel_staff', 'hotel_admin']
+                    in: ["hotel_staff", "hotel_admin"]
                 }
             },
             select: {
@@ -49,18 +50,21 @@ export async function getHotelStaff(hotelId: string) {
 
         return staffUsers;
     } catch (error) {
-        console.error('Failed to get hotel staff:', error);
+        console.error("Failed to get hotel staff:", error);
         throw error;
     }
 }
 
 // Create notifications for all staff members
-export async function notifyHotelStaff(hotelId: string, notification: Omit<NotificationData, 'userId'>) {
+export async function notifyHotelStaff(
+    hotelId: string,
+    notification: Omit<NotificationData, "userId">
+) {
     try {
         const staffUsers = await getHotelStaff(hotelId);
-        
+
         const notifications = await Promise.all(
-            staffUsers.map(user => 
+            staffUsers.map((user) =>
                 createNotification({
                     ...notification,
                     userId: user.id
@@ -70,27 +74,74 @@ export async function notifyHotelStaff(hotelId: string, notification: Omit<Notif
 
         return notifications;
     } catch (error) {
-        console.error('Failed to notify hotel staff:', error);
+        console.error("Failed to notify hotel staff:", error);
         throw error;
     }
 }
 
 // Send push notification to staff
-export async function sendPushNotificationToStaff(hotelId: string, notification: {
-    title: string;
-    message: string;
-    data?: any;
-}) {
-    // In a production environment, you would use web-push to send notifications
-    // For now, we'll simulate this and focus on the database notifications
-    console.log(`Push notification sent to hotel ${hotelId} staff:`, notification);
-    
-    // Here you would typically:
-    // 1. Get push subscriptions for hotel staff from database
-    // 2. Use web-push to send notifications to each subscription
-    // 3. Handle any failed deliveries
-    
-    return true;
+export async function sendPushNotificationToStaff(
+    hotelId: string,
+    notification: {
+        title: string;
+        message: string;
+        data?: any;
+    }
+) {
+    try {
+        // Get staff user IDs for this hotel
+        const staffUsers = await prisma.user.findMany({
+            where: { hotelId, role: { in: ["hotel_staff", "hotel_admin"] } },
+            select: { id: true }
+        });
+        const userIds = staffUsers.map((u) => u.id);
+
+        if (userIds.length === 0) return true;
+
+        // Get web push subscriptions
+        const subs = await prisma.webPushSubscription.findMany({
+            where: { userId: { in: userIds } }
+        });
+
+        if (!subs.length) return true;
+
+        const payload = {
+            title: notification.title,
+            body: notification.message,
+            data: notification.data || {},
+            tag: "service-request"
+        };
+
+        // Send in parallel, clean up gone endpoints
+        await Promise.all(
+            subs.map(async (s) => {
+                try {
+                    await sendWebPush(
+                        {
+                            endpoint: s.endpoint,
+                            keys: { p256dh: s.p256dh, auth: s.auth }
+                        },
+                        payload
+                    );
+                } catch (err: any) {
+                    const status = err?.statusCode || err?.statusCode;
+                    if (status === 404 || status === 410) {
+                        // subscription no longer valid
+                        await prisma.webPushSubscription
+                            .delete({ where: { endpoint: s.endpoint } })
+                            .catch(() => {});
+                    } else {
+                        console.warn("web-push error", err?.message || err);
+                    }
+                }
+            })
+        );
+
+        return true;
+    } catch (e) {
+        console.error("Failed to send web push to staff", e);
+        return false;
+    }
 }
 
 // Service request notification helpers
@@ -111,7 +162,7 @@ export async function notifyStaffNewServiceRequest(serviceRequest: {
     };
 }) {
     const notificationData = {
-        type: 'service_request_created',
+        type: "service_request_created",
         title: `🔔 New ${serviceRequest.priority} priority request`,
         message: `${serviceRequest.guest.name} in Room ${serviceRequest.room.roomNumber} requested ${serviceRequest.service.name}: "${serviceRequest.title}"`,
         data: {
@@ -125,7 +176,10 @@ export async function notifyStaffNewServiceRequest(serviceRequest: {
 
     try {
         // Create database notifications for all staff
-        const notifications = await notifyHotelStaff(serviceRequest.hotelId, notificationData);
+        const notifications = await notifyHotelStaff(
+            serviceRequest.hotelId,
+            notificationData
+        );
 
         // Send push notifications (in production)
         await sendPushNotificationToStaff(serviceRequest.hotelId, {
@@ -134,10 +188,12 @@ export async function notifyStaffNewServiceRequest(serviceRequest: {
             data: notificationData.data
         });
 
-        console.log(`Created ${notifications.length} notifications for new service request`);
+        console.log(
+            `Created ${notifications.length} notifications for new service request`
+        );
         return notifications;
     } catch (error) {
-        console.error('Failed to notify staff of new service request:', error);
+        console.error("Failed to notify staff of new service request:", error);
         throw error;
     }
 }
@@ -151,20 +207,23 @@ export async function getUserNotifications(userId: string, limit = 10) {
                 isRead: false
             },
             orderBy: {
-                createdAt: 'desc'
+                createdAt: "desc"
             },
             take: limit
         });
 
         return notifications;
     } catch (error) {
-        console.error('Failed to get user notifications:', error);
+        console.error("Failed to get user notifications:", error);
         throw error;
     }
 }
 
 // Mark notification as read
-export async function markNotificationRead(notificationId: string, userId: string) {
+export async function markNotificationRead(
+    notificationId: string,
+    userId: string
+) {
     try {
         const notification = await prisma.notification.update({
             where: {
@@ -178,7 +237,7 @@ export async function markNotificationRead(notificationId: string, userId: strin
 
         return notification;
     } catch (error) {
-        console.error('Failed to mark notification as read:', error);
+        console.error("Failed to mark notification as read:", error);
         throw error;
     }
 }
@@ -198,7 +257,7 @@ export async function markAllNotificationsRead(userId: string) {
 
         return result;
     } catch (error) {
-        console.error('Failed to mark all notifications as read:', error);
+        console.error("Failed to mark all notifications as read:", error);
         throw error;
     }
 }

@@ -7,6 +7,7 @@ import Link from "next/link";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardNav from "@/components/DashboardNav";
 import toast from 'react-hot-toast';
+import NotificationService from '@/lib/notificationService';
 
 interface ServiceRequest {
     id: string;
@@ -66,6 +67,8 @@ export default function StaffDashboard() {
         }
 
         fetchData();
+
+        // Web push is initialized via NotificationProvider; avoid double init here
     }, [session, status, router, selectedStatus, selectedPriority]);
 
     const fetchData = async () => {

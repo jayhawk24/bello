@@ -14,7 +14,7 @@ self.addEventListener('activate', (event) => {
 // Handle push notifications
 self.addEventListener('push', (event) => {
     console.log('Push received:', event);
-    
+
     if (!event.data) {
         console.log('No data in push event');
         return;
@@ -32,7 +32,7 @@ self.addEventListener('push', (event) => {
         body: data.body || data.message,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
-        tag: data.tag || 'service-request',
+        tag: data.tag || (data.data && (data.data.serviceRequestId || data.data.id) ? `sr-${data.data.serviceRequestId || data.data.id}` : 'service-request'),
         requireInteraction: true,
         actions: [
             {

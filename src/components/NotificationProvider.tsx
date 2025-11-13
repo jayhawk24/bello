@@ -50,14 +50,10 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
         try {
             const notificationService = NotificationService.getInstance();
             const initialized = await notificationService.initialize();
-            
+
             setIsInitialized(initialized);
             setHasPermission(initialized);
-
-            if (initialized) {
-                // Start polling for notifications
-                notificationService.startPolling(30000); // Poll every 30 seconds
-            }
+            // Polling removed; rely exclusively on browser Push API
         } catch (error) {
             console.error('Failed to initialize notifications:', error);
         }
@@ -65,6 +61,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
 
     useEffect(() => {
         initializeNotifications();
+        return () => { /* no cleanup needed for polling */ };
     }, [session]);
 
     const value: NotificationContextType = {
