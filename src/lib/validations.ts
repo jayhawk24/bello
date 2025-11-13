@@ -14,7 +14,9 @@ export const userRegistrationSchema = z
             .min(2, "First name must be at least 2 characters"),
         lastName: z.string().min(2, "Last name must be at least 2 characters"),
         phone: z.string().min(10, "Phone number must be at least 10 digits"),
-        plan: z.enum(["basic", "premium", "enterprise"])
+        // For initial signup we enroll everyone to 'free' internally.
+        // Keep existing options to support UI, but 'free' is allowed too.
+        plan: z.enum(["free", "basic", "premium", "enterprise"]).default("free")
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords don't match",

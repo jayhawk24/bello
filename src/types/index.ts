@@ -22,7 +22,7 @@ export interface Hotel {
     contactEmail: string;
     contactPhone: string;
     totalRooms: number;
-    subscriptionPlan: "basic" | "premium" | "enterprise";
+    subscriptionPlan: "free" | "basic" | "premium" | "enterprise";
     subscriptionStatus: "active" | "inactive" | "cancelled" | "past_due";
     adminId: string;
     createdAt: Date;
@@ -123,7 +123,7 @@ export interface Payment {
 
 export interface Subscription {
     id: string;
-    plan: "basic" | "premium" | "enterprise";
+    plan: "free" | "basic" | "premium" | "enterprise";
     status: "active" | "inactive" | "cancelled" | "past_due";
     billingCycle: "monthly" | "yearly";
     roomTier: "tier_1_20" | "tier_21_50" | "tier_51_100" | "tier_100_plus";
@@ -236,7 +236,7 @@ export interface RegisterFormData {
     firstName: string;
     lastName: string;
     phone: string;
-    plan: "basic" | "premium" | "enterprise";
+    plan: "free" | "basic" | "premium" | "enterprise";
 }
 
 export interface ForgotPasswordFormData {

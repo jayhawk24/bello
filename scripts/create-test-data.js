@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function createTestData() {
     try {
         console.log('🏨 Creating test data...');
-        
+
         // Check if admin already exists
         let admin = await prisma.user.findUnique({
             where: { email: 'admin@testhotel.com' }
@@ -45,7 +45,7 @@ async function createTestData() {
                     contactEmail: 'info@goldencoasthotel.com',
                     contactPhone: '+1-305-555-0123',
                     adminId: admin.id,
-                    subscriptionPlan: 'basic',
+                    subscriptionPlan: 'free',
                     subscriptionStatus: 'active',
                     totalRooms: 10
                 }
@@ -54,7 +54,7 @@ async function createTestData() {
         } else {
             console.log('🏨 Hotel already exists:', hotel.name);
         }
-        
+
         // Update admin user with hotelId if needed
         if (!admin.hotelId) {
             await prisma.user.update({

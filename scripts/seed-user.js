@@ -34,8 +34,8 @@ async function seedUser() {
                 contactEmail: 'airbnbvandana@gmail.com',
                 contactPhone: '+919453106183',
                 adminId: 'cmefq0zm00000lb04gk0f3bcb', // Link to the user
-                subscriptionPlan: 'basic',
-                subscriptionStatus: 'inactive',
+                subscriptionPlan: 'free',
+                subscriptionStatus: 'active',
                 totalRooms: 0,
             }
         });

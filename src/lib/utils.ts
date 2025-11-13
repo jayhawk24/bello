@@ -81,11 +81,17 @@ export function calculateRoomTier(
 }
 
 export function getSubscriptionPrice(
-    plan: "basic" | "premium" | "enterprise",
+    plan: "free" | "basic" | "premium" | "enterprise",
     roomTier: string,
     billingCycle: "monthly" | "yearly"
 ): number {
     const basePrices = {
+        free: {
+            tier_1_20: 0,
+            tier_21_50: 0,
+            tier_51_100: 0,
+            tier_100_plus: 0
+        },
         basic: {
             tier_1_20: 99,
             tier_21_50: 199,
@@ -106,9 +112,7 @@ export function getSubscriptionPrice(
         }
     };
 
-    const basePrice =
-        basePrices[plan][roomTier as keyof (typeof basePrices)[typeof plan]] ||
-        99;
+    const basePrice = (basePrices as any)[plan]?.[roomTier] ?? 0;
 
     // Apply yearly discount (2 months free)
     if (billingCycle === "yearly") {

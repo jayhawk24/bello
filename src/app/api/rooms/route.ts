@@ -139,6 +139,23 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Enforce free plan room limit (max 1 room)
+        if (hotel.subscriptionPlan === "free") {
+            const count = await prisma.room.count({
+                where: { hotelId: hotel.id }
+            });
+            if (count >= 1) {
+                return NextResponse.json(
+                    {
+                        error: "room_limit_reached",
+                        message:
+                            "Free plan allows only one room. Upgrade your plan to add more rooms."
+                    },
+                    { status: 403 }
+                );
+            }
+        }
+
         // Check if room number already exists
         const existingRoom = await prisma.room.findFirst({
             where: {

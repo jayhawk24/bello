@@ -12,7 +12,7 @@ interface RoomFormData {
 
 const roomTypes = [
     "Standard Single",
-    "Standard Double", 
+    "Standard Double",
     "Deluxe Single",
     "Deluxe Double",
     "Junior Suite",
@@ -32,6 +32,7 @@ export default function AddRoomPage() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showUpgrade, setShowUpgrade] = useState(false);
 
     useEffect(() => {
         if (status === "loading") return;
@@ -71,10 +72,17 @@ export default function AddRoomPage() {
                 router.push("/dashboard/rooms");
             } else {
                 const data = await response.json();
-                setError(data.error || "Failed to add room");
+                if (response.status === 403 && data?.error === "room_limit_reached") {
+                    setError("You're on the Free plan and can only add 1 room.");
+                    setShowUpgrade(true);
+                } else {
+                    setError(data.error || "Failed to add room");
+                    setShowUpgrade(false);
+                }
             }
         } catch (error) {
             setError("Network error occurred");
+            setShowUpgrade(false);
         } finally {
             setIsLoading(false);
         }
@@ -132,6 +140,19 @@ export default function AddRoomPage() {
                 {error && (
                     <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                         {error}
+                    </div>
+                )}
+
+                {showUpgrade && (
+                    <div className="mb-6 bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-4 rounded-lg">
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">⚠️</span>
+                            <div>
+                                <p className="font-semibold mb-1">Upgrade required to add more rooms</p>
+                                <p className="text-sm mb-3">The Free plan allows a single room. Upgrade your subscription to add unlimited rooms and unlock more features.</p>
+                                <Link href="/dashboard/hotel" className="btn-minion">Manage Subscription</Link>
+                            </div>
+                        </div>
                     </div>
                 )}
 

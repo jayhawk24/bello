@@ -252,7 +252,8 @@ export default function HotelProfilePage() {
                                         <div className="flex items-center">
                                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${hotel.subscriptionPlan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
                                                 hotel.subscriptionPlan === 'premium' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-green-100 text-green-800'
+                                                    hotel.subscriptionPlan === 'free' ? 'bg-gray-100 text-gray-800' :
+                                                        'bg-green-100 text-green-800'
                                                 }`}>
                                                 {hotel.subscriptionPlan.charAt(0).toUpperCase() + hotel.subscriptionPlan.slice(1)}
                                             </span>

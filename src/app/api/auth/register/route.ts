@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, calculateRoomTier } from "@/lib/utils";
+import { hashPassword } from "@/lib/utils";
 import { userRegistrationSchema } from "@/lib/validations";
-import { Prisma } from "@prisma/client";
+import { Prisma, SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
     try {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { hotelName, email, password, firstName, lastName, phone, plan } =
+        const { hotelName, email, password, firstName, lastName, phone } =
             validatedFields.data;
 
         // Check if user already exists
@@ -64,13 +64,9 @@ export async function POST(request: NextRequest) {
                         contactEmail: email,
                         contactPhone: phone,
                         adminId: user.id,
-                        subscriptionPlan:
-                            plan === "basic"
-                                ? "basic"
-                                : plan === "premium"
-                                ? "premium"
-                                : "enterprise",
-                        subscriptionStatus: "inactive", // Will be activated after payment
+                        // Enroll all new users on the free plan by default
+                        subscriptionPlan: SubscriptionPlan.free,
+                        subscriptionStatus: SubscriptionStatus.active,
                         totalRooms: 0 // Will be set during hotel setup
                     }
                 });
@@ -85,13 +81,15 @@ export async function POST(request: NextRequest) {
                 const defaultServices = [
                     {
                         name: "Room Service",
-                        description: "Order food and beverages directly to your room",
+                        description:
+                            "Order food and beverages directly to your room",
                         category: "room_service" as const,
                         icon: "🍽️"
                     },
                     {
                         name: "Housekeeping",
-                        description: "Request cleaning services, towels, and amenities",
+                        description:
+                            "Request cleaning services, towels, and amenities",
                         category: "housekeeping" as const,
                         icon: "🧹"
                     },
@@ -109,14 +107,15 @@ export async function POST(request: NextRequest) {
                     },
                     {
                         name: "Laundry Service",
-                        description: "Professional cleaning and pressing services",
+                        description:
+                            "Professional cleaning and pressing services",
                         category: "laundry" as const,
                         icon: "👔"
                     }
                 ];
 
                 await tx.service.createMany({
-                    data: defaultServices.map(service => ({
+                    data: defaultServices.map((service) => ({
                         ...service,
                         hotelId: hotel.id,
                         isActive: true
