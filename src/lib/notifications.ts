@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { sendWebPush } from "@/lib/webPush";
+import { sendExpoPush } from "@/lib/expoPush";
 
 export interface NotificationData {
     userId: string;
@@ -103,7 +104,11 @@ export async function sendPushNotificationToStaff(
             where: { userId: { in: userIds } }
         });
 
-        if (!subs.length) return true;
+        // Also get device tokens for mobile push
+        const deviceTokens = await prisma.deviceToken.findMany({
+            where: { userId: { in: userIds } },
+            select: { token: true }
+        });
 
         const payload = {
             title: notification.title,
@@ -112,7 +117,7 @@ export async function sendPushNotificationToStaff(
             tag: "service-request"
         };
 
-        // Send in parallel, clean up gone endpoints
+        // Send web pushes in parallel, clean up gone endpoints
         await Promise.all(
             subs.map(async (s) => {
                 try {
@@ -137,9 +142,19 @@ export async function sendPushNotificationToStaff(
             })
         );
 
+        // Send Expo mobile pushes
+        const tokens = deviceTokens.map((d) => d.token);
+        if (tokens.length) {
+            await sendExpoPush(tokens, {
+                title: notification.title,
+                body: notification.message,
+                data: notification.data || {}
+            });
+        }
+
         return true;
     } catch (e) {
-        console.error("Failed to send web push to staff", e);
+        console.error("Failed to send push to staff", e);
         return false;
     }
 }
