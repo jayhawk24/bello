@@ -174,15 +174,22 @@ export async function POST(request: NextRequest) {
         // Generate access code
         const accessCode = generateAccessCode();
 
-        // Create room
-        const room = await prisma.room.create({
-            data: {
-                roomNumber,
-                roomType,
-                accessCode,
-                hotelId: hotel.id,
-                isOccupied: false
-            }
+        // Create room and increment hotel's totalRooms atomically
+        const room = await prisma.$transaction(async (tx) => {
+            const created = await tx.room.create({
+                data: {
+                    roomNumber,
+                    roomType,
+                    accessCode,
+                    hotelId: hotel.id,
+                    isOccupied: false
+                }
+            });
+            await tx.hotel.update({
+                where: { id: hotel.id },
+                data: { totalRooms: { increment: 1 } }
+            });
+            return created;
         });
 
         return NextResponse.json({
