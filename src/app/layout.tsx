@@ -3,6 +3,7 @@ import { Raleway, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -33,7 +34,8 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
-        
+        <Analytics />
+
         {/* Service Worker Registration */}
         <Script id="register-sw" strategy="afterInteractive">
           {`
