@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
                 where: { id: paymentOrder.hotelId },
                 data: {
                     subscriptionStatus: "active",
-                    subscriptionTier: paymentOrder.subscription.planType
+                    subscriptionPlan: paymentOrder.subscription.planType
                 }
             });
         }
