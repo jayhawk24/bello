@@ -69,37 +69,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Try to find existing guest user or create one for room access
-        let guestUser = null;
+        // Try to find existing guest user (do not create a user for unauthenticated guests)
+        let guestUser = null as null | {
+            id: string;
+            name: string | null;
+            email: string | null;
+        };
         if (guestEmail) {
-            guestUser = await prisma.user.findFirst({
+            const existing = await prisma.user.findFirst({
                 where: {
                     email: guestEmail,
                     hotelId: hotelId
-                }
+                },
+                select: { id: true, name: true, email: true }
             });
-        }
-
-        // If no guest user found, create a room guest account
-        if (!guestUser) {
-            const timeToCreateGuestUser = Date.now();
-
-            const roomGuestEmail =
-                guestEmail ||
-                `room_${roomId}_guest@${room.hotel.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "")}${timeToCreateGuestUser}.local`;
-            console.log("Creating guest user with email:", roomGuestEmail);
-
-            guestUser = await prisma.user.create({
-                data: {
-                    email: roomGuestEmail,
-                    name: guestName || `Room ${room.roomNumber} Guest`,
-                    role: "guest",
-                    password: "room_access_guest", // Temporary password for room guests
-                    hotelId: hotelId
-                }
-            });
+            if (existing) guestUser = existing;
         }
 
         // Create the service request
@@ -110,18 +94,20 @@ export async function POST(request: NextRequest) {
                 priority: validationResult.data.priority,
                 status: "pending",
                 serviceId: serviceId,
-                guestId: guestUser.id,
+                guestId: guestUser?.id ?? null,
                 hotelId: hotelId,
                 roomId: roomId
             },
             include: {
-                guest: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
-                },
+                guest: guestUser
+                    ? {
+                          select: {
+                              id: true,
+                              name: true,
+                              email: true
+                          }
+                      }
+                    : false,
                 room: {
                     select: {
                         id: true,
@@ -146,7 +132,7 @@ export async function POST(request: NextRequest) {
                 priority: serviceRequest.priority,
                 hotelId: hotelId,
                 guest: {
-                    name: serviceRequest.guest.name
+                    name: guestName || serviceRequest.guest?.name || "Guest"
                 },
                 room: {
                     roomNumber: serviceRequest.room.roomNumber

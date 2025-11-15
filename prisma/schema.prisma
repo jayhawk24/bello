@@ -135,7 +135,7 @@ model Service {
 
 model ServiceRequest {
     id              String               @id @default(cuid())
-    guestId         String               @map("guest_id")
+    guestId         String?              @map("guest_id")
     hotelId         String               @map("hotel_id")
     roomId          String               @map("room_id")
     serviceId       String               @map("service_id")
@@ -151,7 +151,7 @@ model ServiceRequest {
     guestFeedback   String?              @map("guest_feedback")
 
     // Relationships
-    guest         User    @relation(name: "GuestRequests", fields: [guestId], references: [id])
+    guest         User?   @relation(name: "GuestRequests", fields: [guestId], references: [id])
     hotel         Hotel   @relation(fields: [hotelId], references: [id])
     room          Room    @relation(fields: [roomId], references: [id])
     service       Service @relation(fields: [serviceId], references: [id])
