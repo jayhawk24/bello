@@ -2,12 +2,14 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import type { SubscriptionPlan } from '@/types/subscription';
-import type { BillingCycle, SubscriptionPlan } from '@prisma/client';
+// Local type aliases to avoid prisma coupling on the client
+type BillingCycle = 'monthly' | 'yearly';
+type SubscriptionTier = 'free' | 'basic' | 'premium' | 'enterprise';
 import { Switch } from '@headlessui/react';
 
 interface CurrentSubscription {
     id: string;
-    planType: SubscriptionPlan;
+    planType: SubscriptionTier;
     planId: string;
     billingCycle: BillingCycle;
     roomTier: string;
@@ -78,7 +80,7 @@ export default function PricingPage() {
             if (!res.ok) throw new Error(data.error || 'Failed to create subscription');
 
             // Load Razorpay script if not present
-            if (!window.Razorpay) {
+            if (!(window as any).Razorpay) {
                 await new Promise((resolve, reject) => {
                     const script = document.createElement('script');
                     script.src = 'https://checkout.razorpay.com/v1/checkout.js';

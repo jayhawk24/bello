@@ -88,12 +88,22 @@ export async function POST(request: NextRequest) {
                 data: { razorpayCustomerId: razorpayCustomer.id }
             });
         }
-        const rzp_customer_id = user.razorpayCustomerId;
+        const rzp_customer_id =
+            razorpayCustomer?.id || user.razorpayCustomerId || "";
+
+        if (!rzp_customer_id) {
+            return NextResponse.json(
+                {
+                    error: "Unable to create or retrieve Razorpay customer. Please try again."
+                },
+                { status: 400 }
+            );
+        }
 
         // Create subscription in Razorpay using existing plan ID
         const razorpaySubscription = await createRazorpaySubscription({
             plan_id: plan.razorpayPlanId!,
-            customer_id: razorpayCustomer?.id || rzp_customer_id || "",
+            customer_id: rzp_customer_id,
             total_count: billingCycle === "monthly" ? 12 : 1,
             quantity: 1,
             notes: {
@@ -154,7 +164,7 @@ export async function POST(request: NextRequest) {
             customerId: rzp_customer_id,
             amount,
             currency: plan.currency,
-            key: process.env.RAZORPAY_KEY_ID,
+            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
             name: "Bello Hotel Concierge",
             description: `${plan.name} Plan - ${
                 billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1)
