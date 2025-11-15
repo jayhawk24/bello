@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/utils";
+import { hashPassword, calculateRoomTier } from "@/lib/utils";
 import { userRegistrationSchema } from "@/lib/validations";
 import { Prisma, SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 
@@ -53,6 +53,18 @@ export async function POST(request: NextRequest) {
                     }
                 });
 
+                // Get the free plan
+                const freePlan = await tx.rzpSubscriptionPlan.findFirst({
+                    where: {
+                        name: "Free Monthly", // Name from our seed
+                        isActive: true
+                    }
+                });
+
+                if (!freePlan) {
+                    throw new Error("Free plan not found in the database");
+                }
+
                 // Create hotel with the user as admin
                 const hotel = await tx.hotel.create({
                     data: {
@@ -64,10 +76,29 @@ export async function POST(request: NextRequest) {
                         contactEmail: email,
                         contactPhone: phone,
                         adminId: user.id,
-                        // Enroll all new users on the free plan by default
                         subscriptionPlan: SubscriptionPlan.free,
-                        subscriptionStatus: SubscriptionStatus.active,
+                        subscriptionStatus: SubscriptionStatus.active, // Free plan is active immediately
                         totalRooms: 0 // Will be set during hotel setup
+                    }
+                });
+
+                // Create subscription for the free plan
+                await tx.subscription.create({
+                    data: {
+                        hotelId: hotel.id,
+                        planType: SubscriptionPlan.free,
+                        planId: freePlan.id,
+                        billingCycle: freePlan.period,
+                        roomTier: "tier_1_20",
+                        amount: 0,
+                        currency: "USD",
+                        status: SubscriptionStatus.active,
+                        currentPeriodStart: new Date(),
+                        currentPeriodEnd: new Date(
+                            new Date().setFullYear(
+                                new Date().getFullYear() + 100
+                            )
+                        ) // Set far future for free plan
                     }
                 });
 

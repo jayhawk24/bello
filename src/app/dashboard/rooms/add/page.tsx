@@ -73,7 +73,7 @@ export default function AddRoomPage() {
             } else {
                 const data = await response.json();
                 if (response.status === 403 && data?.error === "room_limit_reached") {
-                    setError("You're on the Free plan and can only add 1 room.");
+                    setError(data.message || "Room limit reached. Please upgrade your plan.");
                     setShowUpgrade(true);
                 } else {
                     setError(data.error || "Failed to add room");

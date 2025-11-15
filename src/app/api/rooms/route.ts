@@ -139,17 +139,51 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Enforce free plan room limit (max 1 room)
-        if (hotel.subscriptionPlan === "free") {
-            const count = await prisma.room.count({
+        // Enforce room limits based on active subscription room tier (fallback to free plan)
+        const activeSubscription = await prisma.subscription.findFirst({
+            where: { hotelId: hotel.id, status: "active" },
+            orderBy: { createdAt: "desc" }
+        });
+
+        const getRoomLimitFromTier = (
+            roomTier: string | null | undefined
+        ): number | null => {
+            switch (roomTier) {
+                case "tier_1_20":
+                    return 20;
+                case "tier_21_50":
+                    return 50;
+                case "tier_51_100":
+                    return 100;
+                case "tier_100_plus":
+                    return null; // unlimited
+                default:
+                    return 1; // default for free/unknown
+            }
+        };
+
+        // Determine room limit
+        let roomLimit: number | null = null;
+        if (activeSubscription) {
+            roomLimit = getRoomLimitFromTier(activeSubscription.roomTier);
+        } else if (hotel.subscriptionPlan === "free") {
+            roomLimit = 1;
+        }
+
+        if (roomLimit !== null) {
+            const currentCount = await prisma.room.count({
                 where: { hotelId: hotel.id }
             });
-            if (count >= 1) {
+            if (currentCount >= roomLimit) {
+                const tierLabel = activeSubscription?.roomTier
+                    ? activeSubscription.roomTier.replace(/_/g, " ")
+                    : "free";
                 return NextResponse.json(
                     {
                         error: "room_limit_reached",
-                        message:
-                            "Free plan allows only one room. Upgrade your plan to add more rooms."
+                        message: `Your plan (${tierLabel}) allows a maximum of ${roomLimit} room${
+                            roomLimit === 1 ? "" : "s"
+                        }. Upgrade your plan to add more rooms.`
                     },
                     { status: 403 }
                 );

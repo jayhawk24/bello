@@ -11,6 +11,7 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [hotelName, setHotelName] = useState<string>("");
+    const [totalRooms, setTotalRooms] = useState<number>(0);
     const [currentSubscription, setCurrentSubscription] = useState<any>(null);
 
     useEffect(() => {
@@ -47,6 +48,7 @@ export default function DashboardPage() {
                     if (response.ok) {
                         const data = await response.json();
                         setHotelName(data.hotel?.name || "Dashboard");
+                        setTotalRooms(data.hotel?.totalRooms || 0);
                     } else {
                         setHotelName("Dashboard");
                     }
@@ -207,7 +209,7 @@ export default function DashboardPage() {
                 <div className="grid md:grid-cols-4 gap-4">
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
                         <div className="text-2xl font-bold text-minion-yellow">
-                            {session?.user?.hotel?.totalRooms || 0}
+                            {totalRooms}
                         </div>
                         <div className="text-gray-600">Total Rooms</div>
                     </div>
