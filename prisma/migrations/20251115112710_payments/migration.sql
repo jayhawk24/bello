@@ -9,7 +9,7 @@ CREATE TYPE "PaymentStatus" AS ENUM ('created', 'authorized', 'captured', 'refun
 
 -- AlterTable
 ALTER TABLE "subscriptions" ADD COLUMN     "plan_id" TEXT NOT NULL,
-ALTER COLUMN "currency" SET DEFAULT 'USD';
+ALTER COLUMN "currency" SET DEFAULT 'INR';
 
 -- AlterTable
 ALTER TABLE "users" ADD COLUMN     "razorpayCustomerId" TEXT;
@@ -21,7 +21,7 @@ CREATE TABLE "subscription_plans" (
     "description" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
     "period" "BillingCycle" NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "currency" TEXT NOT NULL DEFAULT 'INR',
     "room_limit" INTEGER NOT NULL,
     "features" TEXT[],
     "is_active" BOOLEAN NOT NULL DEFAULT true,
@@ -39,7 +39,7 @@ CREATE TABLE "payment_orders" (
     "subscription_id" TEXT,
     "razorpay_order_id" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "currency" TEXT NOT NULL DEFAULT 'INR',
     "status" "PaymentStatus" NOT NULL DEFAULT 'created',
     "receipt" TEXT,
     "notes" JSONB,
@@ -57,7 +57,7 @@ CREATE TABLE "payments" (
     "razorpay_order_id" TEXT NOT NULL,
     "razorpay_signature" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "currency" TEXT NOT NULL DEFAULT 'INR',
     "status" "PaymentStatus" NOT NULL,
     "method" TEXT,
     "bank" TEXT,

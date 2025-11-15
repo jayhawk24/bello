@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 function RegisterForm() {
     const searchParams = useSearchParams();
-    const selectedPlan = searchParams.get("plan") || "basic";
+    const selectedPlan = searchParams.get("plan") || "free";
 
     const [formData, setFormData] = useState({
         hotelName: "",
@@ -65,8 +65,10 @@ function RegisterForm() {
     };
 
     const planDetails = {
-        basic: { name: "Basic", price: "$99/month", rooms: "Up to 20 rooms" },
-        premium: { name: "Premium", price: "$299/month", rooms: "Up to 50 rooms each (5 hotels)" },
+        free: { name: "Free", price: "$0/month", rooms: "Up to 1 rooms" },
+        starter: { name: "Starter", price: "$99/month", rooms: "Up to 20 rooms" },
+        growth: { name: "Growth", price: "$199/month", rooms: "Up to 50 rooms" },
+        professional: { name: "Professional", price: "$299/month", rooms: "Up to 100 rooms each (5 hotels)" },
         enterprise: { name: "Enterprise", price: "$699/month", rooms: "Unlimited rooms (10+ hotels)" }
     };
 

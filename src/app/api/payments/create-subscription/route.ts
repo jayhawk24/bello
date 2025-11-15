@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get the subscription plan
-        const plan = await prisma.subscriptionPlan.findUnique({
+        const plan = await prisma.rzpSubscriptionPlan.findUnique({
             where: { id: planId }
         });
 

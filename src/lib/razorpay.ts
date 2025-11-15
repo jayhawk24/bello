@@ -31,7 +31,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Starter",
         description: "1-20 Rooms",
         price: 4900, // ₹49.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: 20,
@@ -47,7 +47,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Growth",
         description: "21-50 Rooms",
         price: 12900, // ₹129.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: 50,
@@ -64,7 +64,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Professional",
         description: "51-100 Rooms",
         price: 24900, // ₹249.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: 100,
@@ -82,7 +82,7 @@ export const SUBSCRIPTION_PLANS = {
         name: "Enterprise",
         description: "100+ Rooms",
         price: 44900, // ₹449.00 in paise
-        currency: "USD",
+        currency: "INR",
         period: "monthly",
         interval: 1,
         roomLimit: -1, // Unlimited
@@ -100,7 +100,7 @@ export const SUBSCRIPTION_PLANS = {
 
 export async function createPaymentOrder(
     amount: number,
-    currency: string = "USD",
+    currency: string = "INR",
     receipt?: string
 ) {
     try {

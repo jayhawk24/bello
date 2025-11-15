@@ -3,27 +3,40 @@ import { prisma } from "../src/lib/prisma";
 import Razorpay from "razorpay";
 
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_RAKPAChI3h6hmt",
-    key_secret: process.env.RAZORPAY_SECRET || "duJKHxuRKqS6FhOmGd07eVLY"
+    key_id:
+        process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET
 });
+const hasRazorpayCreds = Boolean(
+    (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) &&
+        (process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET)
+);
 
 async function createRazorpayPlan(
     name: string,
     description: string,
-    amount: number,
+    amountMinor: number,
     period: BillingCycle
 ) {
+    // amountMinor expected in currency minor units already (e.g. 4900 = $49.00)
+    if (!hasRazorpayCreds) {
+        console.warn(
+            "Skipping Razorpay plan creation – missing API credentials."
+        );
+        return null;
+    }
     try {
         const plan = await razorpay.plans.create({
             period: period === BillingCycle.monthly ? "monthly" : "yearly",
             interval: 1,
             item: {
                 name,
-                amount: amount * 100, // Convert to paise
-                currency: "USD",
+                amount: amountMinor, // already minor units
+                currency: "INR",
                 description
             }
         });
+        console.log(`Created Razorpay plan '${name}' => ${plan.id}`);
         return plan.id;
     } catch (error) {
         console.error(`Failed to create Razorpay plan for ${name}:`, error);
@@ -32,13 +45,14 @@ async function createRazorpayPlan(
 }
 
 async function main() {
+    console.log("🔰 Starting database seed...");
     const plans = [
         {
             name: "Free",
             description: "1-2 Rooms",
             price: 0,
             period: BillingCycle.monthly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 2,
             features: [
                 "Up to 2 rooms",
@@ -54,7 +68,7 @@ async function main() {
             description: "1-20 Rooms",
             price: 4900, // $49.00
             period: BillingCycle.monthly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 20,
             features: [
                 "Up to 20 rooms",
@@ -70,7 +84,7 @@ async function main() {
             description: "1-20 Rooms",
             price: 47040, // $470.40 (20% discount)
             period: BillingCycle.yearly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 20,
             features: [
                 "Up to 20 rooms",
@@ -86,7 +100,7 @@ async function main() {
             description: "21-50 Rooms",
             price: 9900,
             period: BillingCycle.monthly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 50,
             features: [
                 "Up to 50 rooms",
@@ -103,7 +117,7 @@ async function main() {
             description: "21-50 Rooms",
             price: 18800, // $188.00
             period: BillingCycle.yearly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 50,
             features: [
                 "Up to 50 rooms",
@@ -121,7 +135,7 @@ async function main() {
             description: "51-100 Rooms",
             price: 24900, // $249.00
             period: BillingCycle.monthly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 100,
             features: [
                 "Up to 100 rooms",
@@ -139,7 +153,7 @@ async function main() {
             description: "51-100 Rooms",
             price: 298800,
             period: BillingCycle.yearly,
-            currency: "USD",
+            currency: "INR",
             roomLimit: 100,
             features: [
                 "Up to 100 rooms",
@@ -153,6 +167,10 @@ async function main() {
             isActive: true
         }
     ];
+
+    console.log(
+        "Creating initial subscription plans with Razorpay integration..."
+    );
 
     for (const plan of plans) {
         // Skip Razorpay plan creation for free tier
@@ -197,6 +215,11 @@ async function main() {
                 razorpayPlanId: razorpayPlanId
             }
         });
+        console.log(
+            `Upserted subscriptionPlan '${uniqueName}' (Razorpay: ${
+                razorpayPlanId || "none"
+            })`
+        );
     }
 
     console.log(

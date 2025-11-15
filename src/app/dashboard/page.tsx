@@ -115,7 +115,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Dashboard Cards */}
-                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" :
+                <div className={`grid gap-6 mb-8 ${session.user.role === "hotel_admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3" :
                     session.user.role === "super_admin" ? "md:grid-cols-2 lg:grid-cols-2" :
                         "md:grid-cols-3"
                     }`}>

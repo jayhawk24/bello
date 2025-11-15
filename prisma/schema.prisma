@@ -170,7 +170,7 @@ model Subscription {
     razorpaySubscriptionId String?            @map("razorpay_subscription_id")
     razorpayCustomerId     String?            @map("razorpay_customer_id")
     amount                 Int
-    currency               String             @default("USD")
+    currency               String             @default("INR")
     status                 SubscriptionStatus
     currentPeriodStart     DateTime           @map("current_period_start")
     currentPeriodEnd       DateTime           @map("current_period_end")
@@ -187,7 +187,7 @@ model RzpSubscriptionPlan {
     description String
     price       Int          @map("price")
     period      BillingCycle
-    currency    String       @default("USD")
+    currency    String       @default("INR")
     roomLimit   Int          @map("room_limit")
     features    String[]
     isActive    Boolean      @default(true) @map("is_active")
@@ -205,7 +205,7 @@ model PaymentOrder {
     subscriptionId  String?       @map("subscription_id")
     razorpayOrderId String        @unique @map("razorpay_order_id")
     amount          Int // in paise (Indian currency)
-    currency        String        @default("USD")
+    currency        String        @default("INR")
     status          PaymentStatus @default(created)
     receipt         String?
     notes           Json? // Additional notes as JSON
@@ -227,7 +227,7 @@ model Payment {
     razorpayOrderId   String        @map("razorpay_order_id")
     razorpaySignature String        @map("razorpay_signature")
     amount            Int // in paise (Indian currency)
-    currency          String        @default("USD")
+    currency          String        @default("INR")
     status            PaymentStatus
     method            String? // card, netbanking, wallet, upi
     bank              String? // bank name if applicable

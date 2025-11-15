@@ -26,6 +26,9 @@
         "cleanup": "node scripts/cleanup-old-requests.js",
         "setup:cleanup": "bash scripts/setup-cleanup.sh"
     },
+    "prisma": {
+        "seed": "tsx prisma/seed.ts"
+    },
     "dependencies": {
         "@headlessui/react": "^2.2.9",
         "@prisma/client": "^6.19.0",
@@ -58,7 +61,8 @@
         "eslint-config-next": "15.4.6",
         "prisma": "^6.19.0",
         "tailwindcss": "^4",
-        "typescript": "^5"
+        "typescript": "^5",
+        "tsx": "^4.19.1"
     },
     "keywords": [
         "hotel",
