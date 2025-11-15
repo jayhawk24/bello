@@ -1,16 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
     try {
         // Check for API key or internal call
-        const authHeader = request.headers.get('authorization');
-        const apiKey = request.headers.get('x-api-key');
-        
+        const authHeader = request.headers.get("authorization");
+        const apiKey = request.headers.get("x-api-key");
+
         // For security, only allow this from internal calls or with proper API key
-        if (authHeader !== 'Bearer internal-cleanup' && apiKey !== process.env.CLEANUP_API_KEY) {
+        if (
+            authHeader !== "Bearer internal-cleanup" &&
+            apiKey !== process.env.CLEANUP_API_KEY
+        ) {
             return NextResponse.json(
-                { error: 'Unauthorized' },
+                { error: "Unauthorized" },
                 { status: 401 }
             );
         }
@@ -31,28 +34,29 @@ export async function POST(request: NextRequest) {
         // Also cleanup related notifications older than 24 hours
         const notificationDeleteResult = await prisma.notification.deleteMany({
             where: {
-                type: 'service_request_created',
+                type: "service_request_created",
                 createdAt: {
                     lt: twentyFourHoursAgo
                 }
             }
         });
 
-        console.log(`Cleanup completed: Deleted ${deleteResult.count} service requests and ${notificationDeleteResult.count} notifications`);
+        console.log(
+            `Cleanup completed: Deleted ${deleteResult.count} service requests and ${notificationDeleteResult.count} notifications`
+        );
 
         return NextResponse.json({
             success: true,
-            message: 'Cleanup completed successfully',
+            message: "Cleanup completed successfully",
             deleted: {
                 serviceRequests: deleteResult.count,
                 notifications: notificationDeleteResult.count
             }
         });
-
     } catch (error) {
-        console.error('Cleanup error:', error);
+        console.error("Cleanup error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }
@@ -62,12 +66,15 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const hours = parseInt(searchParams.get('hours') || '24');
-        
+        const hours = parseInt(searchParams.get("hours") || "24");
+
         // Validate hours parameter
-        if (isNaN(hours) || hours < 1 || hours > 168) { // Max 7 days
+        if (isNaN(hours) || hours < 1 || hours > 168) {
+            // Max 7 days
             return NextResponse.json(
-                { error: 'Invalid hours parameter. Must be between 1 and 168 (7 days)' },
+                {
+                    error: "Invalid hours parameter. Must be between 1 and 168 (7 days)"
+                },
                 { status: 400 }
             );
         }
@@ -88,7 +95,7 @@ export async function DELETE(request: NextRequest) {
         // Also cleanup related notifications
         const notificationDeleteResult = await prisma.notification.deleteMany({
             where: {
-                type: 'service_request_created',
+                type: "service_request_created",
                 createdAt: {
                     lt: cutoffTime
                 }
@@ -103,11 +110,10 @@ export async function DELETE(request: NextRequest) {
                 notifications: notificationDeleteResult.count
             }
         });
-
     } catch (error) {
-        console.error('Manual cleanup error:', error);
+        console.error("Manual cleanup error:", error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: "Internal server error" },
             { status: 500 }
         );
     }

@@ -38,6 +38,7 @@
         "jose": "^5.9.6",
         "next": "15.4.6",
         "next-auth": "^4.24.10",
+        "razorpay": "^2.9.6",
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "react-hot-toast": "^2.6.0",
