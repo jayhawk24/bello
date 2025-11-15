@@ -55,27 +55,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create a guest user if one doesn't exist for this booking
-        let guestId = booking.guestId;
-        if (!guestId) {
-            const guestUser = await prisma.user.create({
-                data: {
-                    email: booking.guestEmail,
-                    name: booking.guestName,
-                    phone: booking.guestPhone,
-                    role: "guest",
-                    password: "temp_password", // Guest users don't need real passwords
-                    hotelId: booking.hotelId
-                }
-            });
-            guestId = guestUser.id;
-
-            // Update the booking with the guest ID
-            await prisma.booking.update({
-                where: { id: bookingId },
-                data: { guestId }
-            });
-        }
+        // Do not create a user for unauthenticated guests; use existing guestId if present
+        const guestId = booking.guestId ?? null;
 
         // Create the service request
         const serviceRequest = await prisma.serviceRequest.create({
@@ -121,7 +102,10 @@ export async function POST(request: NextRequest) {
                 priority: serviceRequest.priority,
                 hotelId: booking.hotelId,
                 guest: {
-                    name: serviceRequest.guest.name
+                    name:
+                        booking.guestName ||
+                        serviceRequest.guest?.name ||
+                        "Guest"
                 },
                 room: {
                     roomNumber: serviceRequest.room.roomNumber
@@ -177,20 +161,27 @@ export async function GET(request: NextRequest) {
             where: { id: bookingId }
         });
 
-        if (!booking || !booking.guestId) {
-            return NextResponse.json({
-                success: true,
-                serviceRequests: []
-            });
+        if (!booking) {
+            return NextResponse.json(
+                { error: "Booking not found" },
+                { status: 404 }
+            );
         }
 
-        // Get service requests for this guest and booking
+        // Get service requests for this booking's room and time window.
+        // If booking.guestId exists, include it as an additional filter.
+        const where: any = {
+            hotelId: booking.hotelId,
+            roomId: booking.roomId,
+            requestedAt: {
+                gte: booking.checkInDate,
+                lte: booking.checkOutDate
+            }
+        };
+        if (booking.guestId) where.guestId = booking.guestId;
+
         const serviceRequests = await prisma.serviceRequest.findMany({
-            where: {
-                guestId: booking.guestId,
-                hotelId: booking.hotelId,
-                roomId: booking.roomId
-            },
+            where,
             include: {
                 assignedStaff: {
                     select: {
