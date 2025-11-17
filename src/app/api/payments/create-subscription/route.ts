@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         const razorpayCustomer = await createRazorpayCustomer({
             name: user.name,
             email: user.email,
-            contact: hotel.contactPhone,
+            contact: user.phone || undefined,
             notes: {
                 id: user.id
             }

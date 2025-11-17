@@ -66,7 +66,7 @@ async function main() {
         {
             name: "Starter",
             description: "1-20 Rooms",
-            price: 4900, // $49.00
+            price: 49_900, // ₹499.00
             period: BillingCycle.monthly,
             currency: "INR",
             roomLimit: 20,
@@ -82,7 +82,7 @@ async function main() {
         {
             name: "Starter",
             description: "1-20 Rooms",
-            price: 47040, // $470.40 (20% discount)
+            price: 499_900, // ₹4,999.00
             period: BillingCycle.yearly,
             currency: "INR",
             roomLimit: 20,
@@ -98,7 +98,7 @@ async function main() {
         {
             name: "Growth",
             description: "21-50 Rooms",
-            price: 9900,
+            price: 99_900, // ₹999.00
             period: BillingCycle.monthly,
             currency: "INR",
             roomLimit: 50,
@@ -115,7 +115,7 @@ async function main() {
         {
             name: "Growth",
             description: "21-50 Rooms",
-            price: 18800, // $188.00
+            price: 999_900, // ₹9,999.00
             period: BillingCycle.yearly,
             currency: "INR",
             roomLimit: 50,
@@ -133,7 +133,7 @@ async function main() {
         {
             name: "Professional",
             description: "51-100 Rooms",
-            price: 24900, // $249.00
+            price: 199_900, // ₹1,999.00
             period: BillingCycle.monthly,
             currency: "INR",
             roomLimit: 100,
@@ -151,7 +151,7 @@ async function main() {
         {
             name: "Professional",
             description: "51-100 Rooms",
-            price: 298800,
+            price: 1_999_900, // ₹19,999.00
             period: BillingCycle.yearly,
             currency: "INR",
             roomLimit: 100,
