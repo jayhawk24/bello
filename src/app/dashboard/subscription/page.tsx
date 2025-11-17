@@ -11,60 +11,15 @@ declare global {
 }
 
 interface SubscriptionPlan {
+    id: string;
     name: string;
     description: string;
-    monthlyPrice: number;
-    yearlyPrice: number;
-    roomLimit: string;
+    price: number;
+    period: 'monthly' | 'yearly';
+    currency: string;
+    roomLimit: number;
     features: string[];
 }
-
-const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
-    basic: {
-        name: 'Basic',
-        description: 'Perfect for small hotels',
-        monthlyPrice: 49,
-        yearlyPrice: 529,
-        roomLimit: '1-20 rooms',
-        features: [
-            'Up to 20 rooms',
-            'QR code access',
-            'Basic service requests',
-            'Email support',
-            'Basic analytics'
-        ]
-    },
-    premium: {
-        name: 'Premium',
-        description: 'Great for growing hotels',
-        monthlyPrice: 129,
-        yearlyPrice: 1399,
-        roomLimit: '21-50 rooms',
-        features: [
-            'Up to 50 rooms',
-            'QR code access',
-            'Full service requests',
-            'Priority support',
-            'Advanced analytics',
-            'Custom branding'
-        ]
-    },
-    enterprise: {
-        name: 'Enterprise',
-        description: 'For large hotel chains',
-        monthlyPrice: 249,
-        yearlyPrice: 2699,
-        roomLimit: '51+ rooms',
-        features: [
-            'Unlimited rooms',
-            'White-label solution',
-            'Enterprise integrations',
-            '24/7 dedicated support',
-            'Custom analytics',
-            'Multi-property management'
-        ]
-    }
-};
 
 
 export default function SubscriptionPage() {
@@ -72,6 +27,9 @@ export default function SubscriptionPage() {
     const router = useRouter();
     const [selectedBilling, setSelectedBilling] = useState<'monthly' | 'yearly'>('monthly');
     const [loading, setLoading] = useState(false);
+    const [plansLoading, setPlansLoading] = useState(false);
+    const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+    const [planError, setPlanError] = useState<string | null>(null);
     const [currentSubscription, setCurrentSubscription] = useState<any>(null);
     const [hotelData, setHotelData] = useState<any>(null);
 
@@ -84,6 +42,10 @@ export default function SubscriptionPage() {
     useEffect(() => {
         fetchSubscriptionData();
     }, []);
+
+    useEffect(() => {
+        fetchPlans();
+    }, [selectedBilling]);
 
     const fetchSubscriptionData = async () => {
         try {
@@ -100,7 +62,25 @@ export default function SubscriptionPage() {
         }
     };
 
-    const handleSubscribe = async (planType: string) => {
+    const fetchPlans = async () => {
+        setPlansLoading(true);
+        setPlanError(null);
+        try {
+            const response = await fetch(`/api/subscription-plans?interval=${selectedBilling}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch subscription plans');
+            }
+            const data = await response.json();
+            setPlans(data.plans || []);
+        } catch (error) {
+            console.error('Error fetching subscription plans:', error);
+            setPlanError('Unable to load plans. Please try again later.');
+        } finally {
+            setPlansLoading(false);
+        }
+    };
+
+    const handleSubscribe = async (planId: string) => {
         setLoading(true);
 
         try {
@@ -110,7 +90,7 @@ export default function SubscriptionPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    planId: planType,
+                    planId,
                     billingCycle: selectedBilling
                 }),
             });
@@ -174,6 +154,15 @@ export default function SubscriptionPage() {
         return null;
     }
 
+    const formatPrice = (plan: SubscriptionPlan) => {
+        const formatter = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: plan.currency || 'INR',
+            minimumFractionDigits: 0
+        });
+        return formatter.format(Math.round(plan.price / 100));
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100 p-8">
             <div className="max-w-7xl mx-auto">
@@ -202,7 +191,7 @@ export default function SubscriptionPage() {
                                 : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
-                            Yearly (Save 10%)
+                            Yearly (Save 20%)
                         </button>
                     </div>
                 </div>
@@ -245,27 +234,33 @@ export default function SubscriptionPage() {
 
                 {/* Pricing Plans */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => {
-                        const price = selectedBilling === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
-                        const isCurrentPlan = currentSubscription?.planType === key;
-
+                    {plansLoading && (
+                        <div className="col-span-full text-center text-gray-600">Loading plans…</div>
+                    )}
+                    {!plansLoading && planError && (
+                        <div className="col-span-full text-center text-red-600">{planError}</div>
+                    )}
+                    {!plansLoading && !planError && plans.length === 0 && (
+                        <div className="col-span-full text-center text-gray-600">No plans available.</div>
+                    )}
+                    {!plansLoading && !planError && plans.map((plan) => {
+                        const isCurrentPlan = currentSubscription?.planId === plan.id;
                         return (
                             <div
-                                key={key}
-                                className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105 ${isCurrentPlan ? 'ring-4 ring-amber-500' : ''
-                                    }`}
+                                key={plan.id}
+                                className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105 ${isCurrentPlan ? 'ring-4 ring-amber-500' : ''}`}
                             >
                                 <div className="p-8">
                                     <div className="text-center mb-6">
                                         <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                                         <p className="text-gray-600 mb-4">{plan.description}</p>
                                         <div className="text-4xl font-bold text-amber-600 mb-2">
-                                            ₹{price}
+                                            {formatPrice(plan)}
                                             <span className="text-lg text-gray-500">
                                                 /{selectedBilling === 'monthly' ? 'month' : 'year'}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-500">{plan.roomLimit}</p>
+                                        <p className="text-sm text-gray-500">Up to {plan.roomLimit} rooms</p>
                                     </div>
 
                                     <ul className="space-y-3 mb-8">
@@ -288,7 +283,7 @@ export default function SubscriptionPage() {
                                     </ul>
 
                                     <button
-                                        onClick={() => handleSubscribe(key)}
+                                        onClick={() => handleSubscribe(plan.id)}
                                         disabled={loading || isCurrentPlan}
                                         className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${isCurrentPlan
                                             ? 'bg-gray-200 text-gray-500 cursor-not-allowed'

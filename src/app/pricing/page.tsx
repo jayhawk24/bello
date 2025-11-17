@@ -58,9 +58,13 @@ export default function PricingPage() {
         return plan.roomLimit > 20 && plan.roomLimit <= 50;
     };
 
-    // Get price in display format
-    const getPrice = (plan: SubscriptionPlan) => {
-        return Math.floor(plan.price / 100);
+    const formatPrice = (plan: SubscriptionPlan) => {
+        const formatter = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: plan.currency || 'INR',
+            minimumFractionDigits: 0
+        });
+        return formatter.format(Math.round(plan.price / 100));
     };
 
     // Razorpay subscription handler
@@ -166,7 +170,7 @@ export default function PricingPage() {
                     {/* Plans Grid */}
                     <div className="grid md:grid-cols-4 gap-6">
                         {plans.map((plan) => (
-                            <div key={plan.name}
+                            <div key={plan.id}
                                 className={`card-minion text-center flex flex-col h-full relative
                   ${isPopularPlan(plan) ? 'border-minion-yellow border-2' : ''}
                   ${currentSubscription && (
@@ -182,7 +186,7 @@ export default function PricingPage() {
                                     <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                                     <div className="text-sm text-gray-500 mb-4">{plan.description}</div>
                                     <div className="text-3xl font-bold text-minion-yellow mb-4">
-                                        ${getPrice(plan)}<span className="text-base text-gray-500">/month</span>
+                                        {formatPrice(plan)}<span className="text-base text-gray-500">/{plan.period === 'monthly' ? 'month' : 'year'}</span>
                                     </div>
                                     <ul className="text-left space-y-2 mb-6 text-sm px-6">
                                         {plan.features.map((feature: string, idx: number) => (
