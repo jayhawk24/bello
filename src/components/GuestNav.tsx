@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import LogoMark from "./LogoMark";
 
 interface GuestNavProps {
     title: string;
     subtitle?: string;
-    icon?: string;
+    iconSrc?: string;
     backLink?: {
         href: string;
         label: string;
@@ -18,13 +18,11 @@ interface GuestNavProps {
 const GuestNav = ({
     title,
     subtitle,
-    icon = "🏨",
+    iconSrc = "/icon.png",
     backLink,
     actions,
     rightInfo
 }: GuestNavProps) => {
-    const { data: session } = useSession();
-
     return (
         <header className="bg-white shadow-sm border-b border-gray-200">
             <div className="max-w-4xl mx-auto px-4 py-3">
@@ -33,7 +31,7 @@ const GuestNav = ({
                     <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2 flex-1 min-w-0">
                             <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-xl">{icon}</span>
+                                <LogoMark size={24} rounded={false} src={iconSrc} alt={`${title} icon`} />
                             </div>
                             <div className="min-w-0 flex-1">
                                 <h1 className="text-lg font-bold text-gray-800 truncate">{title}</h1>
@@ -69,7 +67,7 @@ const GuestNav = ({
                 <div className="hidden sm:flex justify-between items-center">
                     <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-minion-yellow rounded-full flex items-center justify-center">
-                            <span className="text-2xl">{icon}</span>
+                            <LogoMark size={28} rounded={false} src={iconSrc} alt={`${title} icon`} />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-gray-800">{title}</h1>

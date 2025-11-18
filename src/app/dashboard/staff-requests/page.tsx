@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardNav from "@/components/DashboardNav";
+import LogoMark from "@/components/LogoMark";
 import toast from 'react-hot-toast';
 import NotificationService from '@/lib/notificationService';
 
@@ -237,8 +238,8 @@ export default function StaffDashboard() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
                 <div className="card-minion text-center">
-                    <div className="animate-bounce-slow mb-4">
-                        <span className="text-4xl">🏨</span>
+                    <div className="animate-bounce-slow mb-4 inline-flex">
+                        <LogoMark size={56} src="/icons/requests.svg" alt="Loading staff dashboard" rounded={false} />
                     </div>
                     <p className="text-gray-600">Loading staff dashboard...</p>
                 </div>
@@ -274,28 +275,36 @@ export default function StaffDashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            <DashboardNav title="Staff Dashboard" showNotifications={true} />
+            <DashboardNav title="Staff Dashboard" iconSrc="/icons/requests.svg" showNotifications={true} />
 
             <main className="max-w-7xl mx-auto px-6 py-8">{/* Navigation removed, now using component */}
                 {/* Stats Cards */}
                 <div className="grid md:grid-cols-4 gap-6 mb-8">
                     <div className="card-minion text-center">
-                        <div className="text-3xl mb-2">📋</div>
+                        <div className="flex justify-center mb-2">
+                            <LogoMark size={40} src="/icons/requests.svg" alt="Pending requests" rounded={false} />
+                        </div>
                         <div className="text-2xl font-bold text-orange-600">{pendingRequests.length}</div>
                         <div className="text-gray-600">Pending Requests</div>
                     </div>
                     <div className="card-minion text-center">
-                        <div className="text-3xl mb-2">🔄</div>
+                        <div className="flex justify-center mb-2">
+                            <LogoMark size={40} src="/icons/progress.svg" alt="In progress" rounded={false} />
+                        </div>
                         <div className="text-2xl font-bold text-blue-600">{inProgressRequests.length}</div>
                         <div className="text-gray-600">In Progress</div>
                     </div>
                     <div className="card-minion text-center">
-                        <div className="text-3xl mb-2">✅</div>
+                        <div className="flex justify-center mb-2">
+                            <LogoMark size={40} src="/icons/check.svg" alt="Completed" rounded={false} />
+                        </div>
                         <div className="text-2xl font-bold text-green-600">{completedRequests.length}</div>
                         <div className="text-gray-600">Completed Today</div>
                     </div>
                     <div className="card-minion text-center">
-                        <div className="text-3xl mb-2">🛏️</div>
+                        <div className="flex justify-center mb-2">
+                            <LogoMark size={40} src="/icons/rooms.svg" alt="Total rooms" rounded={false} />
+                        </div>
                         <div className="text-2xl font-bold text-minion-blue">{rooms.length}</div>
                         <div className="text-gray-600">Total Rooms</div>
                     </div>
@@ -332,7 +341,9 @@ export default function StaffDashboard() {
                     <div className="space-y-4 max-h-96 overflow-y-auto">
                         {serviceRequests.length === 0 ? (
                             <div className="text-center py-8">
-                                <div className="text-4xl mb-4">📝</div>
+                                <div className="flex justify-center mb-4">
+                                    <LogoMark size={48} src="/icons/document.svg" alt="No requests" rounded={false} />
+                                </div>
                                 <p className="text-gray-600">No service requests found</p>
                             </div>
                         ) : (
@@ -350,11 +361,23 @@ export default function StaffDashboard() {
                                                 </span>
                                             </div>
                                             <p className="text-gray-600 mb-2">{request.description}</p>
-                                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                                <span>🏨 Room {request.room.roomNumber}</span>
-                                                <span>👤 {request.guest.name}</span>
-                                                <span>📱 {request.guest.phone}</span>
-                                                <span>🕐 {new Date(request.requestedAt).toLocaleString()}</span>
+                                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                                                <div className="flex items-center gap-1">
+                                                    <LogoMark size={18} src="/icons/rooms.svg" alt="Room" rounded={false} />
+                                                    <span>Room {request.room.roomNumber}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <LogoMark size={18} src="/icons/guest.svg" alt="Guest" rounded={false} />
+                                                    <span>{request.guest.name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <LogoMark size={18} src="/icons/phone.svg" alt="Phone" rounded={false} />
+                                                    <span>{request.guest.phone}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <LogoMark size={18} src="/icons/clock.svg" alt="Requested at" rounded={false} />
+                                                    <span>{new Date(request.requestedAt).toLocaleString()}</span>
+                                                </div>
                                             </div>
                                             <div className="mt-2 text-sm text-gray-600">
                                                 <span className="font-medium">Service:</span> {request.service.name} ({request.service.category})
@@ -372,7 +395,7 @@ export default function StaffDashboard() {
                                                     disabled={updatingRequests.has(request.id)}
                                                     className="btn-minion text-sm px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    {updatingRequests.has(request.id) ? '⏳ Starting...' : '▶️ Start Work'}
+                                                    {updatingRequests.has(request.id) ? 'Starting...' : 'Start Work'}
                                                 </button>
                                             )}
                                             {request.status === 'in_progress' && (
@@ -381,12 +404,12 @@ export default function StaffDashboard() {
                                                     disabled={updatingRequests.has(request.id)}
                                                     className="btn-minion-success text-sm px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    {updatingRequests.has(request.id) ? '⏳ Completing...' : '✅ Mark Complete'}
+                                                    {updatingRequests.has(request.id) ? 'Completing...' : 'Mark Complete'}
                                                 </button>
                                             )}
                                             {request.status === 'completed' && (
                                                 <div className="text-sm text-green-600 font-medium px-3 py-1">
-                                                    ✅ Completed
+                                                    Completed
                                                 </div>
                                             )}
                                             {/* Admin-only delete button */}
@@ -397,7 +420,7 @@ export default function StaffDashboard() {
                                                     className="btn-minion-danger text-sm px-3 py-1"
                                                     title="Delete this service request"
                                                 >
-                                                    {deletingRequests.has(request.id) ? '⏳ Deleting...' : '🗑️ Delete'}
+                                                    {deletingRequests.has(request.id) ? 'Deleting...' : 'Delete'}
                                                 </button>
                                             )}
                                         </div>
@@ -439,7 +462,7 @@ export default function StaffDashboard() {
                                         className="btn-minion-danger text-xs px-2 py-1 w-full mt-2"
                                         title={`Delete all service requests for Room ${room.roomNumber}`}
                                     >
-                                        🗑️ Clear Requests
+                                        Clear Requests
                                     </button>
                                 )}
                             </div>

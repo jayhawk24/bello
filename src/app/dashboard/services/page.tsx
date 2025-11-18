@@ -1,10 +1,10 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import DashboardNav from "@/components/DashboardNav";
+import LogoMark from "@/components/LogoMark";
 
 interface Service {
     id: string;
@@ -24,6 +24,63 @@ interface ServiceFormData {
     isActive: boolean;
 }
 
+const categoryIconMap: Record<string, string> = {
+    room_service: "/icons/room-service.svg",
+    housekeeping: "/icons/housekeeping.svg",
+    concierge: "/icons/concierge.svg",
+    transportation: "/icons/valet.svg",
+    laundry: "/icons/laundry.svg",
+    maintenance: "/icons/maintenance.svg",
+    restaurant: "/icons/dining.svg",
+    spa: "/icons/spa.svg",
+    other: "/icons/document.svg"
+};
+
+const categories = [
+    { value: 'room_service', label: 'Room Service' },
+    { value: 'housekeeping', label: 'Housekeeping' },
+    { value: 'concierge', label: 'Concierge' },
+    { value: 'transportation', label: 'Transportation' },
+    { value: 'laundry', label: 'Laundry' },
+    { value: 'maintenance', label: 'Maintenance' },
+    { value: 'restaurant', label: 'Restaurant' },
+    { value: 'spa', label: 'Spa & Wellness' },
+    { value: 'other', label: 'Other' }
+];
+
+const iconFallbackMap: Record<string, string> = {
+    '🏨': "/icons/hotel.svg",
+    '🍽️': "/icons/room-service.svg",
+    '🧹': "/icons/housekeeping.svg",
+    '🎩': "/icons/concierge.svg",
+    '🚗': "/icons/valet.svg",
+    '👔': "/icons/laundry.svg",
+    '🔧': "/icons/maintenance.svg",
+    '🍜': "/icons/dining.svg",
+    '💆': "/icons/spa.svg",
+    '📋': "/icons/document.svg",
+    '🛎️': "/icons/bell.svg",
+    '🌟': "/icons/star.svg",
+    '💼': "/icons/business.svg",
+    '🎯': "/icons/target.svg"
+};
+
+const iconOptions = [
+    { value: "/icons/room-service.svg", label: "Room Service" },
+    { value: "/icons/housekeeping.svg", label: "Housekeeping" },
+    { value: "/icons/concierge.svg", label: "Concierge" },
+    { value: "/icons/valet.svg", label: "Transportation" },
+    { value: "/icons/laundry.svg", label: "Laundry" },
+    { value: "/icons/maintenance.svg", label: "Maintenance" },
+    { value: "/icons/dining.svg", label: "Restaurant" },
+    { value: "/icons/spa.svg", label: "Spa & Wellness" },
+    { value: "/icons/document.svg", label: "Other" },
+    { value: "/icons/bell.svg", label: "Concierge Bell" },
+    { value: "/icons/star.svg", label: "Premium" },
+    { value: "/icons/business.svg", label: "Business" },
+    { value: "/icons/target.svg", label: "Targeted" }
+];
+
 export default function ServicesManagementPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -35,25 +92,25 @@ export default function ServicesManagementPage() {
         name: '',
         description: '',
         category: 'room_service',
-        icon: '🏨',
+        icon: categoryIconMap['room_service'],
         isActive: true
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    const categories = [
-        { value: 'room_service', label: 'Room Service', icon: '🍽️' },
-        { value: 'housekeeping', label: 'Housekeeping', icon: '🧹' },
-        { value: 'concierge', label: 'Concierge', icon: '🎩' },
-        { value: 'transportation', label: 'Transportation', icon: '🚗' },
-        { value: 'laundry', label: 'Laundry', icon: '👔' },
-        { value: 'maintenance', label: 'Maintenance', icon: '🔧' },
-        { value: 'restaurant', label: 'Restaurant', icon: '🍜' },
-        { value: 'spa', label: 'Spa & Wellness', icon: '💆' },
-        { value: 'other', label: 'Other', icon: '📋' }
-    ];
 
-    const iconOptions = ['🏨', '🍽️', '🧹', '🎩', '🚗', '👔', '🔧', '🍜', '💆', '📋', '🛎️', '🌟', '💼', '🎯'];
+    const getIconSrc = (iconValue?: string, category?: string) => {
+        if (iconValue?.startsWith("/")) {
+            return iconValue;
+        }
+        if (iconValue && iconFallbackMap[iconValue]) {
+            return iconFallbackMap[iconValue];
+        }
+        if (category && categoryIconMap[category]) {
+            return categoryIconMap[category];
+        }
+        return "/icon.png";
+    };
 
     useEffect(() => {
         if (status === "loading") return;
@@ -90,10 +147,10 @@ export default function ServicesManagementPage() {
         setSuccess("");
 
         try {
-            const url = editingService 
+            const url = editingService
                 ? `/api/hotel/services/${editingService.id}`
                 : "/api/hotel/services";
-            
+
             const method = editingService ? "PUT" : "POST";
 
             const response = await fetch(url, {
@@ -124,7 +181,7 @@ export default function ServicesManagementPage() {
             name: service.name,
             description: service.description,
             category: service.category,
-            icon: service.icon,
+            icon: getIconSrc(service.icon, service.category),
             isActive: service.isActive
         });
         setShowForm(true);
@@ -176,22 +233,26 @@ export default function ServicesManagementPage() {
             name: '',
             description: '',
             category: 'room_service',
-            icon: '🏨',
+            icon: categoryIconMap['room_service'],
             isActive: true
         });
         setEditingService(null);
     };
 
     const getCategoryInfo = (category: string) => {
-        return categories.find(c => c.value === category) || { label: category, icon: '🏨' };
+        const match = categories.find(c => c.value === category);
+        return {
+            label: match?.label || category,
+            iconSrc: categoryIconMap[category] || "/icon.png"
+        };
     };
 
     if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
                 <div className="card-minion text-center">
-                    <div className="animate-bounce-slow mb-4">
-                        <span className="text-4xl">🛎️</span>
+                    <div className="animate-bounce-slow mb-4 inline-flex">
+                        <LogoMark size={56} src="/icons/services.svg" alt="Loading services" rounded={false} />
                     </div>
                     <p className="text-gray-600">Loading services...</p>
                 </div>
@@ -205,13 +266,13 @@ export default function ServicesManagementPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            <DashboardNav title="Service Management" icon="🛎️" />
+            <DashboardNav title="Service Management" iconSrc="/icons/services.svg" />
 
             <main className="max-w-7xl mx-auto px-6 py-12">{/* Navigation updated to use component */}
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                            Services Management 🛎️
+                            Services Management
                         </h1>
                         <p className="text-xl text-gray-600">
                             Manage the services your hotel offers to guests
@@ -222,9 +283,10 @@ export default function ServicesManagementPage() {
                             resetForm();
                             setShowForm(true);
                         }}
-                        className="btn-minion"
+                        className="btn-minion flex items-center gap-2"
                     >
-                        ➕ Add New Service
+                        <LogoMark size={20} src="/icons/bell.svg" alt="Add service" rounded={false} />
+                        Add New Service
                     </button>
                 </div>
 
@@ -273,7 +335,7 @@ export default function ServicesManagementPage() {
                                     >
                                         {categories.map(category => (
                                             <option key={category.value} value={category.value}>
-                                                {category.icon} {category.label}
+                                                {category.label}
                                             </option>
                                         ))}
                                     </select>
@@ -300,16 +362,18 @@ export default function ServicesManagementPage() {
                                         Icon
                                     </label>
                                     <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-md">
-                                        {iconOptions.map(icon => (
+                                        {iconOptions.map(option => (
                                             <button
-                                                key={icon}
+                                                key={option.value}
                                                 type="button"
-                                                onClick={() => setFormData(prev => ({ ...prev, icon }))}
-                                                className={`p-2 rounded-md text-xl hover:bg-gray-100 ${
-                                                    formData.icon === icon ? 'bg-minion-yellow' : ''
-                                                }`}
+                                                onClick={() => setFormData(prev => ({ ...prev, icon: option.value }))}
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm transition-colors ${formData.icon === option.value
+                                                    ? 'bg-minion-yellow border-minion-yellow'
+                                                    : 'border-transparent hover:bg-gray-100'
+                                                    }`}
                                             >
-                                                {icon}
+                                                <LogoMark size={28} src={option.value} alt={option.label} rounded={false} />
+                                                <span>{option.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -357,17 +421,21 @@ export default function ServicesManagementPage() {
                             <div key={service.id} className="card-minion">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center space-x-3">
-                                        <span className="text-2xl">{service.icon}</span>
+                                        <LogoMark
+                                            size={40}
+                                            rounded={false}
+                                            src={getIconSrc(service.icon, service.category)}
+                                            alt={`${service.name} icon`}
+                                        />
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
                                             <span className="text-sm text-gray-500">{categoryInfo.label}</span>
                                         </div>
                                     </div>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        service.isActive 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : 'bg-gray-100 text-gray-800'
-                                    }`}>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${service.isActive
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                        }`}>
                                         {service.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
@@ -380,23 +448,22 @@ export default function ServicesManagementPage() {
                                             onClick={() => handleEdit(service)}
                                             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                                         >
-                                            ✏️ Edit
+                                            Edit
                                         </button>
                                         <button
                                             onClick={() => toggleServiceStatus(service)}
-                                            className={`text-sm font-medium ${
-                                                service.isActive 
-                                                    ? 'text-orange-600 hover:text-orange-800' 
-                                                    : 'text-green-600 hover:text-green-800'
-                                            }`}
+                                            className={`text-sm font-medium ${service.isActive
+                                                ? 'text-orange-600 hover:text-orange-800'
+                                                : 'text-green-600 hover:text-green-800'
+                                                }`}
                                         >
-                                            {service.isActive ? '⏸️ Deactivate' : '▶️ Activate'}
+                                            {service.isActive ? 'Deactivate' : 'Activate'}
                                         </button>
                                         <button
                                             onClick={() => handleDelete(service)}
                                             className="text-red-600 hover:text-red-800 text-sm font-medium"
                                         >
-                                            🗑️ Delete
+                                            Delete
                                         </button>
                                     </div>
                                 </div>
@@ -407,7 +474,9 @@ export default function ServicesManagementPage() {
 
                 {services.length === 0 && !showForm && (
                     <div className="card-minion text-center">
-                        <div className="text-6xl mb-4">🛎️</div>
+                        <div className="flex justify-center mb-4">
+                            <LogoMark size={72} src="/icons/bell.svg" alt="No services" rounded={false} />
+                        </div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">No Services Added Yet</h2>
                         <p className="text-gray-600 mb-6">
                             Start by adding services that your hotel offers to guests

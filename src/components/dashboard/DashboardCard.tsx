@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoMark from "../LogoMark";
 
 interface DashboardCardButton {
     text: string;
@@ -7,7 +8,8 @@ interface DashboardCardButton {
 }
 
 interface DashboardCardProps {
-    icon: string;
+    icon?: string;
+    iconSrc?: string;
     title: string;
     description: string;
     // Support both single button (backward compatibility) and multiple buttons
@@ -19,6 +21,7 @@ interface DashboardCardProps {
 
 export default function DashboardCard({
     icon,
+    iconSrc,
     title,
     description,
     buttonText,
@@ -42,9 +45,31 @@ export default function DashboardCard({
         }
     };
 
+    const renderIcon = () => {
+        if (iconSrc) {
+            return (
+                <LogoMark
+                    size={40}
+                    className="mx-auto"
+                    src={iconSrc}
+                    alt={`${title} icon`}
+                    rounded={false}
+                />
+            );
+        }
+
+        if (icon) {
+            return <span>{icon}</span>;
+        }
+
+        return <LogoMark size={40} className="mx-auto" alt="Bello logo" />;
+    };
+
     return (
         <div className={`card-minion text-center flex flex-col h-full ${className}`}>
-            <div className="text-4xl mb-4">{icon}</div>
+            <div className="text-4xl mb-4 flex justify-center">
+                {renderIcon()}
+            </div>
             <h3 className="text-xl font-semibold mb-2">{title}</h3>
             <p className="text-gray-600 mb-4 flex-grow">
                 {description}
@@ -58,9 +83,9 @@ export default function DashboardCard({
                     ) : (
                         <div className="flex flex-col gap-2">
                             {buttonsToRender.map((button, index) => (
-                                <Link 
-                                    key={index} 
-                                    href={button.href} 
+                                <Link
+                                    key={index}
+                                    href={button.href}
                                     className={`${getButtonClassName(button.variant)} text-sm`}
                                 >
                                     {button.text}

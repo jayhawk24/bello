@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 type RegisterPageProps = {
-    searchParams?: Record<string, string | string[] | undefined>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 type PlanTier = "free" | "basic" | "premium" | "enterprise";
@@ -36,8 +36,9 @@ const deriveTierFromName = (name: string): PlanTier => {
 };
 
 export default async function RegisterPage({
-    searchParams = {}
+    searchParams
 }: RegisterPageProps) {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
     const plansRaw = await prisma.rzpSubscriptionPlan.findMany({
         where: { isActive: true },
         orderBy: { price: "asc" }
@@ -51,7 +52,7 @@ export default async function RegisterPage({
                         Registration is temporarily unavailable
                     </h1>
                     <p className="text-gray-600">
-                        We're updating our plans. Please check back soon or contact support.
+                        We&apos;re updating our plans. Please check back soon or contact support.
                     </p>
                 </div>
             </div>
@@ -70,7 +71,7 @@ export default async function RegisterPage({
         tier: deriveTierFromName(plan.name)
     }));
 
-    const planQuery = searchParams.plan;
+    const planQuery = resolvedSearchParams.plan;
     const requestedPlanId = Array.isArray(planQuery) ? planQuery[0] : planQuery;
     const requestedPlan = requestedPlanId
         ? plans.find((plan) => plan.id === requestedPlanId)

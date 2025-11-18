@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PricingSection from "@/components/PricingSection";
+import LogoMark from "@/components/LogoMark";
 
 export default function Home() {
   return (
@@ -9,7 +10,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
-              <span className="text-2xl">🏨</span>
+              <LogoMark size={28} priority />
             </div>
             <h1 className="text-2xl font-bold text-gray-800">Bello</h1>
           </div>
@@ -120,7 +121,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-minion-yellow rounded-full flex items-center justify-center">
-              <span className="text-lg">🏨</span>
+              <LogoMark size={20} />
             </div>
             <h3 className="text-xl font-bold">Bello</h3>
           </div>

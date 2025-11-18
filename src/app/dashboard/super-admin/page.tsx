@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardNav from "@/components/DashboardNav";
 import DashboardCard from "@/components/dashboard/DashboardCard";
+import LogoMark from "@/components/LogoMark";
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
@@ -81,7 +82,7 @@ export default function DashboardPage() {
             <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
                 <div className="card-minion text-center">
                     <div className="animate-bounce-slow mb-4">
-                        <span className="text-4xl">🏨</span>
+                        <LogoMark size={56} />
                     </div>
                     <p className="text-gray-600">Loading your dashboard...</p>
                 </div>
@@ -101,13 +102,13 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
-            <DashboardNav title={hotelName || "Dashboard"} showNotifications={true} />
+            <DashboardNav title={hotelName || "Dashboard"} iconSrc="/icons/super-admin.svg" showNotifications={true} />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-12">
                 <div className="mb-8">
                     <h4 className="text-xl md:text-4xl font-bold text-gray-800 mb-4">
-                        Welcome to Your Dashboard! 🎉
+                        Welcome to Your Dashboard!
                     </h4>
                     <p className="text-xl text-gray-600">
                         {session.user.role === "hotel_admin" ? "Manage your hotel and provide excellent guest experiences." :
@@ -123,7 +124,7 @@ export default function DashboardPage() {
                     }`}>
                     {session.user.role === "hotel_admin" && (
                         <DashboardCard
-                            icon="🏨"
+                            iconSrc="/icons/hotel.svg"
                             title="Hotel Profile"
                             description={session.user.hotel?.name || "Setup your hotel details"}
                             buttonText="Manage Hotel"
@@ -132,7 +133,7 @@ export default function DashboardPage() {
                     )}
 
                     <DashboardCard
-                        icon="🛏️"
+                        iconSrc="/icons/rooms.svg"
                         title="Rooms & QR Codes"
                         description={
                             session.user.role === "hotel_admin"
@@ -145,7 +146,7 @@ export default function DashboardPage() {
 
                     {(session.user.role === "hotel_staff" || session.user.role === "hotel_admin") && (
                         <DashboardCard
-                            icon="📋"
+                            iconSrc="/icons/requests.svg"
                             title="Service Requests"
                             description="View and manage incoming guest service requests"
                             buttonText="View Requests"
@@ -156,21 +157,21 @@ export default function DashboardPage() {
                     {session.user.role === "hotel_admin" && (
                         <>
                             <DashboardCard
-                                icon="🛎️"
+                                iconSrc="/icons/services.svg"
                                 title="Services Management"
                                 description="Configure services offered to your guests"
                                 buttonText="Manage Services"
                                 href="/dashboard/services"
                             />
                             <DashboardCard
-                                icon="👥"
+                                iconSrc="/icons/staff.svg"
                                 title="Staff Management"
                                 description="Add and manage your hotel staff members"
                                 buttonText="Manage Staff"
                                 href="/dashboard/staff"
                             />
                             <DashboardCard
-                                icon="💳"
+                                iconSrc="/icons/subscription.svg"
                                 title="Subscription"
                                 description="Manage your subscription plan and billing"
                                 buttonText="Manage Plan"
@@ -182,7 +183,9 @@ export default function DashboardPage() {
                     {session.user.role === "super_admin" && (
                         <div>
                             <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">👑</div>
+                                <div className="w-12 h-12 mx-auto mb-4">
+                                    <LogoMark size={48} src="/icons/super-admin.svg" />
+                                </div>
                                 <h3 className="text-xl font-semibold mb-2">Super Admin</h3>
                                 <p className="text-gray-600 mb-4">
                                     Manage all hotels and subscriptions
@@ -192,7 +195,9 @@ export default function DashboardPage() {
                                 </Link>
                             </div>
                             <div className="card-minion text-center">
-                                <div className="text-4xl mb-4">💳</div>
+                                <div className="w-12 h-12 mx-auto mb-4">
+                                    <LogoMark size={48} src="/icons/subscription.svg" />
+                                </div>
                                 <h3 className="text-xl font-semibold mb-2">Subscription</h3>
                                 <p className="text-gray-600 mb-4">
                                     Manage your subscription plan and billing
@@ -231,17 +236,17 @@ export default function DashboardPage() {
 
                 {/* Getting Started */}
                 <div className="mt-12">
-                    <h2 className="text-2xl font-bold mb-6">🚀 Getting Started</h2>
+                    <h2 className="text-2xl font-bold mb-6">Getting Started</h2>
                     <div className="grid md:grid-cols-2 gap-6">
                         <DashboardCard
-                            icon="🏨"
+                            iconSrc="/icons/hotel.svg"
                             title="Complete Hotel Setup"
                             description="Add your hotel details, address, and contact information."
                             buttonText="Complete Setup"
                             href="/dashboard/hotel/setup"
                         />
                         <DashboardCard
-                            icon="🛏️"
+                            iconSrc="/icons/rooms.svg"
                             title="Add Rooms"
                             description="Configure your rooms and generate QR codes for guest access."
                             buttonText="Add Rooms"

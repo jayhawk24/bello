@@ -180,7 +180,7 @@ export default function SuperUserDashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100">
-            <DashboardNav title="Super Admin Dashboard" icon="👑" showNotifications={false} />
+            <DashboardNav title="Super Admin Dashboard" iconSrc="/icons/super-admin.svg" showNotifications={false} />
 
             <main className="max-w-7xl mx-auto px-6 py-8">
                 {/* Stats Overview */}

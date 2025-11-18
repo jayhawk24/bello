@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import toast from 'react-hot-toast';
 import GuestNav from "@/components/GuestNav";
+import LogoMark from "@/components/LogoMark";
 
 interface Service {
     id: string;
@@ -44,6 +45,48 @@ function ServiceRequestComponent() {
     const [error, setError] = useState("");
     const [step, setStep] = useState<'select' | 'form'>('select');
     const [currentUrl, setCurrentUrl] = useState('');
+
+    const categoryIconMap: Record<string, string> = {
+        room_service: "/icons/room-service.svg",
+        housekeeping: "/icons/housekeeping.svg",
+        concierge: "/icons/concierge.svg",
+        transportation: "/icons/valet.svg",
+        laundry: "/icons/laundry.svg",
+        maintenance: "/icons/maintenance.svg",
+        restaurant: "/icons/dining.svg",
+        spa: "/icons/spa.svg",
+        other: "/icons/document.svg"
+    };
+
+    const iconFallbackMap: Record<string, string> = {
+        '🏨': "/icons/hotel.svg",
+        '🍽️': "/icons/room-service.svg",
+        '🧹': "/icons/housekeeping.svg",
+        '🎩': "/icons/concierge.svg",
+        '🚗': "/icons/valet.svg",
+        '👔': "/icons/laundry.svg",
+        '🔧': "/icons/maintenance.svg",
+        '🍜': "/icons/dining.svg",
+        '💆': "/icons/spa.svg",
+        '📋': "/icons/document.svg",
+        '🛎️': "/icons/bell.svg",
+        '🌟': "/icons/star.svg",
+        '💼': "/icons/business.svg",
+        '🎯': "/icons/target.svg"
+    };
+
+    const getIconSrc = (iconValue?: string, category?: string) => {
+        if (iconValue?.startsWith("/")) {
+            return iconValue;
+        }
+        if (iconValue && iconFallbackMap[iconValue]) {
+            return iconFallbackMap[iconValue];
+        }
+        if (category && categoryIconMap[category]) {
+            return categoryIconMap[category];
+        }
+        return "/icon.png";
+    };
 
     // Get current URL for login redirect
     useEffect(() => {
@@ -166,8 +209,8 @@ function ServiceRequestComponent() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
                 <div className="card-minion text-center">
-                    <div className="animate-bounce-slow mb-4">
-                        <span className="text-4xl">🛎️</span>
+                    <div className="animate-bounce-slow mb-4 inline-flex">
+                        <LogoMark size={56} src="/icons/services.svg" alt="Loading services" rounded={false} />
                     </div>
                     <p className="text-gray-600">Loading services...</p>
                 </div>
@@ -180,7 +223,7 @@ function ServiceRequestComponent() {
             <GuestNav
                 title="Service Request"
                 subtitle={session?.user ? `Welcome, ${session.user.name}!` : 'Request hotel services'}
-                icon="🛎️"
+                iconSrc="/icons/room-service.svg"
                 actions={
                     !bookingId && !session?.user ? (
                         <>
@@ -188,18 +231,18 @@ function ServiceRequestComponent() {
                                 href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
                                 className="btn-minion px-3 py-2 text-sm"
                             >
-                                ✨ Sign Up
+                                Sign Up
                             </Link>
                             <Link
                                 href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
                                 className="btn-minion-secondary px-3 py-2 text-sm"
                             >
-                                👤 Sign In
+                                Sign In
                             </Link>
                         </>
                     ) : session?.user ? (
                         <div className="flex items-center space-x-2 text-gray-600">
-                            <span className="text-xl">👤</span>
+                            <LogoMark size={24} src="/icons/guest.svg" alt="Guest" rounded={false} />
                             <span className="font-medium text-sm">{session.user.name}</span>
                         </div>
                     ) : null
@@ -225,7 +268,14 @@ function ServiceRequestComponent() {
                                     className="card-minion text-center cursor-pointer hover:shadow-lg transition-shadow"
                                     onClick={() => handleServiceSelect(service)}
                                 >
-                                    <div className="text-4xl mb-4">{service.icon}</div>
+                                    <div className="flex justify-center mb-4">
+                                        <LogoMark
+                                            size={48}
+                                            src={getIconSrc(service.icon, service.category)}
+                                            alt={`${service.name} icon`}
+                                            rounded={false}
+                                        />
+                                    </div>
                                     <h3 className="text-xl font-semibold mb-2">{service.name}</h3>
                                     <p className="text-gray-600 mb-4">{service.description}</p>
                                     <p className="text-sm text-gray-500 capitalize">
@@ -237,7 +287,9 @@ function ServiceRequestComponent() {
 
                         {!bookingId && !session?.user && (
                             <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center">
-                                <div className="text-3xl mb-3">👤</div>
+                                <div className="flex justify-center mb-3">
+                                    <LogoMark size={48} src="/icons/guest.svg" alt="Create account" rounded={false} />
+                                </div>
                                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Want to track your requests?</h3>
                                 <p className="text-gray-600 mb-4">
                                     Create an account to track service requests, save preferences, and get updates.
@@ -247,13 +299,13 @@ function ServiceRequestComponent() {
                                         href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
                                         className="btn-minion"
                                     >
-                                        ✨ Create Account
+                                        Create Account
                                     </Link>
                                     <Link
                                         href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
                                         className="btn-minion-secondary"
                                     >
-                                        🔑 Sign In
+                                        Sign In
                                     </Link>
                                 </div>
                             </div>
@@ -262,7 +314,14 @@ function ServiceRequestComponent() {
                 ) : (
                     <div>
                         <div className="text-center mb-8">
-                            <div className="text-6xl mb-4">{selectedService?.icon}</div>
+                            <div className="flex justify-center mb-4">
+                                <LogoMark
+                                    size={64}
+                                    src={getIconSrc(selectedService?.icon, selectedService?.category || undefined)}
+                                    alt={`${selectedService?.name} icon`}
+                                    rounded={false}
+                                />
+                            </div>
                             <h2 className="text-3xl font-bold text-gray-800 mb-2">
                                 {selectedService?.name}
                             </h2>
@@ -326,7 +385,9 @@ function ServiceRequestComponent() {
                                 {!bookingId && !session?.user && (
                                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <div className="flex items-start space-x-3">
-                                            <div className="text-blue-500 text-xl">💡</div>
+                                            <div className="flex-shrink-0">
+                                                <LogoMark size={32} src="/icons/info.svg" alt="Information" rounded={false} />
+                                            </div>
                                             <div className="flex-1">
                                                 <h4 className="text-blue-800 font-medium mb-2">Want to track your requests?</h4>
                                                 <p className="text-blue-700 text-sm mb-3">
@@ -337,13 +398,13 @@ function ServiceRequestComponent() {
                                                         href={`/guest-register?returnUrl=${encodeURIComponent(currentUrl)}&hotelId=${hotelId}`}
                                                         className="inline-block bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors"
                                                     >
-                                                        ✨ Create Account
+                                                        Create Account
                                                     </Link>
                                                     <Link
                                                         href={`/login?returnUrl=${encodeURIComponent(currentUrl)}`}
                                                         className="inline-block bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
                                                     >
-                                                        👤 Sign In
+                                                        Sign In
                                                     </Link>
                                                 </div>
                                             </div>
@@ -364,7 +425,7 @@ function ServiceRequestComponent() {
                                         className="btn-minion flex-1"
                                         disabled={isSubmitting || !formData.title.trim()}
                                     >
-                                        {isSubmitting ? "🔄 Submitting..." : "🚀 Submit Request"}
+                                        {isSubmitting ? "Submitting..." : "Submit Request"}
                                     </button>
                                 </div>
                             </form>

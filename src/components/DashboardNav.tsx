@@ -3,16 +3,17 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import NotificationBell from "./NotificationBell";
+import LogoMark from "./LogoMark";
 
 interface DashboardNavProps {
     title: string;
-    icon?: string;
+    iconSrc?: string;
     showNotifications?: boolean;
 }
 
 const DashboardNav = ({
     title,
-    icon = "🏨",
+    iconSrc = "/icon.png",
     showNotifications = false
 }: DashboardNavProps) => {
     const { data: session } = useSession();
@@ -30,7 +31,7 @@ const DashboardNav = ({
                     <div className="flex justify-between items-center">
                         <Link href="/dashboard" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                             <div className="w-8 h-8 bg-minion-yellow rounded-full flex items-center justify-center">
-                                <span className="text-lg">{icon}</span>
+                                <LogoMark size={24} className="shrink-0" src={iconSrc} />
                             </div>
                             <p className="text-2xl font-bold text-gray-800 max-w-[calc(100%-3rem)] ">{title}</p>
                         </Link>
@@ -48,7 +49,7 @@ const DashboardNav = ({
                 <div className="hidden sm:flex justify-between items-center">
                     <Link href="/dashboard" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                         <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
-                            <span className="text-2xl">{icon}</span>
+                            <LogoMark size={28} className="shrink-0" src={iconSrc} />
                         </div>
                         <h1 className="text-lg md:text-2xl font-bold text-gray-800 truncate">{title}</h1>
                     </Link>

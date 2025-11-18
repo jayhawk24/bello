@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import GuestNav from "@/components/GuestNav";
+import LogoMark from "@/components/LogoMark";
 
 export default function GuestAccess() {
     const { data: session } = useSession();
@@ -16,7 +17,7 @@ export default function GuestAccess() {
             <GuestNav
                 title="Guest Services"
                 subtitle="Access hotel services and amenities"
-                icon="🏨"
+                iconSrc="/icons/guest.svg"
                 actions={
                     session?.user ? (
                         <button
@@ -43,8 +44,8 @@ export default function GuestAccess() {
                 {/* Hero Section */}
                 <div className="text-center mb-16">
                     <div className="mb-8">
-                        <div className="inline-block p-6 bg-minion-yellow rounded-full animate-bounce-slow mb-6">
-                            <span className="text-6xl">🛎️</span>
+                        <div className="inline-flex p-6 bg-minion-yellow rounded-full animate-bounce-slow mb-6">
+                            <LogoMark size={72} src="/icons/bell.svg" alt="Concierge bell" rounded={false} />
                         </div>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
@@ -59,25 +60,31 @@ export default function GuestAccess() {
                 <div className="grid md:grid-cols-2 gap-8 mb-16">
                     {/* QR Code Access */}
                     <div className="card-minion text-center p-8">
-                        <div className="text-6xl mb-6">📱</div>
+                        <div className="flex justify-center mb-6">
+                            <LogoMark size={72} src="/icons/qr.svg" alt="QR access" rounded={false} />
+                        </div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Scan QR Code</h2>
                         <p className="text-gray-600 mb-6">
                             Found a QR code in your hotel room? Scan it for instant access to all concierge services.
                         </p>
-                        <Link href="/guest/qr-scan" className="btn-minion w-full text-lg py-3">
-                            📱 Open QR Scanner
+                        <Link href="/guest/qr-scan" className="btn-minion w-full text-lg py-3 flex items-center justify-center gap-2">
+                            <LogoMark size={24} src="/icons/qr.svg" alt="QR scanner" rounded={false} />
+                            Open QR Scanner
                         </Link>
                     </div>
 
                     {/* Booking ID Access */}
                     <div className="card-minion text-center p-8">
-                        <div className="text-6xl mb-6">🔑</div>
+                        <div className="flex justify-center mb-6">
+                            <LogoMark size={72} src="/icons/booking.svg" alt="Booking access" rounded={false} />
+                        </div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Enter Booking ID</h2>
                         <p className="text-gray-600 mb-6">
                             Have your booking confirmation? Enter your booking ID to access personalized services.
                         </p>
-                        <Link href="/guest/booking-id" className="btn-minion-secondary w-full text-lg py-3">
-                            🔑 Enter Booking ID
+                        <Link href="/guest/booking-id" className="btn-minion-secondary w-full text-lg py-3 flex items-center justify-center gap-2">
+                            <LogoMark size={24} src="/icons/booking.svg" alt="Booking" rounded={false} />
+                            Enter Booking ID
                         </Link>
                     </div>
                 </div>
@@ -100,17 +107,23 @@ export default function GuestAccess() {
                 {/* Information Cards */}
                 <div className="grid md:grid-cols-3 gap-6 mt-16">
                     <div className="text-center">
-                        <div className="text-3xl mb-3">🍽️</div>
+                        <div className="flex justify-center mb-3">
+                            <LogoMark size={40} src="/icons/room-service.svg" alt="Room service" rounded={false} />
+                        </div>
                         <h4 className="font-semibold text-gray-800 mb-2">Room Service</h4>
                         <p className="text-sm text-gray-600">Order food and beverages directly to your room</p>
                     </div>
                     <div className="text-center">
-                        <div className="text-3xl mb-3">🧹</div>
+                        <div className="flex justify-center mb-3">
+                            <LogoMark size={40} src="/icons/housekeeping.svg" alt="Housekeeping" rounded={false} />
+                        </div>
                         <h4 className="font-semibold text-gray-800 mb-2">Housekeeping</h4>
                         <p className="text-sm text-gray-600">Request cleaning services and amenities</p>
                     </div>
                     <div className="text-center">
-                        <div className="text-3xl mb-3">🗺️</div>
+                        <div className="flex justify-center mb-3">
+                            <LogoMark size={40} src="/icons/map.svg" alt="Local guide" rounded={false} />
+                        </div>
                         <h4 className="font-semibold text-gray-800 mb-2">Local Guide</h4>
                         <p className="text-sm text-gray-600">Get recommendations for dining and attractions</p>
                     </div>

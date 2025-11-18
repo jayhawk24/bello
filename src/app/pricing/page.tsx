@@ -142,7 +142,7 @@ export default function PricingPage() {
                 </div>
             )}
 
-            <DashboardNav title="Subscription Plans" showNotifications={true} />
+            <DashboardNav title="Subscription Plans" iconSrc="/icons/subscription.svg" showNotifications={true} />
             <div className="max-w-7xl mx-auto px-4 py-12">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-800 mb-4">Choose Your Plan</h1>
