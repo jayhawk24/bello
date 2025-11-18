@@ -22,7 +22,7 @@ export default function GuestAccess() {
                     session?.user ? (
                         <button
                             onClick={handleSignOut}
-                            className="btn-minion-secondary text-sm px-3 py-2"
+                            className="btn-minion-secondary "
                         >
                             Sign Out
                         </button>
@@ -31,7 +31,7 @@ export default function GuestAccess() {
                             href="/login"
                         >
                             <button
-                                className="btn-minion-secondary text-sm px-3 py-2"
+                                className="btn-minion-secondary "
                             >
                                 Login
                             </button>
