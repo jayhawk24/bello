@@ -1,250 +1,96 @@
-"use client";
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import RegisterFormClient from "./RegisterFormClient";
 
-import Link from "next/link";
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import toast from 'react-hot-toast';
+export const metadata: Metadata = {
+    title: "Create Your Hotel Account | Bello",
+    description:
+        "Start your Bello concierge trial in minutes. Pick a plan, create your admin profile, and get your hotel onboarded today."
+};
 
-function RegisterForm() {
-    const searchParams = useSearchParams();
-    const selectedPlan = searchParams.get("plan") || "free";
+type RegisterPageProps = {
+    searchParams?: Record<string, string | string[] | undefined>;
+};
 
-    const [formData, setFormData] = useState({
-        hotelName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        firstName: "",
-        lastName: "",
-        phone: "",
-        plan: selectedPlan
+type PlanTier = "free" | "basic" | "premium" | "enterprise";
+
+type PlanPayload = {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    currency: string;
+    roomLimit: number;
+    features: string[];
+    period: "monthly" | "yearly";
+    tier: PlanTier;
+};
+
+const deriveTierFromName = (name: string): PlanTier => {
+    const normalized = name.toLowerCase();
+    if (normalized.includes("free")) return "free";
+    if (normalized.includes("starter")) return "basic";
+    if (normalized.includes("growth")) return "premium";
+    return "enterprise";
+};
+
+export default async function RegisterPage({
+    searchParams = {}
+}: RegisterPageProps) {
+    const plansRaw = await prisma.rzpSubscriptionPlan.findMany({
+        where: { isActive: true },
+        orderBy: { price: "asc" }
     });
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (formData.password !== formData.confirmPassword) {
-            toast.error("Passwords don't match!");
-            return;
-        }
-
-        setIsLoading(true);
-
-        try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toast.success('Account created successfully! Please sign in to continue.');
-                // Redirect to login page
-                window.location.href = '/login';
-            } else {
-                toast.error(data.error || 'Registration failed. Please try again.');
-            }
-        } catch (error) {
-            console.error('Registration error:', error);
-            toast.error('Network error. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const planDetails = {
-        free: { name: "Free", price: "$0/month", rooms: "Up to 1 rooms" },
-        starter: { name: "Starter", price: "$99/month", rooms: "Up to 20 rooms" },
-        growth: { name: "Growth", price: "$199/month", rooms: "Up to 50 rooms" },
-        professional: { name: "Professional", price: "$299/month", rooms: "Up to 100 rooms each (5 hotels)" },
-        enterprise: { name: "Enterprise", price: "$699/month", rooms: "Unlimited rooms (10+ hotels)" }
-    };
-
-    const currentPlan = planDetails[formData.plan as keyof typeof planDetails];
-
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 py-12 px-6">
-            <div className="max-w-2xl mx-auto">
-                <div className="text-center mb-8">
-                    <Link href="/" className="inline-block">
-                        <div className="w-12 h-12 bg-minion-yellow rounded-full flex items-center justify-center mb-4">
-                            <span className="text-2xl">🏨</span>
-                        </div>
-                    </Link>
-                    <h1 className="text-3xl font-bold text-gray-800">Create Your Hotel Account</h1>
-                    <p className="text-gray-600 mt-2">
-                        Start your free trial with the {currentPlan.name} plan
-                    </p>
-                </div>
-
-                <div className="card-minion mb-6">
-                    <div className="text-center p-4 bg-minion-yellow-light rounded-lg mb-6">
-                        <h3 className="font-semibold text-gray-800">{currentPlan.name} Plan Selected</h3>
-                        <p className="text-gray-600">{currentPlan.price} • {currentPlan.rooms}</p>
-                        <Link href="/#features" className="text-minion-blue hover:underline text-sm">
-                            Change plan
-                        </Link>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="form-group">
-                                <label htmlFor="firstName" className="form-label">First Name</label>
-                                <input
-                                    type="text"
-                                    id="firstName"
-                                    name="firstName"
-                                    value={formData.firstName}
-                                    onChange={handleChange}
-                                    className="input-minion"
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="lastName" className="form-label">Last Name</label>
-                                <input
-                                    type="text"
-                                    id="lastName"
-                                    name="lastName"
-                                    value={formData.lastName}
-                                    onChange={handleChange}
-                                    className="input-minion"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="hotelName" className="form-label">Hotel Name</label>
-                            <input
-                                type="text"
-                                id="hotelName"
-                                name="hotelName"
-                                value={formData.hotelName}
-                                onChange={handleChange}
-                                placeholder="Grand Palace Hotel"
-                                className="input-minion"
-                                required
-                            />
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="form-group">
-                                <label htmlFor="email" className="form-label">Email Address</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    placeholder="admin@grandpalace.com"
-                                    className="input-minion"
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="phone" className="form-label">Phone Number</label>
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    placeholder="+1 (555) 123-4567"
-                                    className="input-minion"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="form-group">
-                                <label htmlFor="password" className="form-label">Password</label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder="••••••••"
-                                    className="input-minion"
-                                    minLength={8}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                                <input
-                                    type="password"
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    placeholder="••••••••"
-                                    className="input-minion"
-                                    minLength={8}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="flex items-start">
-                                <input type="checkbox" className="mr-3 mt-1" required />
-                                <span className="text-sm text-gray-600">
-                                    I agree to the{" "}
-                                    <Link href="/terms" className="text-minion-blue hover:underline">Terms of Service</Link>
-                                    {" "}and{" "}
-                                    <Link href="/privacy" className="text-minion-blue hover:underline">Privacy Policy</Link>
-                                </span>
-                            </label>
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="btn-minion w-full text-lg py-4"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? "🔄 Creating Account..." : "🚀 Start Free Trial"}
-                        </button>
-                    </form>
-                </div>
-
-                <div className="text-center">
+    if (!plansRaw.length) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <h1 className="text-3xl font-semibold text-gray-800">
+                        Registration is temporarily unavailable
+                    </h1>
                     <p className="text-gray-600">
-                        Already have an account?{" "}
-                        <Link href="/login" className="text-minion-blue hover:underline font-semibold">
-                            Sign in
-                        </Link>
+                        We're updating our plans. Please check back soon or contact support.
                     </p>
-                </div>
-
-                <div className="mt-6 text-center">
-                    <Link href="/" className="text-gray-500 hover:underline">
-                        ← Back to Home
-                    </Link>
                 </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
 
-export default function RegisterPage() {
+    const plans: PlanPayload[] = plansRaw.map((plan) => ({
+        id: plan.id,
+        name: plan.name,
+        description: plan.description,
+        price: plan.price,
+        currency: plan.currency,
+        roomLimit: plan.roomLimit,
+        features: plan.features,
+        period: plan.period,
+        tier: deriveTierFromName(plan.name)
+    }));
+
+    const planQuery = searchParams.plan;
+    const requestedPlanId = Array.isArray(planQuery) ? planQuery[0] : planQuery;
+    const requestedPlan = requestedPlanId
+        ? plans.find((plan) => plan.id === requestedPlanId)
+        : undefined;
+
+    const defaultPlan =
+        requestedPlan || plans.find((plan) => plan.tier === "free") || plans[0];
+
+    const fallbackMessage =
+        requestedPlanId && !requestedPlan
+            ? "Requested plan unavailable. Showing the closest available plan instead."
+            : null;
+
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <RegisterForm />
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-600">Loading registration...</div>}>
+            <RegisterFormClient
+                plans={plans}
+                defaultPlanId={defaultPlan.id}
+                fallbackMessage={fallbackMessage}
+            />
         </Suspense>
     );
 }

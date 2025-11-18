@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import PricingSection from "@/components/PricingSection";
 
 export default function Home() {
   return (
@@ -92,105 +92,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Pricing Section */}
-        <section className="py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Simple, Room-Based Pricing
-            </h2>
-            <p className="text-xl text-gray-600">
-              Pay only for the rooms you manage - perfect for hotels of any size
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="card-minion text-center flex flex-col h-full">
-              <div className="flex-grow">
-                <h3 className="text-2xl font-bold mb-2">Starter</h3>
-                <div className="text-sm text-gray-500 mb-4">1-20 Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$49<span className="text-base text-gray-500">/month</span></div>
-                <ul className="text-left space-y-2 mb-6 text-sm">
-                  <li>✅ Up to 20 rooms</li>
-                  <li>✅ QR code access</li>
-                  <li>✅ Basic service requests</li>
-                  <li>✅ Email support</li>
-                  <li>✅ Basic analytics</li>
-                </ul>
-              </div>
-              <Link href="/register?plan=starter" className="btn-minion w-full mt-auto">
-                Get Started
-              </Link>
-            </div>
-
-            <div className="card-minion text-center border-minion-yellow border-2 relative flex flex-col h-full">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-minion-yellow text-gray-800 px-4 py-1 rounded-full text-sm font-semibold">
-                Most Popular
-              </div>
-              <div className="flex-grow">
-                <h3 className="text-2xl font-bold mb-2">Growth</h3>
-                <div className="text-sm text-gray-500 mb-4">21-50 Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$129<span className="text-base text-gray-500">/month</span></div>
-                <ul className="text-left space-y-2 mb-6 text-sm">
-                  <li>✅ Up to 50 rooms</li>
-                  <li>✅ QR code access</li>
-                  <li>✅ Full service requests</li>
-                  <li>✅ Priority support</li>
-                  <li>✅ Advanced analytics</li>
-                  <li>✅ Custom branding</li>
-                </ul>
-              </div>
-              <Link href="/register?plan=growth" className="btn-minion w-full mt-auto">
-                Get Started
-              </Link>
-            </div>
-
-            <div className="card-minion text-center flex flex-col h-full">
-              <div className="flex-grow">
-                <h3 className="text-2xl font-bold mb-2">Professional</h3>
-                <div className="text-sm text-gray-500 mb-4">51-100 Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$249<span className="text-base text-gray-500">/month</span></div>
-                <ul className="text-left space-y-2 mb-6 text-sm">
-                  <li>✅ Up to 100 rooms</li>
-                  <li>✅ QR code access</li>
-                  <li>✅ Premium service suite</li>
-                  <li>✅ Phone & chat support</li>
-                  <li>✅ Full analytics dashboard</li>
-                  <li>✅ Multi-location support</li>
-                  <li>✅ API access</li>
-                </ul>
-              </div>
-              <Link href="/register?plan=professional" className="btn-minion w-full mt-auto">
-                Get Started
-              </Link>
-            </div>
-
-            <div className="card-minion text-center flex flex-col h-full">
-              <div className="flex-grow">
-                <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                <div className="text-sm text-gray-500 mb-4">100+ Rooms</div>
-                <div className="text-3xl font-bold text-minion-yellow mb-4">$449<span className="text-base text-gray-500">/month</span></div>
-                <ul className="text-left space-y-2 mb-6 text-sm">
-                  <li>✅ Unlimited rooms</li>
-                  <li>✅ White-label solution</li>
-                  <li>✅ Enterprise integrations</li>
-                  <li>✅ 24/7 dedicated support</li>
-                  <li>✅ Custom analytics</li>
-                  <li>✅ Multi-property management</li>
-                  <li>✅ SLA guarantee</li>
-                </ul>
-              </div>
-              <Link href="/register?plan=enterprise" className="btn-minion w-full mt-auto">
-                Contact Sales
-              </Link>
-            </div>
-          </div>
-
-          <div className="text-center mt-8">
-            <p className="text-gray-600 text-sm">
-              All plans include: Real-time notifications, Mobile-responsive design, Secure guest access, and Regular updates
-            </p>
-          </div>
-        </section>
+        <PricingSection />
 
         {/* Guest Access Section */}
         <section className="py-16 bg-white rounded-3xl shadow-lg mt-16">
