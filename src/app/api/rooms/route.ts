@@ -102,6 +102,11 @@ export async function GET(request: NextRequest) {
     }
 }
 
+/**
+ * Create a new room for a hotel.
+ *
+ * Only available for hotel admins.
+ */
 export async function POST(request: NextRequest) {
     try {
         const { role, userId } = await getAuthContext(request);
@@ -139,6 +144,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Check if room number already exists
+        const existingRoom = await prisma.room.findFirst({
+            where: {
+                hotelId: hotel.id,
+                roomNumber
+            }
+        });
+
+        if (existingRoom) {
+            return NextResponse.json(
+                { error: "Room number already exists" },
+                { status: 409 }
+            );
+        }
+
         // Enforce room limits based on active subscription room tier (fallback to free plan)
         const activeSubscription = await prisma.subscription.findFirst({
             where: { hotelId: hotel.id, status: "active" },
@@ -158,14 +178,17 @@ export async function POST(request: NextRequest) {
                 case "tier_100_plus":
                     return null; // unlimited
                 default:
-                    return 1; // default for free/unknown
+                    return 1; // conservative fallback when tier is missing
             }
         };
 
         // Determine room limit
         let roomLimit: number | null = null;
         if (activeSubscription) {
-            roomLimit = getRoomLimitFromTier(activeSubscription.roomTier);
+            roomLimit =
+                activeSubscription.planType === "free"
+                    ? 1
+                    : getRoomLimitFromTier(activeSubscription.roomTier);
         } else if (hotel.subscriptionPlan === "free") {
             roomLimit = 1;
         }
@@ -175,9 +198,12 @@ export async function POST(request: NextRequest) {
                 where: { hotelId: hotel.id }
             });
             if (currentCount >= roomLimit) {
-                const tierLabel = activeSubscription?.roomTier
-                    ? activeSubscription.roomTier.replace(/_/g, " ")
-                    : "free";
+                const tierLabel = activeSubscription
+                    ? activeSubscription.planType === "free"
+                        ? "free"
+                        : activeSubscription.roomTier?.replace(/_/g, " ") ??
+                          "current plan"
+                    : hotel.subscriptionPlan;
                 return NextResponse.json(
                     {
                         error: "room_limit_reached",
@@ -188,21 +214,6 @@ export async function POST(request: NextRequest) {
                     { status: 403 }
                 );
             }
-        }
-
-        // Check if room number already exists
-        const existingRoom = await prisma.room.findFirst({
-            where: {
-                hotelId: hotel.id,
-                roomNumber
-            }
-        });
-
-        if (existingRoom) {
-            return NextResponse.json(
-                { error: "Room number already exists" },
-                { status: 409 }
-            );
         }
 
         // Generate access code
