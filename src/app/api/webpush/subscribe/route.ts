@@ -26,6 +26,14 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) {
+            return NextResponse.json(
+                { success: false, error: "user_not_found" },
+                { status: 404 }
+            );
+        }
+
         const userAgent = req.headers.get("user-agent") || undefined;
 
         // Upsert by endpoint
