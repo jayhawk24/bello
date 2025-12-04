@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState } from "react";
-import Link from "next/link";
 
 interface Room {
     id: string;
@@ -78,13 +77,28 @@ function GuestRoomComponent() {
         }
     };
 
-    const handleServiceRequest = async (serviceId: string, serviceName: string) => {
+    const handleServiceRequest = (service: Service) => {
+        const queryParts = new URLSearchParams();
+        if (booking) {
+            queryParts.set('bookingId', booking.id);
+        } else if (room) {
+            queryParts.set('roomId', room.id);
+            if (room.hotel?.id) {
+                queryParts.set('hotelId', room.hotel.id);
+            }
+        }
+
+        queryParts.set('serviceId', service.id);
+        if (service.category) {
+            queryParts.set('category', service.category);
+        }
+
         if (booking) {
             // If there's an active booking, redirect to service request with booking context
-            router.push(`/guest/services?bookingId=${booking.id}&category=${serviceName}`);
+            router.push(`/guest/services?${queryParts.toString()}`);
         } else if (room) {
             // If no booking but have room access, redirect to services page with room context
-            router.push(`/guest/services?roomId=${room.id}&hotelId=${room.hotel?.id}&category=${serviceName}`);
+            router.push(`/guest/services?${queryParts.toString()}`);
         } else {
             // If no room access, redirect to booking ID entry
             router.push(`/guest/booking-id?message=Please enter your booking reference to request services`);
@@ -185,7 +199,7 @@ function GuestRoomComponent() {
                                 )}
                                 <button 
                                     className="btn-minion w-full"
-                                    onClick={() => handleServiceRequest(service.id, service.name)}
+                                    onClick={() => handleServiceRequest(service)}
                                 >
                                     Request {service.name}
                                 </button>

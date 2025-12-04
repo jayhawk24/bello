@@ -31,11 +31,12 @@ function ServiceRequestComponent() {
     const roomId = searchParams.get('roomId');
     const hotelId = searchParams.get('hotelId');
     const serviceCategory = searchParams.get('category');
+    const serviceIdParam = searchParams.get('serviceId');
 
     const [services, setServices] = useState<Service[]>([]);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [formData, setFormData] = useState<ServiceRequestForm>({
-        serviceId: '',
+        serviceId: serviceIdParam || '',
         title: '',
         description: '',
         priority: 'medium'
@@ -124,7 +125,14 @@ function ServiceRequestComponent() {
                 setServices(result.services);
 
                 // Auto-select service if category is provided
-                if (serviceCategory) {
+                if (serviceIdParam) {
+                    const service = result.services.find((s: Service) => s.id === serviceIdParam);
+                    if (service) {
+                        setSelectedService(service);
+                        setFormData(prev => ({ ...prev, serviceId: service.id }));
+                        setStep('form');
+                    }
+                } else if (serviceCategory) {
                     const service = result.services.find((s: Service) => s.category === serviceCategory);
                     if (service) {
                         setSelectedService(service);
