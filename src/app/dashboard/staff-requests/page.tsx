@@ -17,12 +17,12 @@ interface ServiceRequest {
     priority: 'low' | 'medium' | 'high';
     status: 'pending' | 'in_progress' | 'completed';
     requestedAt: string;
-    guest: {
+    guest?: {
         id: string;
         name: string;
         email: string;
         phone?: string;
-    };
+    } | null;
     room: {
         id: string;
         roomNumber: string;
@@ -368,11 +368,11 @@ export default function StaffDashboard() {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <LogoMark size={18} src="/icons/guest.svg" alt="Guest" rounded={false} />
-                                                    <span>{request.guest.name}</span>
+                                                    <span>{request.guest?.name || `Room ${request.room.roomNumber} Guest`}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <LogoMark size={18} src="/icons/phone.svg" alt="Phone" rounded={false} />
-                                                    <span>{request.guest.phone}</span>
+                                                    <span>{request.guest?.phone || 'N/A'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <LogoMark size={18} src="/icons/clock.svg" alt="Requested at" rounded={false} />
