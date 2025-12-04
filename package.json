@@ -40,7 +40,7 @@
         "bcryptjs": "^3.0.2",
         "expo-server-sdk": "^4.0.0",
         "jose": "^5.9.6",
-        "next": "15.4.6",
+        "next": "^15.5.7",
         "next-auth": "^4.24.10",
         "razorpay": "^2.9.6",
         "react": "19.1.0",
@@ -61,8 +61,8 @@
         "eslint-config-next": "15.4.6",
         "prisma": "^6.19.0",
         "tailwindcss": "^4",
-        "typescript": "^5",
-        "tsx": "^4.19.1"
+        "tsx": "^4.19.1",
+        "typescript": "^5"
     },
     "keywords": [
         "hotel",
