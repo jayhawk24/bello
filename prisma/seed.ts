@@ -64,6 +64,22 @@ async function main() {
             isActive: true
         },
         {
+            name: "Free",
+            description: "1-2 Rooms",
+            price: 0,
+            period: BillingCycle.yearly,
+            currency: "INR",
+            roomLimit: 2,
+            features: [
+                "Up to 2 rooms",
+                "Up to 2 staff users",
+                "QR code access",
+                "Basic service requests",
+                "Notifications"
+            ],
+            isActive: true
+        },
+        {
             name: "Starter",
             description: "1-20 Rooms",
             price: 49_900, // ₹499.00

@@ -168,7 +168,7 @@ export default function PricingPage() {
                     </div>
 
                     {/* Plans Grid */}
-                    <div className="grid md:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-3 gap-6">
                         {plans.map((plan) => (
                             <div key={plan.id}
                                 className={`card-minion text-center flex flex-col h-full relative
