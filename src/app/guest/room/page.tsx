@@ -12,6 +12,7 @@ interface Room {
         name: string;
         contactEmail: string;
         contactPhone: string;
+        receptionNumber: string | null;
     };
 }
 
@@ -30,6 +31,82 @@ interface Service {
     price: number;
 }
 
+interface HotelWifiNetwork {
+    id: string;
+    networkName: string;
+    password: string | null;
+    description: string | null;
+    isPublic: boolean;
+    bandwidth: string | null;
+    coverage: string | null;
+    instructions: string | null;
+}
+
+interface TvGuideChannelInfo {
+    id: string;
+    number: number;
+    name: string;
+    category: string | null;
+    language: string | null;
+    isHd: boolean;
+    logo: string | null;
+    description: string | null;
+}
+
+interface TvGuideInfo {
+    id: string;
+    title: string;
+    description: string | null;
+    category: string | null;
+    channels: TvGuideChannelInfo[];
+}
+
+interface FoodMenuItemInfo {
+    id: string;
+    name: string;
+    description: string | null;
+    price: number | null;
+    category: string | null;
+    isVegetarian: boolean;
+    isVegan: boolean;
+    allergens: string[];
+    spiceLevel: string | null;
+    isAvailable: boolean;
+    image: string | null;
+    prepTime: string | null;
+    calories: number | null;
+}
+
+interface FoodMenuInfo {
+    id: string;
+    name: string;
+    description: string | null;
+    category: string | null;
+    isActive: boolean;
+    availableFrom: string | null;
+    availableTo: string | null;
+    menuItems: FoodMenuItemInfo[];
+}
+
+interface HotelInfo {
+    receptionNumber: string | null;
+    emergencyNumber: string | null;
+    checkInTime: string | null;
+    checkOutTime: string | null;
+    hotelDescription: string | null;
+    amenities: string[];
+    wifiInfos: HotelWifiNetwork[];
+    tvGuides: TvGuideInfo[];
+    foodMenus: FoodMenuInfo[];
+}
+
+interface RoomAccessResponse {
+    success: boolean;
+    room: Room;
+    booking: Booking | null;
+    hotelInfo: HotelInfo | null;
+}
+
 function GuestRoomComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -38,6 +115,10 @@ function GuestRoomComponent() {
     const [services, setServices] = useState<Service[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [hotelInfo, setHotelInfo] = useState<HotelInfo | null>(null);
+    const [activeQuickView, setActiveQuickView] = useState<"tv" | "wifi" | "food" | null>(null);
+
+    const activeFoodMenus = hotelInfo?.foodMenus.filter((menu) => menu.isActive) ?? [];
 
     const hotelId = searchParams.get('hotelId');
     const roomNumber = searchParams.get('roomNumber');
@@ -49,7 +130,7 @@ function GuestRoomComponent() {
             setIsLoading(false);
             return;
         }
-        
+
         fetchRoomInfo();
     }, [hotelId, roomNumber, accessCode]);
 
@@ -57,10 +138,11 @@ function GuestRoomComponent() {
         try {
             const response = await fetch(`/api/guest/room-access?hotelId=${hotelId}&roomNumber=${roomNumber}&accessCode=${accessCode}`);
             if (response.ok) {
-                const data = await response.json();
+                const data: RoomAccessResponse = await response.json();
                 setRoom(data.room);
                 setBooking(data.booking);
-                
+                setHotelInfo(data.hotelInfo ?? null);
+
                 // Fetch available services for this hotel
                 const servicesResponse = await fetch(`/api/guest/services?hotelId=${hotelId}`);
                 if (servicesResponse.ok) {
@@ -197,7 +279,7 @@ function GuestRoomComponent() {
                                         Starting from ${service.price}
                                     </p>
                                 )}
-                                <button 
+                                <button
                                     className="btn-minion w-full"
                                     onClick={() => handleServiceRequest(service)}
                                 >
@@ -220,20 +302,29 @@ function GuestRoomComponent() {
                             <h3 className="font-semibold text-gray-800 mb-2">Contact Information</h3>
                             <div className="space-y-2 text-gray-600">
                                 <p>📧 {room.hotel.contactEmail}</p>
-                                <p>📞 {room.hotel.contactPhone}</p>
+                                <p>📞 {room.hotel.receptionNumber || room.hotel.contactPhone}</p>
                             </div>
                         </div>
                         <div>
                             <h3 className="font-semibold text-gray-800 mb-2">Quick Services</h3>
                             <div className="space-y-2">
-                                <button className="btn-minion-secondary w-full text-sm">
+                                <button
+                                    className="btn-minion-secondary w-full text-sm"
+                                    onClick={() => setActiveQuickView("tv")}
+                                >
                                     📺 TV Guide
                                 </button>
-                                <button className="btn-minion-secondary w-full text-sm">
+                                <button
+                                    className="btn-minion-secondary w-full text-sm"
+                                    onClick={() => setActiveQuickView("wifi")}
+                                >
                                     📶 WiFi Info
                                 </button>
-                                <button className="btn-minion-secondary w-full text-sm">
-                                    🚗 Valet Parking
+                                <button
+                                    className="btn-minion-secondary w-full text-sm"
+                                    onClick={() => setActiveQuickView("food")}
+                                >
+                                    🍴 Food Menu
                                 </button>
                             </div>
                         </div>
@@ -243,13 +334,174 @@ function GuestRoomComponent() {
                 {/* Emergency Contact */}
                 <div className="mt-8 p-4 bg-red-50 rounded-lg border border-red-200 text-center">
                     <p className="text-red-800 font-medium">
-                        🚨 For emergencies, call hotel security or dial 911
+                        🚨 For emergencies, call hotel security or dial 112
                     </p>
                     <p className="text-red-600 text-sm mt-1">
-                        Front desk: {room.hotel.contactPhone}
+                        Front desk: {room.hotel.receptionNumber || room.hotel.contactPhone}
                     </p>
                 </div>
             </main>
+
+            {activeQuickView && (
+                <div
+                    className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 px-4"
+                    onClick={() => setActiveQuickView(null)}
+                    role="presentation"
+                >
+                    <div
+                        className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 relative"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <button
+                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                            onClick={() => setActiveQuickView(null)}
+                            aria-label="Close quick info panel"
+                        >
+                            ✕
+                        </button>
+
+                        {/* Quick info content surfaces selected hotel information */}
+                        {activeQuickView === "wifi" && (
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-semibold text-gray-800">WiFi Networks</h3>
+                                {hotelInfo && hotelInfo.wifiInfos.length > 0 ? (
+                                    hotelInfo.wifiInfos.map((wifi) => (
+                                        <div key={wifi.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                            <p className="font-medium text-gray-800">{wifi.networkName}</p>
+                                            {wifi.description && (
+                                                <p className="text-sm text-gray-600 mt-1">{wifi.description}</p>
+                                            )}
+                                            <div className="text-sm text-gray-700 mt-3 space-y-1">
+                                                <p><span className="font-semibold">Password:</span> {wifi.password || "See front desk"}</p>
+                                                {wifi.isPublic && <p><span className="font-semibold">Network Type:</span> Public network</p>}
+                                                {wifi.bandwidth && <p><span className="font-semibold">Bandwidth:</span> {wifi.bandwidth}</p>}
+                                                {wifi.coverage && <p><span className="font-semibold">Coverage:</span> {wifi.coverage}</p>}
+                                                {wifi.instructions && <p><span className="font-semibold">Instructions:</span> {wifi.instructions}</p>}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-600">WiFi details are not available right now. Please contact the front desk for assistance.</p>
+                                )}
+                            </div>
+                        )}
+
+                        {activeQuickView === "tv" && (
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-semibold text-gray-800">TV Guide</h3>
+                                {hotelInfo && hotelInfo.tvGuides.length > 0 ? (
+                                    hotelInfo.tvGuides.map((guide) => (
+                                        <div key={guide.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-3">
+                                            <div>
+                                                <p className="font-medium text-gray-800">{guide.title}</p>
+                                                {guide.description && (
+                                                    <p className="text-sm text-gray-600 mt-1">{guide.description}</p>
+                                                )}
+                                                {guide.category && (
+                                                    <p className="text-xs uppercase tracking-wide text-gray-500 mt-2">Category: {guide.category}</p>
+                                                )}
+                                            </div>
+                                            {guide.channels.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {guide.channels.map((channel) => (
+                                                        <div key={channel.id} className="flex items-start justify-between bg-white rounded-lg border border-gray-200 p-3">
+                                                            <div>
+                                                                <p className="font-medium text-gray-800">{channel.number}. {channel.name}</p>
+                                                                <p className="text-sm text-gray-600">
+                                                                    {[channel.category, channel.language, channel.isHd ? "HD" : null]
+                                                                        .filter(Boolean)
+                                                                        .join(" • ")}
+                                                                </p>
+                                                                {channel.description && (
+                                                                    <p className="text-xs text-gray-500 mt-1">{channel.description}</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-600">Channel lineup coming soon.</p>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-600">TV guide information is not available at the moment.</p>
+                                )}
+                            </div>
+                        )}
+
+                        {activeQuickView === "food" && (
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-semibold text-gray-800">Food &amp; Beverage</h3>
+                                {hotelInfo && hotelInfo.foodMenus.length > 0 ? (
+                                    activeFoodMenus.length > 0 ? (
+                                        activeFoodMenus.map((menu) => (
+                                            <div key={menu.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-3">
+                                                <div>
+                                                    <p className="font-medium text-gray-800">{menu.name}</p>
+                                                    {menu.description && (
+                                                        <p className="text-sm text-gray-600 mt-1">{menu.description}</p>
+                                                    )}
+                                                    <p className="text-xs uppercase tracking-wide text-gray-500 mt-2">
+                                                        {[menu.category, menu.availableFrom && `From ${menu.availableFrom}`, menu.availableTo && `Until ${menu.availableTo}`]
+                                                            .filter(Boolean)
+                                                            .join(" • ")}
+                                                    </p>
+                                                </div>
+                                                {menu.menuItems.length > 0 ? (
+                                                    <div className="space-y-2">
+                                                        {menu.menuItems
+                                                            .filter((item) => item.isAvailable)
+                                                            .map((item) => (
+                                                                <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-3">
+                                                                    <div className="flex items-start justify-between">
+                                                                        <div>
+                                                                            <p className="font-medium text-gray-800">{item.name}</p>
+                                                                            {item.description && (
+                                                                                <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                                                            )}
+                                                                            <p className="text-xs uppercase tracking-wide text-gray-500 mt-2">
+                                                                                {[item.category, item.isVegetarian ? "Vegetarian" : null, item.isVegan ? "Vegan" : null, item.spiceLevel]
+                                                                                    .filter(Boolean)
+                                                                                    .join(" • ")}
+                                                                            </p>
+                                                                            {item.allergens.length > 0 && (
+                                                                                <p className="text-xs text-red-600 mt-1">Allergens: {item.allergens.join(", ")}</p>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-right">
+                                                                            {item.price !== null ? (
+                                                                                <p className="font-semibold text-gray-800">${item.price.toFixed(2)}</p>
+                                                                            ) : (
+                                                                                <p className="font-semibold text-gray-500">Ask for price</p>
+                                                                            )}
+                                                                            {item.prepTime && (
+                                                                                <p className="text-xs text-gray-500 mt-1">Prep: {item.prepTime}</p>
+                                                                            )}
+                                                                            {item.calories !== null && (
+                                                                                <p className="text-xs text-gray-500">{item.calories} kcal</p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-gray-600">Menu items are being updated.</p>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-600">No active menus are available right now.</p>
+                                    )
+                                ) : (
+                                    <p className="text-gray-600">Food and beverage details are not available right now.</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

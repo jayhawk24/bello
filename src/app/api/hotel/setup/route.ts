@@ -72,8 +72,11 @@ export async function GET(request: NextRequest) {
 
         // If no hotel info exists, create a default one
         if (!hotelInfo) {
-            hotelInfo = await prisma.hotelInfo.create({
-                data: {
+            // Use upsert to avoid racing with other requests creating default info
+            hotelInfo = await prisma.hotelInfo.upsert({
+                where: { hotelId },
+                update: {},
+                create: {
                     hotelId,
                     amenities: []
                 },

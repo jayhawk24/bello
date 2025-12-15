@@ -278,9 +278,9 @@ function GuestDashboardComponent() {
                                         </div>
                                         <div className="text-right">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    request.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                                        request.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                                            'bg-gray-100 text-gray-800'
+                                                request.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                                                    request.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                        'bg-gray-100 text-gray-800'
                                                 }`}>
                                                 {request.status.replace('_', ' ')}
                                             </span>
@@ -334,8 +334,8 @@ function GuestDashboardComponent() {
                                     WiFi Info
                                 </button>
                                 <button className="btn-minion-secondary w-full text-sm flex items-center justify-center gap-2">
-                                    <LogoMark size={18} src="/icons/valet.svg" alt="Valet parking" rounded={false} />
-                                    Valet Parking
+                                    <LogoMark size={18} src="/icons/dining.svg" alt="Food Menu" rounded={false} />
+                                    Food Menu
                                 </button>
                             </div>
                         </div>
