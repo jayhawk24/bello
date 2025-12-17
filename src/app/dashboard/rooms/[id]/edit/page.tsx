@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import toast from 'react-hot-toast';
+import { ROOM_TYPE_OPTIONS, RoomTypeOption } from "@/constants/roomTypes";
 
 interface Room {
     id: string;
@@ -19,7 +20,7 @@ interface Room {
 
 interface RoomFormData {
     roomNumber: string;
-    roomType: string;
+    roomType: RoomTypeOption;
 }
 
 interface RoomEditPageProps {
@@ -36,7 +37,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<RoomFormData>({
         roomNumber: "",
-        roomType: ""
+        roomType: ROOM_TYPE_OPTIONS[0]
     });
     const [roomId, setRoomId] = useState<string>("");
 
@@ -50,15 +51,6 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
-
-    const roomTypes = [
-        "Standard",
-        "Deluxe",
-        "Suite",
-        "Presidential Suite",
-        "Family Room",
-        "Executive Room"
-    ];
 
     useEffect(() => {
         if (status === "loading") return;
@@ -83,7 +75,9 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                 setRoom(data.room);
                 setFormData({
                     roomNumber: data.room.roomNumber,
-                    roomType: data.room.roomType
+                    roomType: (ROOM_TYPE_OPTIONS.includes(data.room.roomType as RoomTypeOption)
+                        ? (data.room.roomType as RoomTypeOption)
+                        : ROOM_TYPE_OPTIONS[0])
                 });
             } else {
                 setError("Failed to load room details");
@@ -249,7 +243,7 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-minion-yellow focus:border-transparent"
                                 >
-                                    {roomTypes.map(type => (
+                                    {ROOM_TYPE_OPTIONS.map(type => (
                                         <option key={type} value={type}>{type}</option>
                                     ))}
                                 </select>
@@ -347,8 +341,8 @@ export default function RoomEditPage({ params }: RoomEditPageProps) {
                                     Status
                                 </label>
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${room.isOccupied
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-green-100 text-green-800'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-green-100 text-green-800'
                                     }`}>
                                     {room.isOccupied ? 'Occupied' : 'Available'}
                                 </span>

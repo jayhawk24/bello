@@ -4,31 +4,19 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ROOM_TYPE_OPTIONS, RoomTypeOption } from "@/constants/roomTypes";
 
 interface RoomFormData {
     roomNumber: string;
-    roomType: string;
+    roomType: RoomTypeOption;
 }
-
-const roomTypes = [
-    "Standard Single",
-    "Standard Double",
-    "Deluxe Single",
-    "Deluxe Double",
-    "Junior Suite",
-    "Executive Suite",
-    "Presidential Suite",
-    "Family Room",
-    "Connecting Rooms",
-    "Accessible Room"
-];
 
 export default function AddRoomPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [formData, setFormData] = useState<RoomFormData>({
         roomNumber: "",
-        roomType: "Standard Single"
+        roomType: ROOM_TYPE_OPTIONS[0]
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -186,7 +174,7 @@ export default function AddRoomPage() {
                                     className="input-minion"
                                     required
                                 >
-                                    {roomTypes.map(type => (
+                                    {ROOM_TYPE_OPTIONS.map(type => (
                                         <option key={type} value={type}>{type}</option>
                                     ))}
                                 </select>

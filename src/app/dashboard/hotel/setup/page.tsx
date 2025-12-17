@@ -4,7 +4,21 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { HotelInfo, HotelWifi, TvGuide, TvChannel, FoodMenu, MenuItem } from "@/types";
+import { HotelInfo, HotelWifi, TvGuide, FoodMenu, MenuItemFormData } from "@/types";
+
+type MenuItemDraft = {
+    name: string;
+    description: string;
+    price: string;
+    category: string;
+    isVegetarian: boolean;
+    isVegan: boolean;
+    allergens: string;
+    spiceLevel: string;
+    isAvailable: boolean;
+    prepTime: string;
+    calories: string;
+};
 
 interface SetupData {
     hotelInfo?: HotelInfo;
@@ -63,6 +77,36 @@ export default function HotelSetupPage() {
         availableFrom: "",
         availableTo: ""
     });
+    const [menuItemDraft, setMenuItemDraft] = useState<MenuItemDraft>({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        isVegetarian: false,
+        isVegan: false,
+        allergens: "",
+        spiceLevel: "",
+        isAvailable: true,
+        prepTime: "",
+        calories: ""
+    });
+    const [menuItemsDraft, setMenuItemsDraft] = useState<MenuItemFormData[]>([]);
+
+    const resetMenuItemDraft = () => {
+        setMenuItemDraft({
+            name: "",
+            description: "",
+            price: "",
+            category: "",
+            isVegetarian: false,
+            isVegan: false,
+            allergens: "",
+            spiceLevel: "",
+            isAvailable: true,
+            prepTime: "",
+            calories: ""
+        });
+    };
 
     useEffect(() => {
         if (status === "loading") return;
@@ -259,7 +303,7 @@ export default function HotelSetupPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...newFoodMenu,
-                    menuItems: [] // Start with empty menu items, can be added later
+                    menuItems: menuItemsDraft
                 })
             });
 
@@ -274,6 +318,8 @@ export default function HotelSetupPage() {
                     availableFrom: "",
                     availableTo: ""
                 });
+                setMenuItemsDraft([]);
+                resetMenuItemDraft();
                 setSuccess("Food Menu added successfully!");
             } else {
                 setError(data.error || "Failed to add Food Menu");
@@ -283,6 +329,65 @@ export default function HotelSetupPage() {
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const addMenuItemDraft = () => {
+        const trimmedName = menuItemDraft.name.trim();
+        const trimmedPrice = menuItemDraft.price.trim();
+
+        if (!trimmedName) {
+            setError("Menu item name is required.");
+            return;
+        }
+
+        if (!trimmedPrice) {
+            setError("Menu item price is required.");
+            return;
+        }
+
+        const parsedPrice = Number.parseFloat(trimmedPrice);
+        if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+            setError("Menu item price must be a valid non-negative number.");
+            return;
+        }
+
+        const trimmedCalories = menuItemDraft.calories.trim();
+        const parsedCalories = trimmedCalories
+            ? Number.parseInt(trimmedCalories, 10)
+            : undefined;
+
+        if (trimmedCalories && (!Number.isFinite(parsedCalories as number) || (parsedCalories as number) < 0)) {
+            setError("Calories must be a valid non-negative number.");
+            return;
+        }
+
+        const allergensArray = menuItemDraft.allergens
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+
+        const nextItem: MenuItemFormData = {
+            name: trimmedName,
+            description: menuItemDraft.description.trim() || undefined,
+            price: parsedPrice,
+            category: menuItemDraft.category.trim() || undefined,
+            isVegetarian: menuItemDraft.isVegetarian,
+            isVegan: menuItemDraft.isVegan,
+            allergens: allergensArray,
+            spiceLevel: menuItemDraft.spiceLevel.trim() || undefined,
+            isAvailable: menuItemDraft.isAvailable,
+            image: undefined,
+            prepTime: menuItemDraft.prepTime.trim() || undefined,
+            calories: parsedCalories
+        };
+
+        setMenuItemsDraft([...menuItemsDraft, nextItem]);
+        resetMenuItemDraft();
+        setError("");
+    };
+
+    const removeMenuItemDraft = (index: number) => {
+        setMenuItemsDraft(menuItemsDraft.filter((_, i) => i !== index));
     };
 
     const addAmenity = () => {
@@ -371,8 +476,8 @@ export default function HotelSetupPage() {
                             <button
                                 onClick={() => setActiveTab("basic")}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "basic"
-                                        ? "border-minion-blue text-minion-blue"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    ? "border-minion-blue text-minion-blue"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                             >
                                 🏨 Basic Info
@@ -380,8 +485,8 @@ export default function HotelSetupPage() {
                             <button
                                 onClick={() => setActiveTab("wifi")}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "wifi"
-                                        ? "border-minion-blue text-minion-blue"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    ? "border-minion-blue text-minion-blue"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                             >
                                 📶 WiFi Networks
@@ -389,8 +494,8 @@ export default function HotelSetupPage() {
                             <button
                                 onClick={() => setActiveTab("tv")}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "tv"
-                                        ? "border-minion-blue text-minion-blue"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    ? "border-minion-blue text-minion-blue"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                             >
                                 📺 TV Guides
@@ -398,8 +503,8 @@ export default function HotelSetupPage() {
                             <button
                                 onClick={() => setActiveTab("food")}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "food"
-                                        ? "border-minion-blue text-minion-blue"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    ? "border-minion-blue text-minion-blue"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                             >
                                 🍽️ Food Menus
@@ -823,12 +928,212 @@ export default function HotelSetupPage() {
                                 </label>
                             </div>
 
+                            <div className="border-t border-gray-200 pt-4 mt-6">
+                                <h4 className="text-lg font-semibold text-gray-800 mb-3">Menu Items</h4>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Add each dish with its price and details before saving the menu.
+                                </p>
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Item Name *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={menuItemDraft.name}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, name: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., Classic Club Sandwich"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Price (₹) *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={menuItemDraft.price}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, price: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., 599"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Category
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={menuItemDraft.category}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, category: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., Main Course"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Spice Level
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={menuItemDraft.spiceLevel}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, spiceLevel: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., Medium"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-4 mt-4">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Description
+                                        </label>
+                                        <textarea
+                                            value={menuItemDraft.description}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, description: e.target.value })}
+                                            rows={3}
+                                            className="input-minion w-full"
+                                            placeholder="Describe the dish..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Allergens (comma separated)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={menuItemDraft.allergens}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, allergens: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., Nuts, Dairy"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Prep Time
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={menuItemDraft.prepTime}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, prepTime: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., 15 mins"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Calories
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={menuItemDraft.calories}
+                                            onChange={(e) => setMenuItemDraft({ ...menuItemDraft, calories: e.target.value })}
+                                            className="input-minion w-full"
+                                            placeholder="e.g., 450"
+                                        />
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={menuItemDraft.isVegetarian}
+                                                onChange={(e) => setMenuItemDraft({ ...menuItemDraft, isVegetarian: e.target.checked })}
+                                                className="mr-2"
+                                            />
+                                            <span className="text-sm text-gray-700">Vegetarian</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={menuItemDraft.isVegan}
+                                                onChange={(e) => setMenuItemDraft({ ...menuItemDraft, isVegan: e.target.checked })}
+                                                className="mr-2"
+                                            />
+                                            <span className="text-sm text-gray-700">Vegan</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={menuItemDraft.isAvailable}
+                                                onChange={(e) => setMenuItemDraft({ ...menuItemDraft, isAvailable: e.target.checked })}
+                                                className="mr-2"
+                                            />
+                                            <span className="text-sm text-gray-700">Available</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 flex justify-between items-center">
+                                    <span className="text-sm text-gray-500">
+                                        {menuItemsDraft.length} item{menuItemsDraft.length !== 1 ? "s" : ""} will be added to this menu
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={addMenuItemDraft}
+                                        className="btn-minion-secondary"
+                                    >
+                                        + Add Menu Item
+                                    </button>
+                                </div>
+
+                                {menuItemsDraft.length > 0 && (
+                                    <div className="mt-6 space-y-3">
+                                        {menuItemsDraft.map((item, index) => (
+                                            <div key={`${item.name}-${index}`} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="font-semibold text-gray-800">{item.name}</p>
+                                                        {item.description && (
+                                                            <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                                        )}
+                                                        <p className="text-xs text-gray-500 mt-2">
+                                                            {[item.category, item.isVegetarian ? "Vegetarian" : null, item.isVegan ? "Vegan" : null, item.spiceLevel]
+                                                                .filter(Boolean)
+                                                                .join(" • ") || "General"}
+                                                        </p>
+                                                        {item.allergens.length > 0 && (
+                                                            <p className="text-xs text-red-600 mt-1">Allergens: {item.allergens.join(", ")}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-semibold text-gray-800">
+                                                            ₹{item.price?.toFixed(2)}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            {item.isAvailable ? "Available" : "Unavailable"}
+                                                        </p>
+                                                        {item.prepTime && (
+                                                            <p className="text-xs text-gray-500">Prep: {item.prepTime}</p>
+                                                        )}
+                                                        {typeof item.calories === "number" && (
+                                                            <p className="text-xs text-gray-500">{item.calories} kcal</p>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeMenuItemDraft(index)}
+                                                            className="text-sm text-red-500 hover:text-red-700 mt-2"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             <button
                                 onClick={addFoodMenu}
                                 disabled={!newFoodMenu.name.trim() || isSaving}
-                                className="btn-minion"
+                                className="btn-minion mt-6"
                             >
-                                Add Food Menu
+                                {isSaving ? "Saving Menu..." : "Save Food Menu"}
                             </button>
                         </div>
 
@@ -867,6 +1172,42 @@ export default function HotelSetupPage() {
                                                 )}
                                                 <p>{menu.menuItems.length} item{menu.menuItems.length !== 1 ? 's' : ''} configured</p>
                                             </div>
+                                            {menu.menuItems.length > 0 && (
+                                                <div className="mt-4 border-t border-gray-200 pt-4 space-y-3">
+                                                    {menu.menuItems.map((item) => (
+                                                        <div key={item.id} className="flex justify-between items-start bg-gray-50 rounded-lg border border-gray-200 p-3">
+                                                            <div>
+                                                                <p className="font-medium text-gray-800">{item.name}</p>
+                                                                {item.description && (
+                                                                    <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                                                )}
+                                                                <p className="text-xs text-gray-500 mt-2">
+                                                                    {[item.category, item.isVegetarian ? "Vegetarian" : null, item.isVegan ? "Vegan" : null, item.spiceLevel]
+                                                                        .filter(Boolean)
+                                                                        .join(" • ") || "General"}
+                                                                </p>
+                                                                {item.allergens.length > 0 && (
+                                                                    <p className="text-xs text-red-600 mt-1">Allergens: {item.allergens.join(", ")}</p>
+                                                                )}
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="font-semibold text-gray-800">
+                                                                    {typeof item.price === "number" ? `₹${item.price.toFixed(2)}` : "Price TBD"}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {item.isAvailable ? "Available" : "Unavailable"}
+                                                                </p>
+                                                                {item.prepTime && (
+                                                                    <p className="text-xs text-gray-500">Prep: {item.prepTime}</p>
+                                                                )}
+                                                                {typeof item.calories === "number" && (
+                                                                    <p className="text-xs text-gray-500">{item.calories} kcal</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
