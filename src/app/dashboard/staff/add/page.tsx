@@ -50,7 +50,7 @@ export default function AddStaffPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords don't match");
             return;

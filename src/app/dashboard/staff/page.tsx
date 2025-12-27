@@ -32,7 +32,7 @@ export default function StaffPage() {
             router.push("/dashboard");
             return;
         }
-        
+
         // Fetch staff data once session is confirmed
         fetchStaff();
     }, [session, status, router]);
@@ -166,11 +166,10 @@ export default function StaffPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                        member.role === 'hotel_staff' 
-                                                            ? 'bg-blue-100 text-blue-800' 
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${member.role === 'hotel_staff'
+                                                            ? 'bg-blue-100 text-blue-800'
                                                             : 'bg-purple-100 text-purple-800'
-                                                    }`}>
+                                                        }`}>
                                                         {member.role === 'hotel_staff' ? 'Staff' : 'Admin'}
                                                     </span>
                                                 </td>
@@ -183,13 +182,13 @@ export default function StaffPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {member.lastLogin 
+                                                    {member.lastLogin
                                                         ? new Date(member.lastLogin).toLocaleDateString()
                                                         : 'Never'
                                                     }
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                                    <Link 
+                                                    <Link
                                                         href={`/dashboard/staff/${member.id}/edit`}
                                                         className="text-minion-blue hover:text-minion-yellow"
                                                     >

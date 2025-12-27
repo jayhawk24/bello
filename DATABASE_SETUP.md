@@ -3,8 +3,9 @@
 ## Overview
 
 This project uses a flexible database configuration that supports:
-- **SQLite** for development (default)
-- **PostgreSQL** for production (recommended)
+
+-   **SQLite** for development (default)
+-   **PostgreSQL** for production (recommended)
 
 ## Environment Variables
 
@@ -21,6 +22,7 @@ DATABASE_URL="postgresql://username:password@host:5432/database_name"
 ## Development Setup
 
 ### Using SQLite (Default - Current Setup)
+
 ```bash
 # Already configured in .env
 DATABASE_URL="file:./prisma/dev.db"
@@ -31,6 +33,7 @@ npm run db:push
 ```
 
 ### Switching to PostgreSQL for Development
+
 ```bash
 # 1. Switch the schema to PostgreSQL
 npm run db:switch:postgres
@@ -44,6 +47,7 @@ npm run db:push
 ```
 
 ### Switching Back to SQLite
+
 ```bash
 # 1. Switch the schema back to SQLite
 npm run db:switch:sqlite
@@ -61,6 +65,7 @@ npm run db:push
 ### 1. PostgreSQL Database Options
 
 #### Option A: Railway (Easiest)
+
 ```bash
 # Install Railway CLI
 npm install -g @railway/cli
@@ -74,17 +79,20 @@ railway add postgresql
 ```
 
 #### Option B: Supabase (Free Tier Available)
+
 1. Go to [supabase.com](https://supabase.com)
 2. Create new project
 3. Go to Settings > Database
 4. Copy the connection string
 
 #### Option C: Neon (Serverless PostgreSQL)
+
 1. Go to [neon.tech](https://neon.tech)
 2. Create new project
 3. Copy the connection string
 
 #### Option D: PlanetScale (MySQL - Alternative)
+
 ```bash
 # If you prefer MySQL, update schema.prisma provider to "mysql"
 DATABASE_PROVIDER="mysql"
@@ -94,6 +102,7 @@ DATABASE_URL="mysql://username:password@host:3306/database_name"
 ### 2. Production Environment Variables
 
 Create `.env.production`:
+
 ```bash
 # IMPORTANT: Switch to PostgreSQL first: npm run db:switch:postgres
 DATABASE_URL="postgresql://username:password@host:5432/stayscan_production"
@@ -138,22 +147,25 @@ npm run db:switch:sqlite     # Switch schema to SQLite
 ### Development to Production Migration
 
 1. **Develop with SQLite** (fast, no setup required)
+
 ```bash
 DATABASE_PROVIDER="sqlite"
 DATABASE_URL="file:./prisma/dev.db"
 ```
 
 2. **Test with PostgreSQL locally** (optional but recommended)
+
 ```bash
 # Run PostgreSQL locally with Docker
 docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
 
 # Update .env
-DATABASE_PROVIDER="postgresql"  
+DATABASE_PROVIDER="postgresql"
 DATABASE_URL="postgresql://postgres:password@localhost:5432/stayscan_test"
 ```
 
 3. **Deploy to Production with PostgreSQL**
+
 ```bash
 DATABASE_PROVIDER="postgresql"
 DATABASE_URL="your-production-postgresql-url"
@@ -162,29 +174,33 @@ DATABASE_URL="your-production-postgresql-url"
 ## Database Differences (SQLite vs PostgreSQL)
 
 ### SQLite Limitations
-- No concurrent writes
-- Limited data types
-- Single file database
-- **Good for:** Development, prototyping, small applications
 
-### PostgreSQL Advantages  
-- Full ACID compliance
-- Concurrent connections
-- Rich data types and features
-- Better performance at scale
-- **Good for:** Production, multi-user applications
+-   No concurrent writes
+-   Limited data types
+-   Single file database
+-   **Good for:** Development, prototyping, small applications
+
+### PostgreSQL Advantages
+
+-   Full ACID compliance
+-   Concurrent connections
+-   Rich data types and features
+-   Better performance at scale
+-   **Good for:** Production, multi-user applications
 
 ## Troubleshooting
 
 ### Common Issues
 
 #### 1. "Database not found" error
+
 ```bash
 # Make sure database exists, then
 npm run db:push
 ```
 
 #### 2. "Provider not supported" error
+
 ```bash
 # Check DATABASE_PROVIDER is either "sqlite" or "postgresql"
 # Regenerate Prisma client
@@ -192,6 +208,7 @@ npm run db:generate
 ```
 
 #### 3. Migration errors
+
 ```bash
 # Reset migrations (CAUTION: Data loss)
 npm run db:reset
@@ -200,13 +217,16 @@ npm run db:reset
 ```
 
 #### 4. Connection refused (PostgreSQL)
-- Verify database server is running
-- Check connection string format
-- Ensure firewall allows connections
-- Verify SSL requirements
+
+-   Verify database server is running
+-   Check connection string format
+-   Ensure firewall allows connections
+-   Verify SSL requirements
 
 ### Environment Variables Debug
+
 The application will log database configuration on startup in development mode:
+
 ```
 🗄️  Database: SQLITE
 🌍 Environment: DEVELOPMENT
@@ -215,6 +235,7 @@ The application will log database configuration on startup in development mode:
 ### Switching Databases
 
 #### From SQLite to PostgreSQL:
+
 1. Export data if needed: `npm run db:studio` > Export
 2. Update `.env` with PostgreSQL settings
 3. Run `npm run db:generate`
@@ -222,8 +243,9 @@ The application will log database configuration on startup in development mode:
 5. Import data if needed
 
 #### From PostgreSQL to SQLite:
+
 1. Export data if needed
-2. Update `.env` with SQLite settings  
+2. Update `.env` with SQLite settings
 3. Run `npm run db:generate`
 4. Run `npm run db:push`
 5. Import data if needed

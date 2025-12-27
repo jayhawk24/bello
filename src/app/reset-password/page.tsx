@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                         Reset Password
                     </h2>
-                    
+
                     <Suspense fallback={<div>Loading...</div>}>
                         <ResetPasswordForm />
                     </Suspense>

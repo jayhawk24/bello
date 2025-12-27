@@ -34,6 +34,7 @@ SMTP_PASSWORD="your-app-password"
 ### 2. Production Database Setup
 
 #### Option A: Using Railway (Recommended - Easy)
+
 ```bash
 # Install Railway CLI
 npm install -g @railway/cli
@@ -49,12 +50,14 @@ railway variables
 ```
 
 #### Option B: Using Supabase (Free tier available)
+
 1. Go to [supabase.com](https://supabase.com)
 2. Create new project
 3. Go to Settings > Database
 4. Copy connection string to `.env.production`
 
 #### Option C: Using PlanetScale (MySQL compatible)
+
 ```bash
 # Install PlanetScale CLI
 curl https://github.com/planetscale/cli/releases/latest/download/pscale_0.146.0_linux_amd64.deb -L -o pscale.deb
@@ -117,7 +120,7 @@ vercel
 
 # Add environment variables in Vercel dashboard
 vercel env add DATABASE_URL
-vercel env add NEXTAUTH_URL  
+vercel env add NEXTAUTH_URL
 vercel env add NEXTAUTH_SECRET
 
 # Deploy to production
@@ -127,14 +130,16 @@ vercel --prod
 ### 6. Configure Custom Domain (Optional)
 
 In Vercel Dashboard:
+
 1. Go to your project
-2. Click "Domains" 
+2. Click "Domains"
 3. Add your custom domain
 4. Update DNS records as instructed
 
 ### 7. Alternative Deployment Options
 
 #### Deploy to Netlify
+
 ```bash
 # Build the app
 npm run build
@@ -149,12 +154,13 @@ netlify deploy --prod --dir=.next
 ```
 
 #### Deploy to DigitalOcean App Platform
+
 1. Create account at DigitalOcean
 2. Go to App Platform
 3. Connect your GitHub repository
 4. Configure build settings:
-   - Build command: `npm run build`
-   - Run command: `npm run start`
+    - Build command: `npm run build`
+    - Run command: `npm run start`
 5. Add environment variables
 6. Deploy
 
@@ -165,75 +171,75 @@ netlify deploy --prod --dir=.next
 ```javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Production optimizations
-  compress: true,
-  poweredByHeader: false,
-  
-  // Security headers
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
-      },
-    ]
-  },
+    // Production optimizations
+    compress: true,
+    poweredByHeader: false,
 
-  // Image optimization
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'your-domain.com',
-      },
-    ],
-  },
+    // Security headers
+    async headers() {
+        return [
+            {
+                source: "/(.*)",
+                headers: [
+                    {
+                        key: "X-Frame-Options",
+                        value: "DENY"
+                    },
+                    {
+                        key: "X-Content-Type-Options",
+                        value: "nosniff"
+                    },
+                    {
+                        key: "Referrer-Policy",
+                        value: "strict-origin-when-cross-origin"
+                    },
+                    {
+                        key: "X-XSS-Protection",
+                        value: "1; mode=block"
+                    }
+                ]
+            }
+        ];
+    },
 
-  // Enable experimental features for better performance
-  experimental: {
-    optimizeCss: true,
-  },
-}
+    // Image optimization
+    images: {
+        formats: ["image/webp", "image/avif"],
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "your-domain.com"
+            }
+        ]
+    },
 
-module.exports = nextConfig
+    // Enable experimental features for better performance
+    experimental: {
+        optimizeCss: true
+    }
+};
+
+module.exports = nextConfig;
 ```
 
 ### Add production scripts to package.json:
 
 ```json
 {
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:prod": "prisma migrate deploy",
-    "build:analyze": "ANALYZE=true npm run build",
-    "test": "echo \"No tests specified\" && exit 0"
-  }
+    "scripts": {
+        "dev": "next dev --turbopack",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "type-check": "tsc --noEmit",
+        "db:generate": "prisma generate",
+        "db:push": "prisma db push",
+        "db:studio": "prisma studio",
+        "db:migrate": "prisma migrate dev",
+        "db:migrate:prod": "prisma migrate deploy",
+        "build:analyze": "ANALYZE=true npm run build",
+        "test": "echo \"No tests specified\" && exit 0"
+    }
 }
 ```
 
@@ -242,28 +248,32 @@ module.exports = nextConfig
 ### Create API health check endpoint:
 
 Create `src/app/api/health/route.ts`:
+
 ```typescript
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  try {
-    // Check database connection
-    await prisma.$queryRaw`SELECT 1`;
-    
-    return NextResponse.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: 'connected',
-    });
-  } catch (error) {
-    return NextResponse.json({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      database: 'disconnected',
-      error: 'Database connection failed',
-    }, { status: 503 });
-  }
+    try {
+        // Check database connection
+        await prisma.$queryRaw`SELECT 1`;
+
+        return NextResponse.json({
+            status: "healthy",
+            timestamp: new Date().toISOString(),
+            database: "connected"
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                status: "unhealthy",
+                timestamp: new Date().toISOString(),
+                database: "disconnected",
+                error: "Database connection failed"
+            },
+            { status: 503 }
+        );
+    }
 }
 ```
 
@@ -272,12 +282,13 @@ export async function GET() {
 ### Test these critical flows after deployment:
 
 1. **Hotel Admin Registration**: `/signup`
-2. **Staff Login**: `/login` with staff credentials  
+2. **Staff Login**: `/login` with staff credentials
 3. **QR Code Access**: Visit a room's QR code URL
 4. **Service Request**: Create and manage a service request
 5. **Database Health**: Visit `/api/health`
 
 ### Load Testing (Optional)
+
 ```bash
 # Install Artillery for load testing
 npm install -g artillery
@@ -303,35 +314,38 @@ artillery run artillery.yml
 ### Common Issues:
 
 1. **Database Connection Errors**
-   - Verify `DATABASE_URL` format
-   - Check database is accessible from your hosting provider
-   - Ensure SSL mode is configured correctly
+
+    - Verify `DATABASE_URL` format
+    - Check database is accessible from your hosting provider
+    - Ensure SSL mode is configured correctly
 
 2. **NextAuth Errors**
-   - Verify `NEXTAUTH_URL` matches your domain exactly
-   - Ensure `NEXTAUTH_SECRET` is at least 32 characters
-   - Check HTTPS is properly configured
+
+    - Verify `NEXTAUTH_URL` matches your domain exactly
+    - Ensure `NEXTAUTH_SECRET` is at least 32 characters
+    - Check HTTPS is properly configured
 
 3. **Build Failures**
-   - Run `npm run type-check` locally
-   - Check for TypeScript errors
-   - Verify all environment variables are set
+
+    - Run `npm run type-check` locally
+    - Check for TypeScript errors
+    - Verify all environment variables are set
 
 4. **Performance Issues**
-   - Enable compression in next.config.js
-   - Set up CDN for static assets
-   - Add database indexes for slow queries
+    - Enable compression in next.config.js
+    - Set up CDN for static assets
+    - Add database indexes for slow queries
 
 ## 🎯 **Go-Live Checklist (Final)**
 
-- [ ] Environment variables configured
-- [ ] Database connected and migrated  
-- [ ] Production build successful
-- [ ] Custom domain configured (if applicable)
-- [ ] SSL certificate active
-- [ ] Health check endpoint working
-- [ ] Test user flows working
-- [ ] Monitoring set up (optional but recommended)
+-   [ ] Environment variables configured
+-   [ ] Database connected and migrated
+-   [ ] Production build successful
+-   [ ] Custom domain configured (if applicable)
+-   [ ] SSL certificate active
+-   [ ] Health check endpoint working
+-   [ ] Test user flows working
+-   [ ] Monitoring set up (optional but recommended)
 
 **Your StayScan Hotel Concierge System is now ready for production! 🎉**
 
