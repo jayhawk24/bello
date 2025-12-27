@@ -11,8 +11,8 @@ interface BrandedQRPageProps {
 }
 
 export const metadata: Metadata = {
-    title: "Room QR Placard | Bello",
-    description: "Branded QR placard for Bello guest room services."
+    title: "Room QR Placard | Stay Scan",
+    description: "Branded QR placard for Stay Scan guest room services."
 };
 
 export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) {
@@ -503,7 +503,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
                         </svg>
                     </div>
                     <div>
-                        <p className="bello-hotel-label">Bello Hospitality</p>
+                        <p className="bello-hotel-label">Stay Scan Hospitality</p>
                         <h1 className="bello-hotel-name">{room.hotel.name}</h1>
                         <p className="bello-room-code">Room {room.roomNumber} · {roomTypeLabel}</p>
                     </div>
@@ -515,7 +515,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
                         <path d="M12 9L9.5 6.5" />
                         <path d="M4.27 10.27a9 9 0 1 0 15.46 0" />
                     </svg>
-                    <span>Scan to unlock your in-room concierge experience.</span>
+                    <span>Scan to unlock your Stay Scan concierge experience.</span>
                 </section>
 
                 <section className="bello-qr-display">
@@ -537,8 +537,8 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
                         <li>
                             <div className="bello-step-icon"></div>
                             <div className="bello-step-body">
-                                <p className="bello-step-title">Align &amp; follow the Bello prompt</p>
-                                <p>Hold steady until the Bello link appears, then tap it to explore room services.</p>
+                                <p className="bello-step-title">Align &amp; follow the Stay Scan prompt</p>
+                                <p>Hold steady until the Stay Scan link appears, then tap it to explore room services.</p>
                             </div>
                         </li>
                     </ol>
