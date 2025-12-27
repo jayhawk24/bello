@@ -73,7 +73,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
 
     const openBrandedQR = () => {
         if (!room) return;
-        const brandedQRUrl = `/api/rooms/${room.id}/branded-qr`;
+        const brandedQRUrl = `/dashboard/rooms/${room.id}/branded-qr`;
         window.open(brandedQRUrl, '_blank');
     };
 
@@ -293,8 +293,8 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                                     Status
                                 </label>
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${room.isOccupied
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-green-100 text-green-800'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-green-100 text-green-800'
                                     }`}>
                                     {room.isOccupied ? 'Occupied' : 'Available'}
                                 </span>
