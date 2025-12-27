@@ -10,7 +10,7 @@ Create `.env.production` file in your project root:
 # IMPORTANT: First switch to PostgreSQL: npm run db:switch:postgres
 
 # Database - PostgreSQL for production
-DATABASE_URL="postgresql://username:password@host:5432/bello_production"
+DATABASE_URL="postgresql://username:password@host:5432/stayscan_production"
 
 # NextAuth Configuration
 NEXTAUTH_URL="https://your-domain.com"
@@ -62,8 +62,8 @@ sudo dpkg -i pscale.deb
 
 # Create database
 pscale auth login
-pscale database create bello-production
-pscale connect bello-production main --port 3309
+pscale database create stayscan-production
+pscale connect stayscan-production main --port 3309
 
 # Update DATABASE_URL to use PlanetScale connection
 ```
@@ -111,7 +111,7 @@ vercel
 
 # Follow prompts:
 # - Link to existing project: N
-# - Project name: bello-hotel-concierge
+# - Project name: stayscan-hotel-concierge
 # - Directory: ./
 # - Override settings: N
 
@@ -333,6 +333,6 @@ artillery run artillery.yml
 - [ ] Test user flows working
 - [ ] Monitoring set up (optional but recommended)
 
-**Your Bello Hotel Concierge System is now ready for production! 🎉**
+**Your StayScan Hotel Concierge System is now ready for production! 🎉**
 
 For ongoing maintenance, refer to the comprehensive `PRODUCTION_DEPLOYMENT_CHECKLIST.md`.

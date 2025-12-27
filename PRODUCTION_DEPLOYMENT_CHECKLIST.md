@@ -1,4 +1,4 @@
-# Production Deployment Checklist for Bello Hotel Concierge System
+# Production Deployment Checklist for StayScan Hotel Concierge System
 
 ## 🔒 **Security & Environment Setup**
 

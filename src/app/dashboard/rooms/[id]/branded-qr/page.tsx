@@ -5,19 +5,19 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 interface BrandedQRPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export const metadata: Metadata = {
-    title: "Room QR Placard | Stay Scan",
-    description: "Branded QR placard for Stay Scan guest room services."
+    title: "Room QR Placard | StayScan",
+    description: "Branded QR placard for StayScan guest room services."
 };
 
 export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) {
+    const { id: roomId } = await params;
     const session = await auth();
-    const roomId = params.id;
 
     if (!session) {
         redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/rooms/${roomId}/branded-qr`)}`);
@@ -64,7 +64,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(qrData)}&color=1f2937&bgcolor=ffffff&ecc=Q`;
 
     const styles = `
-    .bello-branded-qr {
+    .stayscan-branded-qr {
         --accent-primary: #7c3aed;
         --accent-secondary: #38bdf8;
         --accent-muted: rgba(124, 58, 237, 0.12);
@@ -83,12 +83,12 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         overflow-x: hidden;
         overflow-y: auto;
     }
-    .bello-branded-qr *,
-    .bello-branded-qr *::before,
-    .bello-branded-qr *::after {
+    .stayscan-branded-qr *,
+    .stayscan-branded-qr *::before,
+    .stayscan-branded-qr *::after {
         box-sizing: border-box;
     }
-    .bello-aura {
+    .stayscan-aura {
         position: absolute;
         width: 420px;
         height: 420px;
@@ -97,17 +97,17 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         opacity: 0.55;
         pointer-events: none;
     }
-    .bello-aura.one {
+    .stayscan-aura.one {
         top: -120px;
         left: -120px;
         background: rgba(56, 189, 248, 0.55);
     }
-    .bello-aura.two {
+    .stayscan-aura.two {
         bottom: -140px;
         right: -140px;
         background: rgba(124, 58, 237, 0.6);
     }
-    .bello-print-button {
+    .stayscan-print-button {
         position: fixed;
         top: 28px;
         right: 28px;
@@ -126,26 +126,26 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         z-index: 10;
     }
-    .bello-print-button:hover {
+    .stayscan-print-button:hover {
         transform: translateY(-1px);
         box-shadow: 0 22px 44px rgba(99, 102, 241, 0.45);
     }
-    .bello-print-button:focus-visible {
+    .stayscan-print-button:focus-visible {
         outline: 3px solid rgba(56, 189, 248, 0.6);
         outline-offset: 3px;
     }
-    .bello-print-button.print-success {
+    .stayscan-print-button.print-success {
         background: linear-gradient(135deg, #22c55e, #16a34a);
         box-shadow: 0 18px 40px rgba(34, 197, 94, 0.45);
     }
-    .bello-print-icon {
+    .stayscan-print-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 22px;
         height: 22px;
     }
-    .bello-qr-card {
+    .stayscan-qr-card {
         width: min(760px, 100%);
         background: var(--surface);
         border-radius: 28px;
@@ -155,7 +155,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         border: 1px solid rgba(148, 163, 184, 0.12);
         position: relative;
     }
-    .bello-qr-card::before {
+    .stayscan-qr-card::before {
         content: "";
         position: absolute;
         inset: 0;
@@ -164,12 +164,12 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         mask: linear-gradient(#fff, transparent 35%);
         pointer-events: none;
     }
-    .bello-card-header {
+    .stayscan-card-header {
         display: flex;
         align-items: center;
         gap: 24px;
     }
-    .bello-brand-badge {
+    .stayscan-brand-badge {
         width: 72px;
         height: 72px;
         border-radius: 20px;
@@ -180,31 +180,31 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         color: #312e81;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
     }
-    .bello-brand-badge svg {
+    .stayscan-brand-badge svg {
         width: 36px;
         height: 36px;
     }
-    .bello-hotel-label {
+    .stayscan-hotel-label {
         text-transform: uppercase;
         letter-spacing: 0.18em;
         font-size: 11px;
         color: #6366f1;
         margin: 0 0 8px 0;
     }
-    .bello-hotel-name {
+    .stayscan-hotel-name {
         margin: 0;
         font-size: 32px;
         font-weight: 700;
         line-height: 1.2;
         color: var(--text-primary);
     }
-    .bello-room-code {
+    .stayscan-room-code {
         margin: 10px 0 0 0;
         font-size: 16px;
         font-weight: 500;
         color: var(--text-secondary);
     }
-    .bello-cta-ribbon {
+    .stayscan-cta-ribbon {
         margin-top: 32px;
         border-radius: 18px;
         padding: 18px 26px;
@@ -215,17 +215,17 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         font-weight: 600;
         color: #312e81;
     }
-    .bello-cta-ribbon svg {
+    .stayscan-cta-ribbon svg {
         width: 28px;
         height: 28px;
         flex-shrink: 0;
     }
-    .bello-qr-display {
+    .stayscan-qr-display {
         margin-top: 36px;
         display: flex;
         justify-content: center;
     }
-    .bello-qr-frame {
+    .stayscan-qr-frame {
         position: relative;
         padding: 28px;
         border-radius: 24px;
@@ -233,7 +233,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         border: 2px dashed rgba(99, 102, 241, 0.28);
         box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
     }
-    .bello-qr-frame::after {
+    .stayscan-qr-frame::after {
         content: "";
         position: absolute;
         inset: 18px;
@@ -241,15 +241,15 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         border: 1px dashed rgba(148, 163, 184, 0.35);
         pointer-events: none;
     }
-    .bello-qr-frame img {
+    .stayscan-qr-frame img {
         display: block;
         width: 260px;
         height: 260px;
     }
-    .bello-instruction-section {
+    .stayscan-instruction-section {
         margin-top: 44px;
     }
-    .bello-instruction-title {
+    .stayscan-instruction-title {
         margin: 0 0 18px 0;
         font-size: 18px;
         font-weight: 600;
@@ -257,7 +257,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         text-transform: uppercase;
         color: #4338ca;
     }
-    .bello-instruction-list {
+    .stayscan-instruction-list {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -266,7 +266,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         gap: 16px;
         counter-reset: steps;
     }
-    .bello-instruction-list li {
+    .stayscan-instruction-list li {
         display: flex;
         align-items: flex-start;
         gap: 16px;
@@ -275,7 +275,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         background: rgba(99, 102, 241, 0.08);
         border: 1px solid rgba(99, 102, 241, 0.12);
     }
-    .bello-step-icon {
+    .stayscan-step-icon {
         flex-shrink: 0;
         display: grid;
         place-items: center;
@@ -288,10 +288,10 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         font-size: 16px;
         counter-increment: steps;
     }
-    .bello-step-icon::before {
+    .stayscan-step-icon::before {
         content: counter(steps);
     }
-    .bello-step-body {
+    .stayscan-step-body {
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -299,18 +299,18 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         font-size: 15px;
         line-height: 1.5;
     }
-    .bello-step-title {
+    .stayscan-step-title {
         margin: 0;
         font-weight: 600;
         color: var(--text-primary);
     }
-    .bello-services {
+    .stayscan-services {
         margin-top: 32px;
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
     }
-    .bello-service-chip {
+    .stayscan-service-chip {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -322,26 +322,26 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         font-size: 14px;
         border: 1px solid rgba(148, 163, 184, 0.35);
     }
-    .bello-service-chip svg {
+    .stayscan-service-chip svg {
         width: 16px;
         height: 16px;
     }
     @media (max-width: 720px) {
-        .bello-branded-qr {
+        .stayscan-branded-qr {
             padding: 40px 16px;
         }
-        .bello-print-button {
+        .stayscan-print-button {
             position: static;
             margin-bottom: 24px;
         }
-        .bello-qr-card {
+        .stayscan-qr-card {
             padding: 32px 24px;
         }
-        .bello-card-header {
+        .stayscan-card-header {
             flex-direction: column;
             align-items: flex-start;
         }
-        .bello-qr-frame img {
+        .stayscan-qr-frame img {
             width: 220px;
             height: 220px;
         }
@@ -352,18 +352,18 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-branded-qr {
+        .stayscan-branded-qr {
             padding: 16px;
             background: #ffffff !important;
             overflow: visible;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-aura,
-        .bello-print-button {
+        .stayscan-aura,
+        .stayscan-print-button {
             display: none !important;
         }
-        .bello-qr-card {
+        .stayscan-qr-card {
             box-shadow: none;
             background: var(--surface);
             border: 1px solid #cbd5f5;
@@ -372,53 +372,53 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-qr-card::before {
+        .stayscan-qr-card::before {
             display: none;
         }
-        .bello-card-header {
+        .stayscan-card-header {
             gap: 16px;
         }
-        .bello-brand-badge {
+        .stayscan-brand-badge {
             width: 60px;
             height: 60px;
         }
-        .bello-hotel-name {
+        .stayscan-hotel-name {
             font-size: 26px;
         }
-        .bello-room-code {
+        .stayscan-room-code {
             margin-top: 6px;
             font-size: 14px;
         }
-        .bello-cta-ribbon {
+        .stayscan-cta-ribbon {
             margin-top: 20px;
             padding: 14px 18px;
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(244, 114, 182, 0.28));
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-qr-display {
+        .stayscan-qr-display {
             margin-top: 24px;
         }
-        .bello-qr-frame {
+        .stayscan-qr-frame {
             padding: 20px;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-qr-frame img {
+        .stayscan-qr-frame img {
             width: 220px;
             height: 220px;
         }
-        .bello-instruction-section {
+        .stayscan-instruction-section {
             margin-top: 28px;
         }
-        .bello-instruction-list li {
+        .stayscan-instruction-list li {
             padding: 12px 14px;
             background: rgba(99, 102, 241, 0.12);
             border: 1px solid rgba(99, 102, 241, 0.24);
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-step-icon {
+        .stayscan-step-icon {
             width: 30px;
             height: 30px;
             font-size: 14px;
@@ -426,17 +426,17 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .bello-step-body {
+        .stayscan-step-body {
             font-size: 13px;
         }
-        .bello-instruction-title {
+        .stayscan-instruction-title {
             margin-bottom: 14px;
             font-size: 16px;
         }
-        .bello-services {
+        .stayscan-services {
             margin-top: 24px;
         }
-        .bello-service-chip {
+        .stayscan-service-chip {
             padding: 8px 12px;
             font-size: 12px;
             background: rgba(226, 232, 240, 0.85);
@@ -449,7 +449,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
 
     const script = `
         (function () {
-            var printButton = document.querySelector('.bello-print-button');
+            var printButton = document.querySelector('.stayscan-print-button');
             if (!printButton) return;
             var originalMarkup = printButton.innerHTML;
 
@@ -466,7 +466,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
 
             window.addEventListener('afterprint', function () {
                 printButton.classList.add('print-success');
-                printButton.innerHTML = '<span class="bello-print-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span>Print ready</span>';
+                printButton.innerHTML = '<span class="stayscan-print-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span>Print ready</span>';
                 setTimeout(function () {
                     printButton.classList.remove('print-success');
                     printButton.innerHTML = originalMarkup;
@@ -476,12 +476,12 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
     `;
 
     return (
-        <div className="bello-branded-qr">
+        <div className="stayscan-branded-qr">
             <style>{styles}</style>
-            <div className="bello-aura one" aria-hidden="true"></div>
-            <div className="bello-aura two" aria-hidden="true"></div>
-            <button className="bello-print-button" type="button">
-                <span className="bello-print-icon" aria-hidden="true">
+            <div className="stayscan-aura one" aria-hidden="true"></div>
+            <div className="stayscan-aura two" aria-hidden="true"></div>
+            <button className="stayscan-print-button" type="button">
+                <span className="stayscan-print-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M7 8V4h10v4" />
                         <path d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1" />
@@ -492,9 +492,9 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
                 <span>Print QR Placard</span>
             </button>
 
-            <main className="bello-qr-card">
-                <header className="bello-card-header">
-                    <div className="bello-brand-badge" aria-hidden="true">
+            <main className="stayscan-qr-card">
+                <header className="stayscan-card-header">
+                    <div className="stayscan-brand-badge" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M4 21V5.5A2.5 2.5 0 0 1 6.5 3H17a3 3 0 0 1 3 3V21" />
                             <path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
@@ -503,56 +503,56 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
                         </svg>
                     </div>
                     <div>
-                        <p className="bello-hotel-label">Stay Scan Hospitality</p>
-                        <h1 className="bello-hotel-name">{room.hotel.name}</h1>
-                        <p className="bello-room-code">Room {room.roomNumber} · {roomTypeLabel}</p>
+                        <p className="stayscan-hotel-label">StayScan Hospitality</p>
+                        <h1 className="stayscan-hotel-name">{room.hotel.name}</h1>
+                        <p className="stayscan-room-code">Room {room.roomNumber} · {roomTypeLabel}</p>
                     </div>
                 </header>
 
-                <section className="bello-cta-ribbon">
+                <section className="stayscan-cta-ribbon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M12 3v6l2.5-2.5" />
                         <path d="M12 9L9.5 6.5" />
                         <path d="M4.27 10.27a9 9 0 1 0 15.46 0" />
                     </svg>
-                    <span>Scan to unlock your Stay Scan concierge experience.</span>
+                    <span>Scan to unlock your StayScan concierge experience.</span>
                 </section>
 
-                <section className="bello-qr-display">
-                    <div className="bello-qr-frame">
+                <section className="stayscan-qr-display">
+                    <div className="stayscan-qr-frame">
                         <img src={qrImageUrl} alt="Room services QR code" />
                     </div>
                 </section>
 
-                <section className="bello-instruction-section">
-                    <h2 className="bello-instruction-title">How to access</h2>
-                    <ol className="bello-instruction-list">
+                <section className="stayscan-instruction-section">
+                    <h2 className="stayscan-instruction-title">How to access</h2>
+                    <ol className="stayscan-instruction-list">
                         <li>
-                            <div className="bello-step-icon"></div>
-                            <div className="bello-step-body">
-                                <p className="bello-step-title">Open your device camera</p>
+                            <div className="stayscan-step-icon"></div>
+                            <div className="stayscan-step-body">
+                                <p className="stayscan-step-title">Open your device camera</p>
                                 <p>Most smartphones launch a QR reader directly in the camera app.</p>
                             </div>
                         </li>
                         <li>
-                            <div className="bello-step-icon"></div>
-                            <div className="bello-step-body">
-                                <p className="bello-step-title">Align &amp; follow the Stay Scan prompt</p>
-                                <p>Hold steady until the Stay Scan link appears, then tap it to explore room services.</p>
+                            <div className="stayscan-step-icon"></div>
+                            <div className="stayscan-step-body">
+                                <p className="stayscan-step-title">Align &amp; follow the StayScan prompt</p>
+                                <p>Hold steady until the StayScan link appears, then tap it to explore room services.</p>
                             </div>
                         </li>
                     </ol>
                 </section>
 
-                <section className="bello-services">
-                    <span className="bello-service-chip">
+                <section className="stayscan-services">
+                    <span className="stayscan-service-chip">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="m5 11 7-7 7 7" />
                             <path d="M12 18V4" />
                         </svg>
                         Concierge
                     </span>
-                    <span className="bello-service-chip">
+                    <span className="stayscan-service-chip">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M4 5h16" />
                             <path d="M4 10h16" />
@@ -563,7 +563,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
                         </svg>
                         Housekeeping
                     </span>
-                    <span className="bello-service-chip">
+                    <span className="stayscan-service-chip">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M3 10h18" />
                             <path d="m8 2 2 8" />

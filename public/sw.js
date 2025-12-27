@@ -1,5 +1,5 @@
 // Service Worker for push notifications
-const CACHE_NAME = 'bello-notifications-v1';
+const CACHE_NAME = 'stayscan-notifications-v1';
 
 self.addEventListener('install', (event) => {
     console.log('Service Worker installing...');

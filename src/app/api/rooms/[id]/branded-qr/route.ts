@@ -416,7 +416,7 @@ export async function GET(
                         </svg>
                     </div>
                     <div>
-                        <p class="hotel-label">Stay Scan Hospitality</p>
+                        <p class="hotel-label">StayScan Hospitality</p>
                         <h1 class="hotel-name">${room.hotel.name}</h1>
                         <p class="room-code">Room ${
                             room.roomNumber
@@ -429,7 +429,7 @@ export async function GET(
                         <path d="M12 9L9.5 6.5" />
                         <path d="M4.27 10.27a9 9 0 1 0 15.46 0" />
                     </svg>
-                    <span>Scan to unlock your Stay Scan concierge experience.</span>
+                    <span>Scan to unlock your StayScan concierge experience.</span>
                 </section>
                 <section class="qr-display">
                     <div class="qr-frame">
@@ -452,13 +452,13 @@ export async function GET(
                             <div class="step-icon"></div>
                             <div class="step-body">
                                 <p class="step-title">Align the code inside the frame</p>
-                                <p>Hold steady until the prompt appears confirming Stay Scan room services.</p>
+                                <p>Hold steady until the prompt appears confirming StayScan room services.</p>
                             </div>
                         </li>
                         <li>
                             <div class="step-icon"></div>
                             <div class="step-body">
-                                <p class="step-title">Tap the Stay Scan link to continue</p>
+                                <p class="step-title">Tap the StayScan link to continue</p>
                                 <p>Instantly view room details, housekeeping requests, dining, and more.</p>
                             </div>
                         </li>

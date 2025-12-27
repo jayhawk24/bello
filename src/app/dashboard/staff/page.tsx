@@ -80,7 +80,7 @@ export default function StaffPage() {
                             <span className="text-2xl">👥</span>
                         </div>
                         <Link href="/dashboard" className="text-2xl font-bold text-gray-800 hover:text-minion-blue transition-colors">
-                            Bello Dashboard
+                            StayScan Dashboard
                         </Link>
                     </div>
                     <div className="flex items-center space-x-4">

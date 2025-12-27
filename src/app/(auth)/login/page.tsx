@@ -58,7 +58,7 @@ function LoginForm() {
                             <span className="text-2xl">🏨</span>
                         </div>
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-800">Bello Hotels</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">StayScan Hotels</h1>
                     <p className="text-gray-600 mt-2">
                         Sign in to your account
                     </p>
@@ -116,7 +116,7 @@ function LoginForm() {
 
                 <div className="mt-6 text-center">
                     <p className="text-gray-600 mb-4">
-                        New to Bello?
+                        New to StayScan?
                     </p>
                     <div className="space-y-2">
                         <Link

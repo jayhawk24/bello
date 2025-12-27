@@ -1,6 +1,6 @@
-# 🏨 Bello - Hotel Concierge Service Platform
+# 🏨 StayScan - Hotel Concierge Service Platform
 
-A comprehensive Next.js full-stack application providing premium concierge services for hotel guests with a subscription-based model.
+A comprehensive Next.js full-stack application providing premium concierge services for hotel guests with a subscription-based model under the StayScan brand.
 
 ## ✨ Features
 
@@ -49,7 +49,7 @@ A comprehensive Next.js full-stack application providing premium concierge servi
 
     ```bash
     git clone <repository-url>
-    cd bello
+    cd stayscan
     ```
 
 2. **Install dependencies**

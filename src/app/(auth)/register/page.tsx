@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 import RegisterFormClient from "./RegisterFormClient";
 
 export const metadata: Metadata = {
-    title: "Create Your Hotel Account | Bello",
+    title: "Create Your Hotel Account | StayScan",
     description:
-        "Start your Bello concierge trial in minutes. Pick a plan, create your admin profile, and get your hotel onboarded today."
+        "Start your StayScan concierge trial in minutes. Pick a plan, create your admin profile, and get your hotel onboarded today."
 };
 
 type RegisterPageProps = {

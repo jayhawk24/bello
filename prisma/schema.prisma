@@ -1,4 +1,4 @@
-// Bello Hotel Concierge Service Database Schema
+// StayScan Hotel Concierge Service Database Schema
 // Based on PROJECT_REQUIREMENTS.md specifications
 
 generator client {

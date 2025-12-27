@@ -11,7 +11,7 @@ export default function Contact() {
                             <span className="text-2xl">🏨</span>
                         </div>
                         <Link href="/" className="text-2xl font-bold text-gray-800 hover:text-minion-blue transition-colors">
-                            Bello
+                            StayScan
                         </Link>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -107,8 +107,8 @@ export default function Contact() {
                                     <span className="text-2xl">📧</span>
                                     <div>
                                         <p className="font-medium">Email</p>
-                                        <a href="mailto:hello@bello.com" className="text-minion-blue hover:text-minion-yellow transition-colors">
-                                            hello@bello.com
+                                        <a href="mailto:hello@stayscan.com" className="text-minion-blue hover:text-minion-yellow transition-colors">
+                                            hello@stayscan.com
                                         </a>
                                     </div>
                                 </div>
@@ -116,8 +116,8 @@ export default function Contact() {
                                     <span className="text-2xl">📞</span>
                                     <div>
                                         <p className="font-medium">Phone</p>
-                                        <a href="tel:+1-555-BELLO-01" className="text-minion-blue hover:text-minion-yellow transition-colors">
-                                            +1 (555) BELLO-01
+                                        <a href="tel:+1-555-STAY-01" className="text-minion-blue hover:text-minion-yellow transition-colors">
+                                            +1 (555) STAY-01
                                         </a>
                                     </div>
                                 </div>

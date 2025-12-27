@@ -1,7 +1,7 @@
 {
-    "name": "bello-hotel-concierge",
+    "name": "stayscan-hotel-concierge",
     "version": "0.1.0",
-    "description": "Premium concierge services platform for hotels with subscription-based access",
+    "description": "StayScan delivers premium concierge services for hotels with subscription-based access",
     "private": true,
     "scripts": {
         "dev": "next dev --turbopack",
@@ -73,6 +73,6 @@
         "typescript",
         "subscription"
     ],
-    "author": "Bello Team",
+    "author": "StayScan Team",
     "license": "MIT"
 }

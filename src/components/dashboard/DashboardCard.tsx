@@ -62,7 +62,7 @@ export default function DashboardCard({
             return <span>{icon}</span>;
         }
 
-        return <LogoMark size={40} className="mx-auto" alt="Bello logo" />;
+        return <LogoMark size={40} className="mx-auto" alt="StayScan logo" />;
     };
 
     return (

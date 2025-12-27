@@ -36,7 +36,7 @@ npm run db:push
 npm run db:switch:postgres
 
 # 2. Update your .env file
-DATABASE_URL="postgresql://username:password@localhost:5432/bello_dev"
+DATABASE_URL="postgresql://username:password@localhost:5432/stayscan_dev"
 
 # 3. Generate Prisma client and push schema
 npm run db:generate
@@ -96,7 +96,7 @@ DATABASE_URL="mysql://username:password@host:3306/database_name"
 Create `.env.production`:
 ```bash
 # IMPORTANT: Switch to PostgreSQL first: npm run db:switch:postgres
-DATABASE_URL="postgresql://username:password@host:5432/bello_production"
+DATABASE_URL="postgresql://username:password@host:5432/stayscan_production"
 NEXTAUTH_URL="https://yourdomain.com"
 NEXTAUTH_SECRET="your-32-character-secret"
 # ... other variables
@@ -150,7 +150,7 @@ docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgre
 
 # Update .env
 DATABASE_PROVIDER="postgresql"  
-DATABASE_URL="postgresql://postgres:password@localhost:5432/bello_test"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/stayscan_test"
 ```
 
 3. **Deploy to Production with PostgreSQL**

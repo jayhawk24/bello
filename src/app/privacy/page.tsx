@@ -11,7 +11,7 @@ export default function Privacy() {
                             <span className="text-2xl">🏨</span>
                         </div>
                         <Link href="/" className="text-2xl font-bold text-gray-800 hover:text-minion-blue transition-colors">
-                            Bello
+                            StayScan
                         </Link>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -58,7 +58,7 @@ export default function Privacy() {
 
                     <h2>Contact Us</h2>
                     <p>
-                        If you have any questions about this Privacy Policy, please contact us at privacy@bello.com
+                        If you have any questions about this Privacy Policy, please contact us at privacy@stayscan.com
                     </p>
                 </div>
 

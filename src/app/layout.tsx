@@ -18,9 +18,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Bello - Hotel Concierge Service",
-  description: "Premium concierge services for hotel guests. Access services, make requests, and enhance your stay experience.",
-  keywords: ["hotel", "concierge", "service", "guest", "hospitality"],
+  title: "StayScan - Hotel Concierge Service",
+  description: "Premium concierge services for hotel guests. Access services, make requests, and enhance your stay experience with StayScan.",
+  keywords: ["stayscan", "hotel", "concierge", "service", "guest", "hospitality"],
   icons: {
     icon: [
       { url: "/favicon.ico" },

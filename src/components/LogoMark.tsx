@@ -16,7 +16,7 @@ export function LogoMark({
     priority = false,
     rounded = true,
     src = "/icon.png",
-    alt = "Bello hotel concierge"
+    alt = "StayScan hotel concierge"
 }: LogoMarkProps) {
     return (
         <Image

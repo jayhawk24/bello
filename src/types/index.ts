@@ -1,4 +1,4 @@
-// Shared TypeScript type definitions for the Bello Hotel Concierge Service
+// Shared TypeScript type definitions for the StayScan Hotel Concierge Service
 
 export interface User {
     id: string;

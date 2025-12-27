@@ -12,7 +12,7 @@ export default function Home() {
             <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
               <LogoMark size={28} priority />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Bello</h1>
+            <h1 className="text-2xl font-bold text-gray-800">StayScan</h1>
           </div>
           <div className="flex items-center space-x-4 ml-5">
             <Link href="/guest" className="btn-minion">
@@ -123,7 +123,7 @@ export default function Home() {
             <div className="w-8 h-8 bg-minion-yellow rounded-full flex items-center justify-center">
               <LogoMark size={20} />
             </div>
-            <h3 className="text-xl font-bold">Bello</h3>
+            <h3 className="text-xl font-bold">StayScan</h3>
           </div>
           <p className="text-gray-400 mb-4">
             Premium concierge services for the modern hotel industry

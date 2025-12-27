@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
             amount,
             currency: plan.currency,
             key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-            name: "Bello Hotel Concierge",
+            name: "StayScan Hotel Concierge",
             description: `${plan.name} Plan - ${
                 billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1)
             }`,
