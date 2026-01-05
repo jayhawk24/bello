@@ -58,7 +58,7 @@ export const roomSchema = z.object({
 // Service request validation
 export const serviceRequestSchema = z.object({
     serviceId: z.string().min(1, "Service is required"),
-    title: z.string().min(5, "Title must be at least 5 characters"),
+    title: z.string().min(3, "Title must be at least 3 characters"),
     description: z.string().optional(),
     priority: z.enum(["low", "medium", "high", "urgent"]).default("medium")
 });

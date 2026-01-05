@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (!validationResult.success) {
+            console.log(validationResult);
             return NextResponse.json(
                 {
                     error: "Invalid request data",

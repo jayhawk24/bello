@@ -74,6 +74,7 @@ export default async function BrandedQRCodePage({ params }: BrandedQRPageProps) 
         min-height: 100vh;
         padding: 64px 24px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         position: relative;
