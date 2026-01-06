@@ -7,6 +7,7 @@ import Link from "next/link";
 import DashboardNav from "@/components/DashboardNav";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import LogoMark from "@/components/LogoMark";
+import LiveRequestBoard from "@/components/LiveRequestBoard";
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
@@ -211,7 +212,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid md:grid-cols-4 gap-4">
+                <div className="grid md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
                         <div className="text-2xl font-bold text-minion-yellow">
                             {totalRooms}
@@ -233,6 +234,13 @@ export default function DashboardPage() {
                         <div className="text-gray-600">Current Plan</div>
                     </div>
                 </div>
+
+                {/* Live Request Board */}
+                {(session.user.role === "hotel_staff" || session.user.role === "hotel_admin") && (
+                    <div className="mb-8">
+                        <LiveRequestBoard maxItems={5} showHeader={true} />
+                    </div>
+                )}
 
                 {/* Getting Started */}
                 <div className="mt-12">
