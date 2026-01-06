@@ -107,8 +107,8 @@ export default function Contact() {
                                     <span className="text-2xl">📧</span>
                                     <div>
                                         <p className="font-medium">Email</p>
-                                        <a href="mailto:hello@stayscan.com" className="text-minion-blue hover:text-minion-yellow transition-colors">
-                                            hello@stayscan.com
+                                        <a href="mailto:support@stayscan.com" className="text-minion-blue hover:text-minion-yellow transition-colors">
+                                            support@stayscan.com
                                         </a>
                                     </div>
                                 </div>
@@ -116,8 +116,8 @@ export default function Contact() {
                                     <span className="text-2xl">📞</span>
                                     <div>
                                         <p className="font-medium">Phone</p>
-                                        <a href="tel:+1-555-STAY-01" className="text-minion-blue hover:text-minion-yellow transition-colors">
-                                            +1 (555) STAY-01
+                                        <a href="tel:+91-961-650-4623" className="text-minion-blue hover:text-minion-yellow transition-colors">
+                                            +91 (961) 650-4623
                                         </a>
                                     </div>
                                 </div>

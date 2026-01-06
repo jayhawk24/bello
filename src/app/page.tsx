@@ -12,9 +12,9 @@ export default function Home() {
             <div className="w-10 h-10 bg-minion-yellow rounded-full flex items-center justify-center">
               <LogoMark size={28} priority />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">StayScan</h1>
+            <p className="text-2xl sm:text-4xl font-bold text-gray-800">StayScan</p>
           </div>
-          <div className="flex items-center space-x-4 ml-5">
+          <div className="flex items-center space-x-2 sm:ml-5 sm:space-x-4">
             <Link href="/guest" className="btn-minion">
               Guest Access
             </Link>
