@@ -1,39 +1,14 @@
 import Link from "next/link";
 import PricingSection from "@/components/PricingSection";
 import LogoMark from "@/components/LogoMark";
+import HowItWorksTimeline from "@/components/HowItWorksTimeline";
 
 export default function Home() {
+
   const highlights = [
     { value: "4.9/5", label: "Guest satisfaction" },
     { value: "2.3M+", label: "Requests resolved" },
     { value: "2m 10s", label: "Avg. response" },
-  ];
-
-  const steps = [
-    {
-      title: "Scan & greet",
-      description: "Guests scan the in-room QR and land on a branded concierge without downloads or logins.",
-      badge: "No app required",
-      icon: "📲",
-    },
-    {
-      title: "Smart triage",
-      description: "Requests route to the right team instantly—front desk, housekeeping, dining, or transport.",
-      badge: "Auto-routing",
-      icon: "🛰️",
-    },
-    {
-      title: "Live updates",
-      description: "Guests see realtime progress, ETA, and chat with staff, reducing lobby calls and wait times.",
-      badge: "Realtime",
-      icon: "📡",
-    },
-    {
-      title: "Insights & upsells",
-      description: "Managers view trends, measure SLAs, and trigger timely upsells with zero manual spreadsheets.",
-      badge: "Data rich",
-      icon: "📊",
-    },
   ];
 
   const features = [
@@ -61,8 +36,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-yellow-50 via-white to-amber-100">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_20%_20%,rgba(255,215,0,0.25),transparent_50%),radial-gradient(circle_at_80%_0%,rgba(33,150,243,0.18),transparent_45%)]" aria-hidden />
-
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-[radial-gradient(circle_at_20%_20%,rgba(255,215,0,0.25),transparent_50%),radial-gradient(circle_at_80%_0%,rgba(33,150,243,0.18),transparent_45%)]" aria-hidden />
       <nav className="nav-minion px-6 py-4 bg-white/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
@@ -94,7 +68,7 @@ export default function Home() {
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
               Hospitality that answers
-              <span className="text-minion-yellow"> before guests ask.</span>
+              <span className="text-minion-blue"> before guests ask.</span>
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
               Turn every stay into a memorable one with instant service requests, live updates, and a concierge your team can run in under a day.
@@ -153,54 +127,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="how-it-works" className="relative py-6 lg:py-10">
-          <div className="absolute inset-x-0 -top-10 h-32 bg-gradient-to-b from-amber-100/70 to-transparent" aria-hidden />
-          <div className="grid lg:grid-cols-[0.85fr,1.15fr] gap-10 items-start relative">
-            <div className="card-minion sticky top-24 bg-white/90 shadow-lg border-yellow-100">
-              <p className="text-sm font-semibold text-minion-blue mb-2">Step-by-step flow</p>
-              <h2 className="text-4xl font-bold text-gray-900 leading-snug mb-4">
-                How StayScan works across every stay.
-              </h2>
-              <p className="text-base text-gray-700 mb-6">
-                A guided timeline for guests and teams—scroll to see each milestone. On mobile, swipe through the steps.
-              </p>
-              <div className="flex flex-wrap gap-3 text-sm">
-                <span className="px-3 py-2 rounded-full bg-minion-yellow/30 text-gray-800 font-semibold">1 day setup</span>
-                <span className="px-3 py-2 rounded-full bg-minion-blue/15 text-gray-800 font-semibold">No-code launch</span>
-                <span className="px-3 py-2 rounded-full bg-white border border-yellow-200">Built for staff & guests</span>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="hidden lg:block absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-minion-blue/40 via-minion-yellow/30 to-transparent" aria-hidden />
-              <div className="flex lg:block gap-4 overflow-x-auto pb-4 lg:overflow-visible snap-x">
-                {steps.map((step, idx) => (
-                  <article
-                    key={step.title}
-                    className="relative min-w-[280px] lg:min-w-0 lg:pl-12 snap-center"
-                  >
-                    <div className="hidden lg:flex absolute left-1 top-6 w-3 h-3 rounded-full bg-white border-2 border-minion-blue shadow-sm" aria-hidden />
-                    <div className="card-minion bg-white/90 border-yellow-100 shadow-md h-full">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{step.icon}</span>
-                          <div>
-                            <p className="text-xs font-semibold uppercase text-gray-500">Step {String(idx + 1).padStart(2, "0")}</p>
-                            <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
-                          </div>
-                        </div>
-                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-minion-yellow/50 text-gray-800">
-                          {step.badge}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">{step.description}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <HowItWorksTimeline />
 
         <section id="features" className="py-6 lg:py-10">
           <div className="text-center mb-10">
