@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata.contact;
 
 export default function Contact() {
     return (
@@ -107,8 +110,8 @@ export default function Contact() {
                                     <span className="text-2xl">📧</span>
                                     <div>
                                         <p className="font-medium">Email</p>
-                                        <a href="mailto:support@stayscan.com" className="text-minion-blue hover:text-minion-yellow transition-colors">
-                                            support@stayscan.com
+                                        <a href="mailto:support@stayscan.in" className="text-minion-blue hover:text-minion-yellow transition-colors">
+                                            support@stayscan.in
                                         </a>
                                     </div>
                                 </div>

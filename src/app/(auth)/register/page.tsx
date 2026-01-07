@@ -2,12 +2,9 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import RegisterFormClient from "./RegisterFormClient";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-    title: "Create Your Hotel Account | StayScan",
-    description:
-        "Start your StayScan concierge trial in minutes. Pick a plan, create your admin profile, and get your hotel onboarded today."
-};
+export const metadata = pageMetadata.register;
 
 type RegisterPageProps = {
     searchParams?: Promise<Record<string, string | string[] | undefined>>;

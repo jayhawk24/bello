@@ -2,6 +2,10 @@ import Link from "next/link";
 import PricingSection from "@/components/PricingSection";
 import LogoMark from "@/components/LogoMark";
 import HowItWorksTimeline from "@/components/HowItWorksTimeline";
+import { pageMetadata } from "@/lib/seo";
+import { JsonLd, organizationSchema, softwareSchema } from "@/components/seo/JsonLd";
+
+export const metadata = pageMetadata.home;
 
 export default function Home() {
 
@@ -188,6 +192,8 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <JsonLd data={organizationSchema} />
+      <JsonLd data={softwareSchema} />
     </div>
   );
 }

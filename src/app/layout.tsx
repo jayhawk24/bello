@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import { defaultMetadata } from "@/lib/seo";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -18,9 +19,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "StayScan - Hotel Concierge Service",
-  description: "Premium concierge services for hotel guests. Access services, make requests, and enhance your stay experience with StayScan.",
-  keywords: ["stayscan", "hotel", "concierge", "service", "guest", "hospitality"],
+  ...defaultMetadata,
   icons: {
     icon: [
       { url: "/favicon.ico" },

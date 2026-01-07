@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata.terms;
 
 export default function Terms() {
     return (
@@ -70,7 +73,7 @@ export default function Terms() {
 
                     <h2>Contact Information</h2>
                     <p>
-                        Questions about the Terms of Service should be sent to us at legal@stayscan.com
+                        Questions about the Terms of Service should be sent to us at legal@stayscan.in
                     </p>
                 </div>
 

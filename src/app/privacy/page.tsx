@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata.privacy;
 
 export default function Privacy() {
     return (
@@ -58,7 +61,7 @@ export default function Privacy() {
 
                     <h2>Contact Us</h2>
                     <p>
-                        If you have any questions about this Privacy Policy, please contact us at privacy@stayscan.com
+                        If you have any questions about this Privacy Policy, please contact us at privacy@stayscan.in
                     </p>
                 </div>
 
