@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { defaultMetadata } from "@/lib/seo";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -44,6 +45,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <Analytics />
+        <GoogleAnalytics measurementId="G-GF9XXH07VL" />
 
         {/* Service Worker Registration */}
         <Script id="register-sw" strategy="afterInteractive">

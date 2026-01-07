@@ -1,14 +1,14 @@
 import Script from 'next/script';
 
 export function GoogleAnalytics({ measurementId }: { measurementId: string }) {
-  return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
+    return (
+        <>
+            <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+                strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+                {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
@@ -16,7 +16,7 @@ export function GoogleAnalytics({ measurementId }: { measurementId: string }) {
             page_path: window.location.pathname,
           });
         `}
-      </Script>
-    </>
-  );
+            </Script>
+        </>
+    );
 }

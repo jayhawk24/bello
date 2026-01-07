@@ -1,2 +1,6 @@
-export { JsonLd, organizationSchema, softwareSchema } from './JsonLd';
-export { generateBreadcrumbSchema, generateFAQSchema, generateProductSchema } from './JsonLd';
+export { JsonLd, organizationSchema, softwareSchema } from "./JsonLd";
+export {
+    generateBreadcrumbSchema,
+    generateFAQSchema,
+    generateProductSchema
+} from "./JsonLd";
