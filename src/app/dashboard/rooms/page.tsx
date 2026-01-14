@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import toast from 'react-hot-toast';
 
@@ -22,6 +22,10 @@ export default function RoomsPage() {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const openBrandedQRModal = useCallback((roomId: string) => {
+        const url = `/dashboard/rooms/${roomId}/branded-qr`;
+        window.open(url, "_blank", "noopener,noreferrer");
+    }, []);
 
     useEffect(() => {
         if (status === "loading") return;
@@ -187,10 +191,10 @@ export default function RoomsPage() {
 
                                 <div className="flex flex-col space-y-2">
                                     <button
-                                        onClick={() => downloadQRCode(room.id, room.roomNumber)}
+                                        onClick={() => openBrandedQRModal(room.id)}
                                         className="btn-minion w-full text-sm"
                                     >
-                                        📱 Download QR Code
+                                        🖨️ Print Branded QR Code
                                     </button>
                                     <div className="flex space-x-2">
                                         {session.user.role === 'hotel_admin' && (

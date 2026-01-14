@@ -360,7 +360,7 @@ export default function RoomViewPage({ params }: RoomViewPageProps) {
                                     onClick={openBrandedQR}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
                                 >
-                                    ✨ View Branded QR Code
+                                    🖨️ Print Branded QR Code
                                 </button>
                                 <button
                                     onClick={downloadQRCode}
