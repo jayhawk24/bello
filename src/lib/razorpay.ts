@@ -25,82 +25,9 @@ export async function getSubscriptionPlans(
     return plans;
 }
 
-// Legacy subscription plans - to be removed after migration
-export const SUBSCRIPTION_PLANS = {
-    starter: {
-        name: "Starter",
-        description: "1-20 Rooms",
-        price: 4900, // ₹49.00 in paise
-        currency: "INR",
-        period: "monthly",
-        interval: 1,
-        roomLimit: 20,
-        features: [
-            "Up to 20 rooms",
-            "QR code access",
-            "Basic service requests",
-            "Email support",
-            "Basic analytics"
-        ]
-    },
-    growth: {
-        name: "Growth",
-        description: "21-50 Rooms",
-        price: 12900, // ₹129.00 in paise
-        currency: "INR",
-        period: "monthly",
-        interval: 1,
-        roomLimit: 50,
-        features: [
-            "Up to 50 rooms",
-            "QR code access",
-            "Full service requests",
-            "Priority support",
-            "Advanced analytics",
-            "Custom branding"
-        ]
-    },
-    professional: {
-        name: "Professional",
-        description: "51-100 Rooms",
-        price: 24900, // ₹249.00 in paise
-        currency: "INR",
-        period: "monthly",
-        interval: 1,
-        roomLimit: 100,
-        features: [
-            "Up to 100 rooms",
-            "QR code access",
-            "Premium service suite",
-            "Phone & chat support",
-            "Full analytics dashboard",
-            "Multi-location support",
-            "API access"
-        ]
-    },
-    enterprise: {
-        name: "Enterprise",
-        description: "100+ Rooms",
-        price: 44900, // ₹449.00 in paise
-        currency: "INR",
-        period: "monthly",
-        interval: 1,
-        roomLimit: -1, // Unlimited
-        features: [
-            "Unlimited rooms",
-            "White-label solution",
-            "Enterprise integrations",
-            "24/7 dedicated support",
-            "Custom analytics",
-            "Multi-property management",
-            "SLA guarantee"
-        ]
-    }
-};
-
 export async function createPaymentOrder(
     amount: number,
-    currency: string = "INR",
+    currency: string = "USD",
     receipt?: string
 ) {
     try {

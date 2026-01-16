@@ -949,7 +949,7 @@ export default function HotelSetupPage() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Price (₹) *
+                                            Price ($) *
                                         </label>
                                         <input
                                             type="number"
@@ -1102,7 +1102,7 @@ export default function HotelSetupPage() {
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="font-semibold text-gray-800">
-                                                            ₹{item.price?.toFixed(2)}
+                                                            ${item.price?.toFixed(2)}
                                                         </p>
                                                         <p className="text-xs text-gray-500 mt-1">
                                                             {item.isAvailable ? "Available" : "Unavailable"}
@@ -1192,7 +1192,7 @@ export default function HotelSetupPage() {
                                                             </div>
                                                             <div className="text-right">
                                                                 <p className="font-semibold text-gray-800">
-                                                                    {typeof item.price === "number" ? `₹${item.price.toFixed(2)}` : "Price TBD"}
+                                                                    {typeof item.price === "number" ? `$${item.price.toFixed(2)}` : "Price TBD"}
                                                                 </p>
                                                                 <p className="text-xs text-gray-500 mt-1">
                                                                     {item.isAvailable ? "Available" : "Unavailable"}

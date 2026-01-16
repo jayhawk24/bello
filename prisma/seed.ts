@@ -32,7 +32,7 @@ async function createRazorpayPlan(
             item: {
                 name,
                 amount: amountMinor, // already minor units
-                currency: "INR",
+                currency: "USD",
                 description
             }
         });
@@ -52,7 +52,7 @@ async function main() {
             description: "1-2 Rooms",
             price: 0,
             period: BillingCycle.monthly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 2,
             features: [
                 "Up to 2 rooms",
@@ -68,7 +68,7 @@ async function main() {
             description: "1-2 Rooms",
             price: 0,
             period: BillingCycle.yearly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 2,
             features: [
                 "Up to 2 rooms",
@@ -82,9 +82,9 @@ async function main() {
         {
             name: "Starter",
             description: "1-20 Rooms",
-            price: 49_900, // ₹499.00
+            price: 499, // $4.99
             period: BillingCycle.monthly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 20,
             features: [
                 "Up to 20 rooms",
@@ -98,9 +98,9 @@ async function main() {
         {
             name: "Starter",
             description: "1-20 Rooms",
-            price: 499_900, // ₹4,999.00
+            price: 3999, // $39.99
             period: BillingCycle.yearly,
-            currency: "INR",
+            currency: "USD",
             roomLimit: 20,
             features: [
                 "Up to 20 rooms",
@@ -113,13 +113,13 @@ async function main() {
         },
         {
             name: "Growth",
-            description: "21-50 Rooms",
-            price: 99_900, // ₹999.00
+            description: "21-100 Rooms",
+            price: 999, // $9.99
             period: BillingCycle.monthly,
-            currency: "INR",
-            roomLimit: 50,
+            currency: "USD",
+            roomLimit: 100,
             features: [
-                "Up to 50 rooms",
+                "Up to 100 rooms",
                 "QR code access",
                 "Full service requests",
                 "Priority support",
@@ -130,13 +130,13 @@ async function main() {
         },
         {
             name: "Growth",
-            description: "21-50 Rooms",
-            price: 999_900, // ₹9,999.00
+            description: "21-100 Rooms",
+            price: 9999, // $99.99
             period: BillingCycle.yearly,
-            currency: "INR",
-            roomLimit: 50,
+            currency: "USD",
+            roomLimit: 100,
             features: [
-                "Up to 50 rooms",
+                "Up to 100 rooms",
                 "QR code access",
                 "Full service requests",
                 "Priority support",
@@ -144,44 +144,44 @@ async function main() {
                 "Custom branding"
             ],
             isActive: true
-        },
-
-        {
-            name: "Professional",
-            description: "51-100 Rooms",
-            price: 199_900, // ₹1,999.00
-            period: BillingCycle.monthly,
-            currency: "INR",
-            roomLimit: 100,
-            features: [
-                "Up to 100 rooms",
-                "QR code access",
-                "Premium service suite",
-                "Phone & chat support",
-                "Full analytics dashboard",
-                "Multi-location support",
-                "API access"
-            ],
-            isActive: true
-        },
-        {
-            name: "Professional",
-            description: "51-100 Rooms",
-            price: 1_999_900, // ₹19,999.00
-            period: BillingCycle.yearly,
-            currency: "INR",
-            roomLimit: 100,
-            features: [
-                "Up to 100 rooms",
-                "QR code access",
-                "Premium service suite",
-                "Phone & chat support",
-                "Full analytics dashboard",
-                "Multi-location support",
-                "API access"
-            ],
-            isActive: true
         }
+
+        // {
+        //     name: "Professional",
+        //     description: "51-100 Rooms",
+        //     price: 199_00, // $1,999.00
+        //     period: BillingCycle.monthly,
+        //     currency: "USD",
+        //     roomLimit: 100,
+        //     features: [
+        //         "Up to 100 rooms",
+        //         "QR code access",
+        //         "Premium service suite",
+        //         "Phone & chat support",
+        //         "Full analytics dashboard",
+        //         "Multi-location support",
+        //         "API access"
+        //     ],
+        //     isActive: true
+        // },
+        // {
+        //     name: "Professional",
+        //     description: "51-100 Rooms",
+        //     price: 1_999_900, // $19,999.00
+        //     period: BillingCycle.yearly,
+        //     currency: "USD",
+        //     roomLimit: 100,
+        //     features: [
+        //         "Up to 100 rooms",
+        //         "QR code access",
+        //         "Premium service suite",
+        //         "Phone & chat support",
+        //         "Full analytics dashboard",
+        //         "Multi-location support",
+        //         "API access"
+        //     ],
+        //     isActive: true
+        // }
     ];
 
     console.log(

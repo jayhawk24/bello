@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
-function formatPrice(amount: number, currency = "INR") {
-    const formatter = new Intl.NumberFormat("en-IN", {
+function formatPrice(amount: number, currency = "USD") {
+    const formatter = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency,
         minimumFractionDigits: 0

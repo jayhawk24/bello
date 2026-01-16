@@ -59,9 +59,9 @@ export default function PricingPage() {
     };
 
     const formatPrice = (plan: SubscriptionPlan) => {
-        const formatter = new Intl.NumberFormat('en-IN', {
+        const formatter = new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: plan.currency || 'INR',
+            currency: plan.currency || 'USD',
             minimumFractionDigits: 0
         });
         return formatter.format(Math.round(plan.price / 100));
