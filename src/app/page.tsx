@@ -2,13 +2,13 @@ import Link from "next/link";
 import PricingSection from "@/components/PricingSection";
 import LogoMark from "@/components/LogoMark";
 import HowItWorksTimeline from "@/components/HowItWorksTimeline";
+import DemoVideoModal from "@/components/DemoVideoModal";
 import { pageMetadata } from "@/lib/seo";
 import { JsonLd, organizationSchema, softwareSchema } from "@/components/seo/JsonLd";
 
 export const metadata = pageMetadata.home;
 
 export default function Home() {
-
   const highlights = [
     { value: "4.9/5", label: "Guest satisfaction" },
     { value: "2.3M+", label: "Requests resolved" },
@@ -64,68 +64,57 @@ export default function Home() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-16 space-y-20">
-        <section className="grid lg:grid-cols-[1.05fr,0.95fr] gap-12 items-center">
-          <div className="space-y-6">
+        <section id="demo-video" className="relative overflow-hidden rounded-3xl border border-yellow-200 bg-white/70 px-6 py-12 shadow-sm">
+          <div className="absolute inset-0">
+            <video
+              className="h-full w-full object-cover"
+              src="/assets/howitworks.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls={false}
+            />
+            <div className="absolute inset-0 bg-white/75" aria-hidden />
+          </div>
+          <div className="relative space-y-6">
             <div className="inline-flex items-center gap-3 rounded-full bg-white/80 px-4 py-2 shadow-sm border border-yellow-200 w-fit">
               <span className="text-lg">🛎️</span>
               <span className="text-sm font-semibold text-gray-700">Concierge that feels immediate</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-              Hospitality that answers
-              <span className="text-minion-blue"> before guests ask.</span>
+              Quick service,
+              <span className="text-minion-blue"> smoother stays.</span>
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
               Turn every stay into a memorable one with instant service requests, live updates, and a concierge your team can run in under a day.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/register" className="btn-minion text-lg px-8 py-4">
-                Start Free Trial
-              </Link>
-              <Link href="/contact" className="btn-minion-secondary text-lg px-8 py-4">
-                View a Demo
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 pt-4">
-              {highlights.map((item) => (
-                <div key={item.label} className="card-minion bg-white/80 border-yellow-100 shadow-sm">
-                  <p className="text-2xl font-bold text-gray-900">{item.value}</p>
-                  <p className="text-sm text-gray-600">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -top-10 -right-8 h-32 w-32 bg-minion-yellow/30 rounded-full blur-3xl" aria-hidden />
-            <div className="card-minion relative overflow-hidden bg-white/90">
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-minion-yellow via-amber-400 to-minion-blue" aria-hidden />
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-minion-blue/10 rounded-2xl flex items-center justify-center text-2xl">🧭</div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">Live request board</p>
-                    <p className="text-lg font-bold text-gray-900">Today, 14:22</p>
-                  </div>
-                </div>
-                <span className="rounded-full bg-green-100 text-green-700 text-xs font-semibold px-3 py-1">Online</span>
+            <div className="rounded-2xl border border-yellow-200 bg-white/80 p-4 sm:p-6 shadow-sm">
+              <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-700">
+                <span className="px-3 py-1 rounded-full bg-minion-yellow/40 text-gray-900">Fast launch</span>
+                <span>Be live in a day, with zero downloads.</span>
               </div>
-
-              <div className="space-y-4">
-                {["Room service", "Housekeeping", "Airport pickup"].map((title, idx) => (
-                  <div key={title} className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">{["🍽️", "🧺", "✈️"][idx]}</span>
-                      <div>
-                        <p className="font-semibold text-gray-800">{title}</p>
-                        <p className="text-xs text-gray-500">Room {140 + idx}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <span className="rounded-full bg-white px-2 py-1">ETA 8m</span>
-                      <span className="rounded-full bg-minion-yellow/40 px-2 py-1 font-semibold">In progress</span>
-                    </div>
+              <div className="mt-4 grid gap-6 lg:grid-cols-[1.05fr,0.95fr] items-center">
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Link href="/register" className="btn-minion text-lg px-8 py-4">
+                      Start Free Trial
+                    </Link>
+                    <DemoVideoModal
+                      buttonLabel="View a Demo"
+                      buttonClassName="btn-minion-secondary text-lg px-8 py-4"
+                      videoSrc="/assets/howitworks.mp4"
+                    />
                   </div>
-                ))}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                    {highlights.map((item) => (
+                      <div key={item.label} className="card-minion bg-white/80 border-yellow-100 shadow-sm">
+                        <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+                        <p className="text-sm text-gray-600">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
